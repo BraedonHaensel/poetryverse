@@ -4,7 +4,7 @@
 import { getAuthSession } from "@/lib/nextauth";
 import Link from "next/link";
 import Image from "next/image";
-import SignOutButton from "@/components/SignOutButton";
+import SignOutButton from "@/components/AuthButtons/SignOutButton";
 
 export default async function Home() {
   const session = await getAuthSession();
