@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="pt-20 pb-20">
+      <body>
         {children}
       </body>
     </html>
