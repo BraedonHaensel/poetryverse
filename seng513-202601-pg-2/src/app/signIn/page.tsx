@@ -6,7 +6,11 @@ const Page = async () => {
   const session = await getAuthSession();
 
   if (session?.user) {
-    redirect("/");
+    if (session?.user?.username){
+      redirect("/");
+    } else {
+      redirect("/setUsername")
+    } 
   }
 
   return (

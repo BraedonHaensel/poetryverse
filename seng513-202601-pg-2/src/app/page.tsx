@@ -14,7 +14,10 @@ export default async function Home() {
     <div>
       {session?.user ? (
           <div className='flex items-center justify-between gap-2 '>
-              <h1>{session?.user.name}</h1>
+              <h1>
+                <div>{session?.user.username}</div>
+                <div>{session?.user?.name}</div>
+              </h1>
               <SignOutButton text = {"SignOut"}/>
           </div>
       ):(
