@@ -1,8 +1,8 @@
 "use client";
-// This is test purpose code for the username Set Page
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// The handle submit function implements the backend api logic to add a username upon initial login
 export default function OnboardingPage() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
@@ -29,6 +29,7 @@ export default function OnboardingPage() {
   }
 
   return (
+    // Change this to the front end we want. The current code can be removed when working frontend is added.
     <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-2xl font-bold mb-6">
         Choose your username
