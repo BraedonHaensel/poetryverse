@@ -21,5 +21,5 @@ Create a `.env` file in the root of the monorepo:
 
 ```
 DATABASE_URL=your_database_url
-PORT=3001
+API_PORT=3001
 ```
