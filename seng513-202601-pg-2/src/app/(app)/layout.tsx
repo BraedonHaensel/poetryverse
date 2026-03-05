@@ -1,5 +1,3 @@
-"use client";
-
 import DesktopNavbar from "@/components/DesktopNavbar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
