@@ -1,19 +1,19 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import SignOutButton from "@/components/AuthButtons/SignOutButton";
-import { Feather, Settings } from "lucide-react";
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import SignOutButton from '@/components/AuthButtons/SignOutButton'
+import { Feather, Settings } from 'lucide-react'
 
 const links = [
-  { label: "Home", href: "/" },
-  { label: "Poem of the Day", href: "/poem-of-the-day" },
-  { label: "Create", href: "/create" },
-  { label: "My Profile", href: "/profile" }
-];
+  { label: 'Home', href: '/' },
+  { label: 'Poem of the Day', href: '/poem-of-the-day' },
+  { label: 'Create', href: '/create' },
+  { label: 'My Profile', href: '/profile' },
+]
 
 export default function DesktopNavbar() {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <header className="w-full border-b border-black/10 bg-white">
@@ -25,13 +25,13 @@ export default function DesktopNavbar() {
 
           <nav className="flex items-center gap-8 text-[20px]">
             {links.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = pathname === link.href
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={`relative pb-1 font-medium text-black ${
-                    isActive ? "font-semibold" : "opacity-90"
+                    isActive ? 'font-semibold' : 'opacity-90'
                   }`}
                 >
                   {link.label}
@@ -39,7 +39,7 @@ export default function DesktopNavbar() {
                     <span className="absolute -bottom-[2px] left-0 h-[2px] w-full rounded bg-black" />
                   )}
                 </Link>
-              );
+              )
             })}
           </nav>
         </div>
@@ -55,5 +55,5 @@ export default function DesktopNavbar() {
         </div>
       </div>
     </header>
-  );
+  )
 }

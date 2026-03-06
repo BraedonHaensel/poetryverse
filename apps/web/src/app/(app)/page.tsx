@@ -1,9 +1,9 @@
-import Link from "next/link";
-import { getAuthSession } from "@/lib/nextauth";
-import SignOutButton from "@/components/AuthButtons/SignOutButton";
+import Link from 'next/link'
+import { getAuthSession } from '@/lib/nextauth'
+import SignOutButton from '@/components/AuthButtons/SignOutButton'
 
 export default async function Home() {
-  const session = await getAuthSession();
+  const session = await getAuthSession()
 
   if (!session?.user) {
     return (
@@ -13,7 +13,7 @@ export default async function Home() {
           Sign in
         </Link>
       </div>
-    );
+    )
   }
 
   return (
@@ -24,5 +24,5 @@ export default async function Home() {
       </div>
       <SignOutButton text="Sign Out" />
     </div>
-  );
+  )
 }

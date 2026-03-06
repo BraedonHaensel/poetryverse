@@ -43,3 +43,6 @@ next-env.d.ts
 
 # prisma
 **/prisma/generated/
+
+# IDE files
+.vscode/

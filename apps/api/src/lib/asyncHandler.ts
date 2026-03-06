@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express'
 
 /**
  * Wraps an async Express handler and forwards rejected promises to `next`.
@@ -9,5 +9,5 @@ import type { NextFunction, Request, Response } from 'express';
 export const asyncHandler =
   (fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
+    Promise.resolve(fn(req, res, next)).catch(next)
+  }

@@ -1,3 +1,3 @@
 export default function PoemOfTheDay() {
-  return <div>Poem of the Day</div>;
+  return <div>Poem of the Day</div>
 }

@@ -1,1 +1,1 @@
-export { prisma } from '@seng513/database';
+export { prisma } from '@seng513/database'

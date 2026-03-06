@@ -53,3 +53,39 @@ npm run build:web
 npm run db:migrate --workspace=packages/database
 npm run db:studio --workspace=packages/database
 ```
+
+## Recommended Extensions
+
+ESLint
+
+- Analyze all files with `npm run lint`
+
+GitLens
+
+Path Intellisense
+
+Prettier - Code formatter
+
+- Format all files with `npx prettier . --write`
+
+Tailwind CSS IntelliSense
+
+## Recommended VSCode Settings
+
+Create a `.vscode/settings.json` file with the following configuration:
+
+```json
+{
+  "editor.tabSize": 2,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "files.insertFinalNewline": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "workbench.editor.customLabels.patterns": {
+    "**/page.tsx": "${dirname}/${filename}.${extname}"
+  }
+}
+```
+
+Restart VSCode to apply the new configuration.
