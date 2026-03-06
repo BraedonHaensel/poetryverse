@@ -82,17 +82,20 @@ export default function Create() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Your Poem</FormLabel>
-              <FormControl className="max-h-50 min-h-25">
+              <FormControl className="h-50">
                 <Textarea
-                  {...field}
+                  className="resize-none"
                   placeholder="Write your poem..."
                   maxLength={1000}
+                  {...field}
                 />
               </FormControl>
-              <div className="text-muted-foreground text-right text-sm">
-                {field.value ? field.value.length : 0}/{1000}
+              <div className="flex w-full justify-between">
+                <div className="text-muted-foreground ml-auto text-right text-sm">
+                  {field.value?.length ?? 0}/{1000}
+                </div>
+                <FormMessage />
               </div>
-              <FormMessage />
             </FormItem>
           )}
         />
