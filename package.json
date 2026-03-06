@@ -14,7 +14,9 @@
     "build:web": "npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "prettier": "3.8.1"
+  },
   "engines": {
     "node": ">=18.0.0"
   }
