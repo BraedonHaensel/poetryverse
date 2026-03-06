@@ -84,7 +84,10 @@ Create a `.vscode/settings.json` file with the following configuration:
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "workbench.editor.customLabels.patterns": {
     "**/page.tsx": "${dirname}/${filename}.${extname}"
-  }
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
 }
 ```
 
