@@ -3,6 +3,10 @@ import type { NextFunction, Request, Response } from 'express';
 import { logger } from '../lib/logger';
 import { HttpError } from '../lib/httpErrors';
 
+/**
+ * Express error middleware that maps `HttpError` instances to structured
+ * client responses and falls back to a generic 500 for unknown errors.
+ */
 export function errorHandler(
   err: unknown,
   _req: Request,

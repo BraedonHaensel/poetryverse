@@ -1,11 +1,16 @@
 import { Router } from "express";
-import { prisma } from '../lib/db';
+import { requireAuth } from "../middleware/auth";
+import { asyncHandler } from "../lib/asyncHandler";
+import { getUsers } from "../controllers/userController";
 
 const router = Router()
 
-router.get('/', async (_req, res) => {
-    const users = await prisma.user.findMany();
-    res.json(users);
-});
+// This is an example endpoint we can refine later, demonstrating the use of middleware
+router.get(
+    '/',
+    requireAuth,
+    // validate(getUserSchema) This is an example, we might not have a schema for this GET unless we include an optional filter
+    asyncHandler(getUsers)
+ );
 
 export default router;
