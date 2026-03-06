@@ -86,8 +86,8 @@ Create a `.vscode/settings.json` file with the following configuration:
     "**/page.tsx": "${dirname}/${filename}.${extname}"
   },
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
+    "source.fixAll.eslint": "always"
+  }
 }
 ```
 
