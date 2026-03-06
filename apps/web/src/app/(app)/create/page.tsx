@@ -91,10 +91,10 @@ export default function Create() {
                 />
               </FormControl>
               <div className="flex w-full justify-between">
+                <FormMessage />
                 <div className="text-muted-foreground ml-auto text-right text-sm">
                   {field.value?.length ?? 0}/{1000}
                 </div>
-                <FormMessage />
               </div>
             </FormItem>
           )}
