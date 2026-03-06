@@ -129,6 +129,7 @@ export default function Create() {
               </div>
               <FormControl>
                 <Switch
+                  className="scale-150"
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
@@ -154,6 +155,7 @@ export default function Create() {
               </div>
               <FormControl>
                 <Switch
+                  className="scale-150"
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
