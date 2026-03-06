@@ -1,8 +1,8 @@
-import { Router } from "express";
+import { Router } from 'express'
 
-const router = Router();
+const router = Router()
 
 // An example:
 // router.get('/', getPoems);
 
-export default router;
+export default router

@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express'
 
 /**
  * Placeholder authentication guard.
@@ -8,7 +8,11 @@ import type { NextFunction, Request, Response } from 'express';
  * @param next Next middleware function.
  * @returns Calls `next` to continue request processing.
  */
-export const requireAuth = (req: Request, _res: Response, next: NextFunction) => {
-    // TODO: Set up auth middleware here
-    next()
+export const requireAuth = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  // TODO: Set up auth middleware here
+  next()
 }

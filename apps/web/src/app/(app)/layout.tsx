@@ -1,4 +1,4 @@
-import DesktopNavbar from "@/components/DesktopNavbar";
+import DesktopNavbar from '@/components/DesktopNavbar'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,5 +8,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto w-full max-w-5xl">{children}</div>
       </main>
     </div>
-  );
+  )
 }
