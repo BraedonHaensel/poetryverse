@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express'
-import { logger } from '../lib/logger'
+
 import { HttpError } from '../lib/httpErrors'
+import { logger } from '../lib/logger'
 
 /**
  * Express error middleware that maps `HttpError` instances to structured
