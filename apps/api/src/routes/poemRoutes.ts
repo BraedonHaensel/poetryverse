@@ -3,8 +3,9 @@ dotenv.config()
 
 import { Router } from 'express'
 import { Request, Response } from 'express'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenAI } from '@google/genai'
 import { error } from 'console'
+import { z, toJSONSchema } from 'zod'
 
 const router = Router()
 
@@ -15,11 +16,14 @@ if (!geminiApiKey) {
   throw new Error('Gemini API failed to retrieve from env')
 }
 
-const geminiClient = new GoogleGenerativeAI(geminiApiKey)
+const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
 
-const model = geminiClient.getGenerativeModel({
-  model: 'gemini-2.5-flash',
+const aiGenSchema = z.object({
+  title: z.string().describe('Title of the poem.'),
+  poem: z.string().describe('The generated poem text.'),
 })
+
+type PoemAIResponse = z.infer<typeof aiGenSchema>
 
 /**
  * AI generation prompt and type sent to Gemini Model
@@ -34,30 +38,6 @@ interface PoemAIRequest {
    * the description prompt of the poem requested
    */
   prompt: string
-}
-
-/**
- * AI generation response returned by the gemini model
- * Returns a json schema that includes a ai generated title and poem
- */
-interface PoemAIResponse {
-  /**
-   * The title suggested by the model based off the prompt
-   */
-  title: string
-  /**
-   * The poem suggested by the model based off the type and propmt requested
-   */
-  poem: string
-}
-
-/*Helper function: Parse AI Response*/
-const generateParser = (responseText: string): PoemAIResponse => {
-  const parsedJSON = responseText
-    .replace(/```json/g, '')
-    .replace(/```/g, '')
-    .trim()
-  return JSON.parse(parsedJSON)
 }
 
 /**
@@ -76,19 +56,37 @@ router.post(
     try {
       const { type, prompt } = req.body
 
-      if (!type || !prompt) {
-        return res.status(400).json({ error: 'type or poem not provided' })
+      if (!type) {
+        return res.status(400).json({ error: 'type not provided' })
       }
 
-      const geminiPrompt = `Generate a ${type} poem and title based off the following prompt below: \n ${prompt} \n Ensure that only the JSON is returned in the following format \n {"title": "...", "poem": "..."}`
-      const result = await model.generateContent(geminiPrompt)
-      const responseText = result.response.text()
-      const responseJSON: PoemAIResponse = generateParser(responseText)
+      if (!prompt) {
+        return res.status(400).json({ error: 'prompt not provided' })
+      }
+      const geminiPrompt = `Generate a ${type} poem and title based off the following prompt: \n${prompt}`
+
+      const result = await geminiClient.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: geminiPrompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseJsonSchema: toJSONSchema(aiGenSchema),
+        },
+      })
+
+      const responseJSON: PoemAIResponse = aiGenSchema.parse(
+        JSON.parse(result.text ?? '')
+      )
 
       return res.status(200).json({ data: responseJSON })
-    } catch {
-      console.error('Error Generating Poem')
-      return res.status(500).json({ error: 'Poem Failed to generate' })
+    } catch (err: any) {
+      console.error('Error Generating Poem', err)
+      const status = err?.status ?? 500
+      const message =
+        status === 429
+          ? 'Rate limit exceeded, please try again later'
+          : 'Poem failed to generate'
+      return res.status(status).json({ error: message })
     }
   }
 )
