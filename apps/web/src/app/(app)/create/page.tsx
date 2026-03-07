@@ -23,8 +23,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ReactSVG } from 'react-svg'
+import { ShadowCard } from '@/components/shadow-card'
 
 // TODO Hardcoded example, clean up when we can get the poem types from the backend
 const POEM_TYPES = ['Haiku', 'Couplet', 'Sonnet']
@@ -49,7 +50,7 @@ export default function Create() {
   }
 
   return (
-    <Card>
+    <ShadowCard>
       <CardHeader>
         <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold">
           Create From Scratch <ReactSVG src="/stylus-icon.svg" />
@@ -110,19 +111,23 @@ export default function Create() {
             />
 
             {/* Poem title field */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Title your poem..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <ShadowCard>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Title your poem..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </ShadowCard>
 
             {/* Public Visibility field */}
             <FormField
@@ -180,6 +185,6 @@ export default function Create() {
           </form>
         </Form>
       </CardContent>
-    </Card>
+    </ShadowCard>
   )
 }
