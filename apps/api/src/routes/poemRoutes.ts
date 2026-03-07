@@ -9,21 +9,12 @@ import { z, toJSONSchema } from 'zod'
 
 const router = Router()
 
-// Init Google Gemini Client
+/** Init Google Gemini Client */
 const geminiApiKey = process.env['GEMINI_API_KEY']
-
 if (!geminiApiKey) {
   throw new Error('Gemini API failed to retrieve from env')
 }
-
 const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
-
-const aiGenSchema = z.object({
-  title: z.string().describe('Title of the poem.'),
-  poem: z.string().describe('The generated poem text.'),
-})
-
-type PoemAIResponse = z.infer<typeof aiGenSchema>
 
 /**
  * AI generation prompt and type sent to Gemini Model
@@ -39,6 +30,24 @@ interface PoemAIRequest {
    */
   prompt: string
 }
+
+/**
+ * AI generation JSON Schema response
+ * Describes the type of poem and user prompt used when requestion an ai generated poem response
+ */
+const aiGenSchema = z.object({
+  /**
+   * The ai generated title of poem returned
+   */
+  title: z.string().describe('Title of the poem.'),
+  /**
+   * The ai generated poem returned
+   */
+  poem: z.string().describe('The generated poem text.'),
+})
+
+/** Response Type expected from route post/api/users/generate */
+type PoemAIResponse = z.infer<typeof aiGenSchema>
 
 /**
  * Route serving AI generated poem form
