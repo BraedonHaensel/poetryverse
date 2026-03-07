@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
-import { getAuthSession } from '@/lib/nextauth'
+
 import SignInButton from '@/components/AuthButtons/SigninButton'
+import { getAuthSession } from '@/lib/nextauth'
 
 const Page = async () => {
   const session = await getAuthSession()
