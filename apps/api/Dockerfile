@@ -7,7 +7,7 @@ COPY apps/api/package.json apps/api/package.json
 COPY packages/database/package.json packages/database/package.json
 RUN npm ci
 
-# Copy apy and database and preserve file structure for npm workspaces
+# Copy api and database and preserve file structure for npm workspaces
 COPY apps/api apps/api
 COPY packages/database packages/database
 
