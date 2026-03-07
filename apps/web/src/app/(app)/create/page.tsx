@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ReactSVG } from 'react-svg'
 
 // TODO Hardcoded example, clean up when we can get the poem types from the backend
 const POEM_TYPES = ['Haiku', 'Couplet', 'Sonnet']
@@ -50,8 +51,8 @@ export default function Create() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-center font-bold">
-          Create From Scratch (TODO icon)
+        <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold">
+          Create From Scratch <ReactSVG src="/stylus-icon.svg" />
         </CardTitle>
       </CardHeader>
       <CardContent>
