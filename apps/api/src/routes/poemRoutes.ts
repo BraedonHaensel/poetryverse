@@ -18,7 +18,7 @@ const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
 
 /**
  * AI generation prompt and type sent to Gemini Model
- * Describes the type of poem and user prompt used when requestion an ai generated poem response
+ * Describes the type of poem and user prompt used when requesting an AI generated poem response.
  */
 interface PoemAIRequest {
   /**
@@ -26,14 +26,14 @@ interface PoemAIRequest {
    */
   type: string
   /**
-   * the description prompt of the poem requested
+   * The description prompt of the poem requested
    */
   prompt: string
 }
 
 /**
  * AI generation JSON Schema response
- * Describes the type of poem and user prompt used when requestion an ai generated poem response
+ * Describes the type of poem and user prompt used when requesting an AI generated poem response.
  */
 const aiGenSchema = z.object({
   /**
