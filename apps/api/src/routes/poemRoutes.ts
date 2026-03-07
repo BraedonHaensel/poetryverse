@@ -37,21 +37,21 @@ interface PoemAIRequest {
  */
 const aiGenSchema = z.object({
   /**
-   * The ai generated title of poem returned
+   * The AI generated title of poem returned
    */
   title: z.string().describe('Title of the poem.'),
   /**
-   * The ai generated poem returned
+   * The AI generated poem returned
    */
   poem: z.string().describe('The generated poem text.'),
 })
 
-/** Response Type expected from route post/api/users/generate */
+/** Response Type expected from route post/api/generate */
 type PoemAIResponse = z.infer<typeof aiGenSchema>
 
 /**
  * Route serving AI generated poem form
- * @name post/api/users/generate
+ * @name post/api/poems/generate
  * @function
  * @memberof module:routes/poemRoutes
  * @inner
