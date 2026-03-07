@@ -3,7 +3,7 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { Card } from './ui/card'
 
-// Standard card component to use. Includes a larger border and a shadow effect
+// Wraps the shadcn Card component with a larger shadow and border.
 export function ShadowCard({
   className,
   ...props

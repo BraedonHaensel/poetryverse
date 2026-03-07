@@ -17,6 +17,7 @@ export const CreateFromScratchSchema = z.object({
     .string()
     .min(TITLE_MIN, `Title must be at least ${TITLE_MIN} characters.`)
     .max(TITLE_MAX, `Poem must be at most ${TITLE_MAX} characters.`),
+  tags: z.array(z.string()).max(5, 'Poem can have at most 5 tags'),
   publicVisibility: z.boolean(),
   createdWithAI: z.boolean(),
 })
