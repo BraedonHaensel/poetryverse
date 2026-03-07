@@ -1,7 +1,7 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import { CreateFromScratchSchema } from './schema'
+import { CreateFromScratchSchema } from '@/schemas/createPoemSchemas'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Form,
