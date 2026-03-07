@@ -61,10 +61,10 @@ export default function Create() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="grid grid-cols-1 md:grid-cols-2"
+            className="grid grid-cols-1 gap-x-5 md:grid-cols-2"
           >
             {/* Left column fields */}
-            <div>
+            <div className="flex flex-col space-y-3">
               {/* Poem type field */}
               <ShadowCard className="p-3">
                 <CardContent className="p-0">
@@ -99,15 +99,15 @@ export default function Create() {
               </ShadowCard>
 
               {/* Your Poem field */}
-              <ShadowCard className="p-3">
-                <CardContent className="p-0">
+              <ShadowCard className="flex-1 p-3">
+                <CardContent className="flex flex-1 flex-col p-0">
                   <FormField
                     control={form.control}
                     name="poem"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-1 flex-col">
                         <FormLabel>Your Poem</FormLabel>
-                        <FormControl className="h-50">
+                        <FormControl className="flex-1">
                           <Textarea
                             className="bg-off-white resize-none border-2"
                             placeholder="Write your poem..."
@@ -129,7 +129,7 @@ export default function Create() {
             </div>
 
             {/* Right column fields */}
-            <div>
+            <div className="space-y-3">
               {/* Poem title field */}
               <ShadowCard className="p-3">
                 <CardContent className="p-0">
