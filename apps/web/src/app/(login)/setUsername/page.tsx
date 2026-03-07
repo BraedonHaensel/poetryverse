@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 // The handle submit function implements the backend api logic to add a username upon initial login
 export default function OnboardingPage() {

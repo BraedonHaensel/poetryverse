@@ -1,8 +1,9 @@
 //Backend adds a Username to the User table and checks if a username aready exists
 
+import { NextRequest, NextResponse } from 'next/server'
+
 import { prisma } from '@/lib/db'
 import { getAuthSession } from '@/lib/nextauth'
-import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   const session = await getAuthSession()

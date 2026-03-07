@@ -9,6 +9,6 @@ import { ZodType } from 'zod'
  */
 export const validate =
   (schema: ZodType) => (req: Request, _res: Response, next: NextFunction) => {
-    //TODO: Implement validation with zod schemas
+    //TODO: Implement validation with zod schemas, change
     next()
   }
