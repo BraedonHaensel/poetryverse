@@ -79,12 +79,16 @@ export default function Create() {
                             value={field.value}
                             onValueChange={field.onChange}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-off-white w-full">
                               <SelectValue placeholder="Select a poem type..." />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-off-white">
                               {POEM_TYPES.map((type) => (
-                                <SelectItem key={type} value={type}>
+                                <SelectItem
+                                  key={type}
+                                  value={type}
+                                  className="data-highlighted:bg-gray-200"
+                                >
                                   {type}
                                 </SelectItem>
                               ))}
