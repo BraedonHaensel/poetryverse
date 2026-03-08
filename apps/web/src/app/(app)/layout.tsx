@@ -1,4 +1,4 @@
-import DesktopNavbar from '@/components/DesktopNavbar'
+import DesktopNavbar from '@/components/desktop-navbar'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

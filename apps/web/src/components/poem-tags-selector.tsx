@@ -1,5 +1,7 @@
 'use client'
 
+import { X } from 'lucide-react'
+
 import {
   Combobox,
   ComboboxChip,
@@ -12,7 +14,6 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from '@/components/ui/combobox'
-import { X } from 'lucide-react'
 
 // TODO Hardcoded example, clean up when we can get the poem tags from the backend
 const POEM_TAGS = ['Nature', 'Romance', 'Comedy', 'Parody']

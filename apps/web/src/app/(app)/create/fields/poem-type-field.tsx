@@ -1,4 +1,6 @@
 import { Control } from 'react-hook-form'
+
+import { ShadowCard } from '@/components/shadow-card'
 import {
   FormControl,
   FormField,
@@ -13,8 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ShadowCard } from '@/components/shadow-card'
-import { CreateFromScratchSchema } from '@/schemas/createPoemSchemas'
+import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 // TODO Hardcoded example, clean up when we can get the poem types from the backend
 const POEM_TYPES = ['Haiku', 'Couplet', 'Sonnet']

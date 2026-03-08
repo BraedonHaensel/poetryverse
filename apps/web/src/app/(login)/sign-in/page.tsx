@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-import SignInButton from '@/components/AuthButtons/SigninButton'
+import SignInButton from '@/components/auth-buttons/sign-in-button'
 import { getAuthSession } from '@/lib/nextauth'
 
 const Page = async () => {

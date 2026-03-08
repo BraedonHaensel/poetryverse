@@ -1,4 +1,6 @@
 import { Control } from 'react-hook-form'
+
+import { ShadowCard } from '@/components/shadow-card'
 import {
   FormControl,
   FormField,
@@ -6,9 +8,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { ShadowCard } from '@/components/shadow-card'
-import { CreateFromScratchSchema } from '@/schemas/createPoemSchemas'
 import { Input } from '@/components/ui/input'
+import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 type Props = {
   control: Control<CreateFromScratchSchema>

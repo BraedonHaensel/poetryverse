@@ -1,6 +1,7 @@
-'use client'
-
 import { Control } from 'react-hook-form'
+
+import { PoemTagsSelector } from '@/components/poem-tags-selector'
+import { ShadowCard } from '@/components/shadow-card'
 import {
   FormControl,
   FormField,
@@ -8,9 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { ShadowCard } from '@/components/shadow-card'
-import { CreateFromScratchSchema } from '@/schemas/createPoemSchemas'
-import { PoemTagsSelector } from '@/components/poem-tags-selector'
+import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 type Props = {
   control: Control<CreateFromScratchSchema>
