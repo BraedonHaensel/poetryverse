@@ -8,7 +8,7 @@ import { LargeButton } from '@/components/large-button'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
-import { CreateFromScratchSchema } from '@/schemas/createPoemSchemas'
+import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 import { PoemAIAssistanceField } from './fields/poem-ai-assistance-field'
 import { PoemContentsField } from './fields/poem-contents-field'

@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Switch } from '@/components/ui/switch'
-import { CreateFromScratchSchema } from '@/schemas/createPoemSchemas'
+import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 type Props = {
   control: Control<CreateFromScratchSchema>
