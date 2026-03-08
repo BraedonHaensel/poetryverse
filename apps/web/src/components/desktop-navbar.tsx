@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 
+import CreateDropdown from './create-nav-dropdown'
+
 const links = [
   { label: 'Home', href: '/' },
   { label: 'Poem of the Day', href: '/poem-of-the-day' },
@@ -27,6 +29,10 @@ export default function DesktopNavbar() {
           <nav className="flex items-center gap-8 text-[20px]">
             {links.map((link) => {
               const isActive = pathname === link.href
+              if (link.label === 'Create') {
+                // Poem creation method method dropdown
+                return <CreateDropdown key={link.href} isActive={isActive} />
+              }
               return (
                 <Link
                   key={link.href}

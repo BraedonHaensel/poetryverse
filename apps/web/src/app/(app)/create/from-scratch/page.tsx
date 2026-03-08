@@ -10,15 +10,17 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
-import { PoemAIAssistanceField } from './fields/poem-ai-assistance-field'
-import { PoemContentsField } from './fields/poem-contents-field'
-import { PoemTagsField } from './fields/poem-tags-field'
-import { PoemTitleField } from './fields/poem-title-field'
-import { PoemTypeField } from './fields/poem-type-field'
-import { PoemVisibilityField } from './fields/poem-visibility-field'
+import { PoemAIAssistanceField } from '../fields/poem-ai-assistance-field'
+import { PoemContentsField } from '../fields/poem-contents-field'
+import { PoemTagsField } from '../fields/poem-tags-field'
+import { PoemTitleField } from '../fields/poem-title-field'
+import { PoemTypeField } from '../fields/poem-type-field'
+import { PoemVisibilityField } from '../fields/poem-visibility-field'
 
-// Create poems page
-export default function Create() {
+/**
+ * Create poem from scratch page.
+ */
+export default function CreatePoemFromScratch() {
   // Create poem from scratch form
   const form = useForm<CreateFromScratchSchema>({
     resolver: zodResolver(CreateFromScratchSchema),
