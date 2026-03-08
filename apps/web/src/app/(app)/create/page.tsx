@@ -1,8 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
-import { ReactSVG } from 'react-svg'
 
 import { LargeButton } from '@/components/large-button'
 import { ShadowCard } from '@/components/shadow-card'
@@ -42,9 +42,12 @@ export default function Create() {
   return (
     <ShadowCard>
       <CardHeader>
-        <CardTitle className="flex items-center justify-center gap-3 text-2xl font-bold">
-          Create From Scratch <ReactSVG src="/stylus-icon.svg" />
-        </CardTitle>
+        <div className="flex items-center justify-center gap-3">
+          <CardTitle className="text-2xl font-bold">
+            Create From Scratch
+          </CardTitle>
+          <Image src="/stylus-icon.svg" alt="" width={40} height={40} />
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
