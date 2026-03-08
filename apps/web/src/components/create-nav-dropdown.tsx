@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -8,6 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 
@@ -49,12 +51,19 @@ export default function CreateDropdown({ isActive }: Props) {
           <DropdownMenuContent>
             <DropdownMenuItem asChild>
               <Link className="hover:bg-gray-400" href={'/create/from-scratch'}>
-                Create From Scratch
+                <div className="flex items-center justify-center gap-3 text-[16px] font-bold">
+                  <Image src="/stylus-icon.svg" alt="" width={30} height={30} />
+                  Create From Scratch
+                </div>
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link className="hover:bg-gray-400" href={'/create/with-ai'}>
-                Create With AI
+                <div className="flex items-center justify-center gap-3 text-[16px] font-bold">
+                  <Image src="/robot-icon.svg" alt="" width={30} height={30} />
+                  Create With AI
+                </div>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

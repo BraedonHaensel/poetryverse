@@ -28,11 +28,17 @@ export default function DesktopNavbar() {
 
           <nav className="flex items-center gap-8 text-[20px]">
             {links.map((link) => {
-              const isActive = pathname === link.href
               if (link.label === 'Create') {
                 // Poem creation method method dropdown
-                return <CreateDropdown key={link.href} isActive={isActive} />
+                return (
+                  <CreateDropdown
+                    key={link.href}
+                    isActive={pathname.startsWith('/create/')}
+                  />
+                )
               }
+
+              const isActive = pathname === link.href
               return (
                 <Link
                   key={link.href}
