@@ -54,6 +54,20 @@ npm run db:migrate --workspace=packages/database
 npm run db:studio --workspace=packages/database
 ```
 
+## Building and Running Docker Images
+
+**TODO: Replace this with docker-compose steps once docker-compose is created**
+
+Follow these steps to build and run the backend docker image
+
+From root:
+
+`docker build -f apps/api/Dockerfile -t seng513-api .`
+
+`docker run --rm -p 3001:3001 -e DATABASE_URL="your-postgres-url" seng513-api`
+
+An important caveat: You must replace "localhost" in the db url with host.docker.internal. This is because host.docker.internal tells the docker container to use the host OS instead of localhost from within the container itself.
+
 ## Recommended Extensions
 
 ESLint

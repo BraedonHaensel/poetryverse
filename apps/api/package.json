@@ -2,13 +2,13 @@
   "name": "@seng513/api",
   "version": "1.0.0",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec \"tsx src/server.ts\"",
     "build": "tsc",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "start": "node dist/index.js"
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@seng513/database": "*",
