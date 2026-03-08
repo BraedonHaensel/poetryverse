@@ -8,7 +8,7 @@ const POEM_MAX = 1000
 const MIN_TAGS = 1
 const MAX_TAGS = 5
 
-// Schema for validating the create poem from scratch form
+/** Schema for validating the create poem from scratch form. */
 export const CreateFromScratchSchema = z.object({
   type: z.string().nonempty('Please select a poem type.'),
   poem: z
@@ -21,7 +21,7 @@ export const CreateFromScratchSchema = z.object({
     .max(TITLE_MAX, `Poem must be at most ${TITLE_MAX} characters.`),
   tags: z
     .array(z.string())
-    .min(MIN_TAGS, `Poem must have at least ${MIN_TAGS} tags.`)
+    .min(MIN_TAGS, `Poem must have at least ${MIN_TAGS} tag.`)
     .max(MAX_TAGS, `Poem can have at most ${MAX_TAGS} tags`),
   publicVisibility: z.boolean(),
   createdWithAI: z.boolean(),
