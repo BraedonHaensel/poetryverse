@@ -44,7 +44,7 @@ export function PoemTagsField({ control }: Props) {
   return (
     <ShadowCard className="p-3">
       <FormItem>
-        <FormLabel>Type</FormLabel>
+        <FormLabel>Tags</FormLabel>
         <FormControl>
           <Combobox
             multiple
@@ -67,9 +67,7 @@ export function PoemTagsField({ control }: Props) {
               </ComboboxValue>
               <ComboboxChipsInput
                 className="h-6"
-                placeholder={
-                  field.value.length === 0 ? 'Select poem tags...' : ''
-                }
+                placeholder={field.value.length === 0 ? 'Add poem tags...' : ''}
               />
               {/* Clear button */}
               {field.value.length > 0 && (

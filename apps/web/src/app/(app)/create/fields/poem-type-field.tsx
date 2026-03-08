@@ -37,7 +37,7 @@ export function PoemTypeField({ control }: Props) {
             <FormLabel>Type</FormLabel>
             <FormControl>
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger className="bg-off-white w-full">
+                <SelectTrigger className="bg-off-white w-full hover:cursor-pointer">
                   <SelectValue placeholder="Select a poem type..." />
                 </SelectTrigger>
                 <SelectContent className="bg-off-white">

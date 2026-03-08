@@ -34,6 +34,7 @@ export function PoemVisibilityField({ control }: Props) {
             </div>
             <FormControl>
               <Switch
+                className="hover:cursor-pointer"
                 size="lg"
                 checked={field.value}
                 onCheckedChange={field.onChange}
