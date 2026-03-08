@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
-import poemRoutes from './poemRoutes'
-import userRoutes from './userRoutes'
+import poemRoutes from './poem-routes'
+import userRoutes from './user-routes'
 
 const router = Router()
 router.use('/users', userRoutes)
