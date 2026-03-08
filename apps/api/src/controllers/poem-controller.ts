@@ -32,7 +32,7 @@ const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
  */
 
 export const generateAIPoem = async (
-  req: Request<{}, {}, PoemAIRequest>,
+  req: Request<Record<string, never>, Record<string, never>, PoemAIRequest>,
   res: Response
 ) => {
   try {
@@ -64,9 +64,19 @@ export const generateAIPoem = async (
     )
 
     return res.status(200).json({ data: responseJSON })
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('Error Generating Poem', err)
-    const status = err?.status ?? 500
+    let status = 500
+
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      'status' in err &&
+      typeof (err as { status: unknown }).status === 'number'
+    ) {
+      status = (err as { status: number }).status
+    }
+
     const message =
       status === 429
         ? 'Rate limit exceeded, please try again later'
