@@ -1,4 +1,4 @@
-import { z, toJSONSchema } from 'zod'
+import { z } from 'zod'
 
 /**
  * AI generation prompt and type sent to Gemini Model

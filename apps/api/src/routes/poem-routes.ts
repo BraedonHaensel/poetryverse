@@ -1,9 +1,8 @@
 import { Router } from 'express'
-import { Request, Response } from 'express'
-import { error } from 'console'
-import { asyncHandler } from '../lib/asyncHandler'
+
+import { generateAIPoem } from '../controllers/poem-controller'
+import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
-import { generateAIPoem } from '../controllers/poemController'
 
 const router = Router()
 

@@ -1,14 +1,14 @@
-import { prisma } from '@seng513/database'
-import type { NextFunction, Request, Response } from 'express'
-import config from '../lib/config'
 import { GoogleGenAI } from '@google/genai'
-import { z, toJSONSchema } from 'zod'
+import type { Request, Response } from 'express'
+import { toJSONSchema } from 'zod'
+
+import config from '../lib/config'
+import { logger } from '../lib/logger'
 import {
+  aiGenSchema,
   PoemAIRequest,
   PoemAIResponse,
-  aiGenSchema,
-} from '../schemas/poemSchemas'
-import { logger } from '../lib/logger'
+} from '../schemas/poem-schemas'
 
 /** Init Google Gemini Client */
 const geminiApiKey = config.GEMINI_API_KEY
