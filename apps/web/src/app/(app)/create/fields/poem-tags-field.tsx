@@ -1,5 +1,3 @@
-'use client'
-
 import { Control } from 'react-hook-form'
 
 import { PoemTagsSelector } from '@/components/poem-tags-selector'

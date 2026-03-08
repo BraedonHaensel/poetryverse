@@ -1,6 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import {
   Combobox,
@@ -35,7 +36,14 @@ export function PoemTagsSelector({
   onChange,
   isInvalid = false,
 }: Props) {
+  const [isClient, setIsClient] = useState(false)
   const anchor = useComboboxAnchor()
+
+  // Prevent hydration errors caused by the ComboBoxChips
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsClient(true)
+  }, [])
 
   return (
     <Combobox
@@ -52,13 +60,15 @@ export function PoemTagsSelector({
           isInvalid ? 'border-destructive! ring-destructive/20!' : ''
         }`}
       >
-        <ComboboxValue>
-          {selectedTags.map((tag) => (
-            <ComboboxChip key={tag} className="bg-gray-300 text-sm">
-              {tag}
-            </ComboboxChip>
-          ))}
-        </ComboboxValue>
+        {isClient && (
+          <ComboboxValue>
+            {selectedTags.map((tag) => (
+              <ComboboxChip key={tag} className="bg-gray-300 text-sm">
+                {tag}
+              </ComboboxChip>
+            ))}
+          </ComboboxValue>
+        )}
         <ComboboxChipsInput
           className="h-6"
           placeholder={selectedTags.length === 0 ? 'Add poem tags...' : ''}
