@@ -101,6 +101,10 @@ Create a `.vscode/settings.json` file with the following configuration:
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.scss": "tailwindcss"
   }
 }
 ```
