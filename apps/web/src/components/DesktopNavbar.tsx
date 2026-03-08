@@ -37,7 +37,7 @@ export default function DesktopNavbar() {
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute -bottom-[2px] left-0 h-[2px] w-full rounded bg-black" />
+                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
                   )}
                 </Link>
               )
