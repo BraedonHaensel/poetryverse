@@ -56,7 +56,7 @@ export default function Create() {
             className="grid grid-cols-1 gap-x-5 md:grid-cols-2"
           >
             {/* Left column fields */}
-            <div className="flex flex-col space-y-3">
+            <div className="space-y-3">
               <PoemTypeField control={control} />
               <PoemContentsField control={control} />
             </div>
