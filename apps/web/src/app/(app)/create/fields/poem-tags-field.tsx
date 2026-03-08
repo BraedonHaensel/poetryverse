@@ -56,7 +56,11 @@ export function PoemTagsField({ control }: Props) {
             <ComboboxChips
               ref={anchor}
               // Override the default padding to fit the clear button
-              className="bg-off-white relative py-2! pr-8! pl-3!"
+              className={`bg-off-white relative border-2 py-2! pr-8! pl-3! ${
+                fieldState.error
+                  ? 'border-destructive! ring-destructive/20!'
+                  : ''
+              }`}
             >
               <ComboboxValue>
                 {field.value.map((tag) => (

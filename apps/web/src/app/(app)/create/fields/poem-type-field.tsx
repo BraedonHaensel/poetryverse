@@ -32,12 +32,17 @@ export function PoemTypeField({ control }: Props) {
       <FormField
         control={control}
         name="type"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <FormLabel>Type</FormLabel>
             <FormControl>
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger className="bg-off-white w-full hover:cursor-pointer">
+                <SelectTrigger
+                  aria-invalid={!!fieldState.error}
+                  className={`bg-off-white w-full border-2 hover:cursor-pointer ${
+                    fieldState.error ? 'border-destructive' : ''
+                  }`}
+                >
                   <SelectValue placeholder="Select a poem type..." />
                 </SelectTrigger>
                 <SelectContent className="bg-off-white">
