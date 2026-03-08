@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import SignOutButton from '@/components/AuthButtons/SignOutButton'
+import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import { getAuthSession } from '@/lib/nextauth'
 
 export default async function Home() {

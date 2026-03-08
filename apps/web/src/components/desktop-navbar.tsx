@@ -4,7 +4,7 @@ import { Feather, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import SignOutButton from '@/components/AuthButtons/SignOutButton'
+import SignOutButton from '@/components/auth-buttons/sign-out-button'
 
 const links = [
   { label: 'Home', href: '/' },

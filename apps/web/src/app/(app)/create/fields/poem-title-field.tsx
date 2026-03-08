@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { CreateFromScratchSchema } from '@/schemas/createPoemSchemas'
+import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 type Props = {
   control: Control<CreateFromScratchSchema>
