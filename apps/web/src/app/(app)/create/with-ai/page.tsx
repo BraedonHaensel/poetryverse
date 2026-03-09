@@ -48,13 +48,27 @@ export default function CreatePoemWithAI() {
     if (!isValid) return
 
     const { type, prompt } = form.getValues()
-    // TODO send to backend
-    console.log('Generating...')
-    console.log(type, prompt)
+    // TODO Implement proper error handling and don't hardcode the API URL
+    const res = await fetch('http://localhost:3001/api/poems/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type,
+        prompt,
+      }),
+    })
+    const data = await res.json()
 
+    if (!res.ok) {
+      console.log(data.error)
+      return
+    }
+
+    console.log(`GOT RESPONSE: ${JSON.stringify(data)}`)
+
+    form.setValue('title', data.data.title)
+    form.setValue('poem', data.data.poem)
     setIsGenerated(true)
-    form.setValue('title', 'AI Title TODO')
-    form.setValue('poem', 'Sample AI poem output TODO')
   }
 
   // Handle submitting the completed form
