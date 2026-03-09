@@ -9,6 +9,7 @@ import { LargeButton } from '@/components/large-button'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
+import { api, displayApiError } from '@/lib/api'
 import { CreateWithAISchema } from '@/schemas/create-poem-schemas'
 
 import { PoemContentsField } from '../fields/poem-contents-field'
@@ -22,7 +23,10 @@ import { PoemVisibilityField } from '../fields/poem-visibility-field'
  * Create poem with AI page.
  */
 export default function CreatePoemWithAI() {
+  // Whether an AI poem has been generated
   const [isGenerated, setIsGenerated] = useState<boolean>(false)
+  // Whether the AI poem generation is in progress
+  const [isGenerating, setIsGenerating] = useState<boolean>(false)
 
   // Create poem with AI form
   const form = useForm<CreateWithAISchema>({
@@ -39,36 +43,38 @@ export default function CreatePoemWithAI() {
 
   // Handle generating an AI poem from the current prompt
   async function generate() {
-    if (isGenerated) {
-      // TODO handle regeneration
-    }
-
     // Validate the poem type and AI prompt
     const isValid = await form.trigger(['type', 'prompt'])
     if (!isValid) return
 
+    // Send an API request to generate the poem
+    setIsGenerated(false)
+    setIsGenerating(true)
     const { type, prompt } = form.getValues()
-    // TODO Implement proper error handling and don't hardcode the API URL
-    const res = await fetch('http://localhost:3001/api/poems/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type,
-        prompt,
-      }),
-    })
-    const data = await res.json()
-
-    if (!res.ok) {
-      console.log(data.error)
-      return
-    }
-
-    console.log(`GOT RESPONSE: ${JSON.stringify(data)}`)
-
-    form.setValue('title', data.data.title)
-    form.setValue('poem', data.data.poem)
-    setIsGenerated(true)
+    api
+      .post(
+        '/api/poems/generate',
+        { type, prompt },
+        {
+          headers: {
+            Authorization: `Bearer ${'<TODO GET AUTH TOKEN>'}`,
+          },
+        }
+      )
+      .then((response) => {
+        // Parse the generated poem from the response
+        const data = response.data.data
+        const { title, poem } = data
+        form.setValue('title', title)
+        form.setValue('poem', poem)
+        setIsGenerated(true)
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to generate poem')
+      })
+      .finally(() => {
+        setIsGenerating(false)
+      })
   }
 
   // Handle submitting the completed form
