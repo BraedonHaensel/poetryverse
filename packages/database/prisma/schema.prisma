@@ -15,26 +15,27 @@ datasource db {
 
 // Entities Postgresql needs for NextAuth
 
+// OAuth provider accounts linked to users (tokens, provider IDs, and ownership).
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
-  providerAccountId String
+  providerAccountId String // Provider-side unique account identifier.
   refresh_token     String? @db.Text
   access_token      String? @db.Text
-  expires_at        Int?
+  expires_at        Int? // OAuth access token expiry (unix seconds).
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+  id_token          String? @db.Text // OpenID Connect ID token.
+  session_state     String? // Provider-managed auth session state.
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([provider, providerAccountId])
 
   @@index([userId], name: "account_userId_idx")
 }
- 
 
+// User login sessions (token, expiry, and owning user).
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -45,7 +46,7 @@ model Session {
 
 }
 
-
+// Core app user profile plus auth relations, social graph, and moderation relations.
 model User { 
   id             String    @id @default(cuid())
   name           String?
@@ -54,7 +55,7 @@ model User {
   image          String?
  
   username       String?   @unique
-  role           RoleEnum  @default(USER)
+  role           RoleEnum  @default(USER) // App authorization role.
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
  
@@ -71,37 +72,43 @@ model User {
 
 // Other entities
 
+// Authorization levels used for access control.
 enum RoleEnum {
   SUPER_ADMIN
   ADMIN
   USER
 }
 
+// Why a poem was reported.
 enum ReasonType {
   CUSTOM
   AI
   PLAGIARISM
+  INAPPROPRIATE
 }
 
+// Moderator action taken on a report.
 enum ResolutionType {
   KEEP
   REMOVE
   UPDATE_AI_TAG
 }
 
+// Current lifecycle state of a report.
 enum ReportStatus {
   OPEN
   RESOLVED
 }
 
+// Main poem content authored by a user, including metadata and relations.
 model Poem {
   id                String     @id @default(cuid())
   authorId          String
   title             String
-  typeId            String
+  typeId            String // FK to PoemType lookup row.
   isPublic          Boolean    @default(true)
-  isAIAssisted      Boolean    @default(false)
-  aiLikelihoodScore Float?
+  isAIAssisted      Boolean    @default(false) // True if AI was used to help create poem.
+  aiLikelihoodScore Float? // Optional score from moderation/AI detection workflow.
   body              String
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
@@ -117,6 +124,7 @@ model Poem {
   @@index([createdAt])
 }
 
+// Lookup table for poem type/category values.
 model PoemType {
   id    String @id
   name  String @unique
@@ -124,12 +132,14 @@ model PoemType {
   poems Poem[]
 }
 
+// Lookup table of tags that can be attached to poems.
 model Tag {
   id       String    @id @default(cuid())
   name     String    @unique
   poemTags PoemTag[]
 }
 
+// Join table mapping poems to tags (many-to-many).
 model PoemTag {
   poemId String
   tagId  String
@@ -141,9 +151,10 @@ model PoemTag {
   @@index([tagId])
 }
 
+// Join table mapping users to liked poems (many-to-many) with timestamp.
 model PoemLike {
-  poemId    String
-  userId    String
+  poemId    String // Poem that was liked
+  userId    String // User that liked the poem
   createdAt DateTime @default(now())
 
   poem      Poem     @relation(fields: [poemId], references: [id], onDelete: Cascade)
@@ -153,6 +164,7 @@ model PoemLike {
   @@index([userId])
 }
 
+// Join table representing follower -> following user relationships.
 model Follow {
   followerId  String
   followingId String
@@ -165,24 +177,25 @@ model Follow {
   @@index([followingId])
 }
 
+// Moderation report on a poem, including reporter, resolver, status, and decision.
 model Report {
   id               Int             @id @default(autoincrement())
-  reporterUserId   String?
+  reporterUserId   String? // Nullable to support deleted/unknown reporter records.
   poemId           String
-  resolvedByUserId String?
+  resolvedByUserId String? // Admin who resolved; null while still open.
   reasonType       ReasonType
   reason           String
-  resolution       ResolutionType?
-  status           ReportStatus    @default(OPEN)
-  adminNote        String?
+  resolution       ResolutionType? // Final moderator decision; null until resolved.
+  status           ReportStatus    @default(OPEN) // Workflow state.
+  adminNote        String? // Internal note not intended for public display.
   createdAt        DateTime        @default(now())
-  resolvedAt       DateTime?
+  resolvedAt       DateTime? // Set when report transitions to RESOLVED.
 
   reporter         User?           @relation("ReportsMade", fields: [reporterUserId], references: [id], onDelete: SetNull)
   resolver         User?           @relation("ReportsHandled", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
   poem             Poem            @relation(fields: [poemId], references: [id], onDelete: Cascade)
 
-  @@unique([reporterUserId, poemId])
+  @@unique([reporterUserId, poemId]) // One report per user per poem (for non-null reporterUserId).
   @@index([poemId])
   @@index([reporterUserId])
   @@index([resolvedByUserId])
