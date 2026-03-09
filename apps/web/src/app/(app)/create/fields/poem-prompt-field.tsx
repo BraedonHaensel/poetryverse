@@ -1,4 +1,4 @@
-import { Control, Path } from 'react-hook-form'
+import { Control } from 'react-hook-form'
 
 import { ShadowCard } from '@/components/shadow-card'
 import {
@@ -10,36 +10,31 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
+import { CreateWithAISchema } from '@/schemas/create-poem-schemas'
 
-type HasPoem = { poem: string }
-
-type Props<T extends HasPoem> = {
-  control: Control<T>
-  showAIDescription: boolean
+type Props = {
+  control: Control<CreateWithAISchema>
 }
 
 /**
- * Poem contents field.
+ * Poem AI prompt field.
  */
-export function PoemContentsField<T extends HasPoem>({
-  control,
-  showAIDescription,
-}: Props<T>) {
+export function PoemPromptField({ control }: Props) {
   return (
     <ShadowCard className="p-3">
       <FormField
         control={control}
-        name={'poem' as Path<T>}
+        name="prompt"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Your Poem</FormLabel>
-            {showAIDescription && (
-              <FormDescription>Customize the generated poem.</FormDescription>
-            )}
+            <FormLabel>AI Prompt</FormLabel>
+            <FormDescription>
+              Describe the poem for AI to generate.
+            </FormDescription>
             <FormControl>
               <Textarea
                 className="bg-off-white h-60 resize-none border-2"
-                placeholder="Write your poem..."
+                placeholder="Create a poem about..."
                 maxLength={1000}
                 {...field}
               />

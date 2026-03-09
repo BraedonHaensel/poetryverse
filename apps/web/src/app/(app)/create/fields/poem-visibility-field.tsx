@@ -1,4 +1,4 @@
-import { Control } from 'react-hook-form'
+import { Control, Path } from 'react-hook-form'
 
 import { ShadowCard } from '@/components/shadow-card'
 import {
@@ -10,21 +10,24 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Switch } from '@/components/ui/switch'
-import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
-type Props = {
-  control: Control<CreateFromScratchSchema>
+type HasPublicVisibility = { publicVisibility: boolean }
+
+type Props<T extends HasPublicVisibility> = {
+  control: Control<T>
 }
 
 /**
  * Poem visibility field.
  */
-export function PoemVisibilityField({ control }: Props) {
+export function PoemVisibilityField<T extends HasPublicVisibility>({
+  control,
+}: Props<T>) {
   return (
     <ShadowCard className="p-3">
       <FormField
         control={control}
-        name="publicVisibility"
+        name={'publicVisibility' as Path<T>}
         render={({ field }) => (
           <FormItem className="flex items-center justify-between gap-5">
             <div>

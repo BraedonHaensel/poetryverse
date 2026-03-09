@@ -1,4 +1,4 @@
-import { Control } from 'react-hook-form'
+import { Control, Path } from 'react-hook-form'
 
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
 import { ShadowCard } from '@/components/shadow-card'
@@ -9,27 +9,28 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
-type Props = {
-  control: Control<CreateFromScratchSchema>
+type HasTags = { tags: string[] }
+
+type Props<T extends HasTags> = {
+  control: Control<T>
 }
 
 /**
  * Poem tags field.
  */
-export function PoemTagsField({ control }: Props) {
+export function PoemTagsField<T extends HasTags>({ control }: Props<T>) {
   return (
     <ShadowCard className="p-3">
       <FormField
         control={control}
-        name="tags"
+        name={'tags' as Path<T>}
         render={({ field, fieldState }) => (
           <FormItem>
             <FormLabel>Tags</FormLabel>
             <FormControl>
               <PoemTagsSelector
-                selectedTags={field.value}
+                selectedTags={field.value as string[]}
                 onChange={field.onChange}
                 isInvalid={!!fieldState.error}
               />
