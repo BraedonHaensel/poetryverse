@@ -153,8 +153,8 @@ model PoemTag {
 
 // Join table mapping users to liked poems (many-to-many) with timestamp.
 model PoemLike {
-  poemId    String // Poem that was liked
-  userId    String // User that liked the poem
+  poemId    String // Poem that was liked.
+  userId    String // User that liked the poem.
   createdAt DateTime @default(now())
 
   poem      Poem     @relation(fields: [poemId], references: [id], onDelete: Cascade)
