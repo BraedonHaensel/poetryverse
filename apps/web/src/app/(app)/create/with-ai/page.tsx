@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { LargeButton } from '@/components/large-button'
+import { LoadingDialog } from '@/components/loading-dialog'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
@@ -85,44 +86,47 @@ export default function CreatePoemWithAI() {
   const control = form.control
 
   return (
-    <ShadowCard className={`m-auto ${!isGenerated ? 'w-150' : ''}`}>
-      <CardHeader>
-        <div className="flex items-center justify-center gap-3">
-          <CardTitle className="text-2xl font-bold">Create With AI</CardTitle>
-          <Image src="/robot-icon.svg" alt="" width={40} height={40} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className={`grid grid-cols-1 gap-x-5 ${isGenerated ? 'md:grid-cols-2' : ''}`}
-          >
-            {/* Left column fields */}
-            <div className="space-y-3">
-              <PoemTypeField control={control} />
-              <PoemPromptField control={control} />
-              {/* Generate button */}
-              <LargeButton type="button" onClick={generate}>
-                {isGenerated ? 'Regenerate' : 'Generate'}
-              </LargeButton>
-              {isGenerated && <PoemTitleField control={control} />}
-            </div>
-
-            {/* Right column fields */}
-            {isGenerated && (
+    <>
+      <LoadingDialog isOpen={isGenerating} message="Generating poem..." />
+      <ShadowCard className={`m-auto ${!isGenerated ? 'w-150' : ''}`}>
+        <CardHeader>
+          <div className="flex items-center justify-center gap-3">
+            <CardTitle className="text-2xl font-bold">Create With AI</CardTitle>
+            <Image src="/robot-icon.svg" alt="" width={40} height={40} />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className={`grid grid-cols-1 gap-x-5 ${isGenerated ? 'md:grid-cols-2' : ''}`}
+            >
+              {/* Left column fields */}
               <div className="space-y-3">
-                <PoemContentsField control={control} showAIDescription />
-                <PoemTagsField control={control} />
-                <PoemVisibilityField control={control} />
-
-                {/* Publish button */}
-                <LargeButton type="submit">Publish</LargeButton>
+                <PoemTypeField control={control} />
+                <PoemPromptField control={control} />
+                {/* Generate button */}
+                <LargeButton type="button" onClick={generate}>
+                  {isGenerated ? 'Regenerate' : 'Generate'}
+                </LargeButton>
+                {isGenerated && <PoemTitleField control={control} />}
               </div>
-            )}
-          </form>
-        </Form>
-      </CardContent>
-    </ShadowCard>
+
+              {/* Right column fields */}
+              {isGenerated && (
+                <div className="space-y-3">
+                  <PoemContentsField control={control} showAIDescription />
+                  <PoemTagsField control={control} />
+                  <PoemVisibilityField control={control} />
+
+                  {/* Publish button */}
+                  <LargeButton type="submit">Publish</LargeButton>
+                </div>
+              )}
+            </form>
+          </Form>
+        </CardContent>
+      </ShadowCard>
+    </>
   )
 }

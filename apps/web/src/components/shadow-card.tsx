@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils'
 
 import { Card } from './ui/card'
 
-// Wraps the shadcn Card component with a larger shadow and border.
+/**
+ * Wraps the shadcn Card component with a larger shadow and border.
+ */
 export function ShadowCard({
   className,
   ...props
