@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils'
 
 import { Button } from './ui/button'
 
-// Wraps the shadcn Button component for larger default styling.
+/**
+ * Wraps the shadcn Button component for larger default styling.
+ */
 export function LargeButton({
   className,
   ...props
