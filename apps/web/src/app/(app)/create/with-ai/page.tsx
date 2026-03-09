@@ -26,7 +26,7 @@ import { PoemVisibilityField } from '../fields/poem-visibility-field'
  */
 export default function CreatePoemWithAI() {
   // Whether an AI poem has been generated
-  const [isGenerated, setIsGenerated] = useState<boolean>(true)
+  const [isGenerated, setIsGenerated] = useState<boolean>(false)
   // Whether the AI poem generation is in progress
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   // Whether the regenerate poem confirmation is open

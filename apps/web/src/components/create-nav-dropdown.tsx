@@ -51,7 +51,7 @@ export default function CreateDropdown({ isActive }: Props) {
           <DropdownMenuContent>
             <DropdownMenuItem asChild>
               <Link className="hover:bg-gray-400" href={'/create/from-scratch'}>
-                <div className="flex items-center justify-center gap-3 text-[16px] font-bold">
+                <div className="flex items-center justify-center gap-3 text-base font-bold">
                   <Image src="/stylus-icon.svg" alt="" width={30} height={30} />
                   Create From Scratch
                 </div>
@@ -60,7 +60,7 @@ export default function CreateDropdown({ isActive }: Props) {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link className="hover:bg-gray-400" href={'/create/with-ai'}>
-                <div className="flex items-center justify-center gap-3 text-[16px] font-bold">
+                <div className="flex items-center justify-center gap-3 text-base font-bold">
                   <Image src="/robot-icon.svg" alt="" width={30} height={30} />
                   Create With AI
                 </div>
