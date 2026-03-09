@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { ConfirmationDialog } from '@/components/confirmation-dialog'
 import { LargeButton } from '@/components/large-button'
 import { LoadingDialog } from '@/components/loading-dialog'
 import { ShadowCard } from '@/components/shadow-card'
@@ -25,9 +26,11 @@ import { PoemVisibilityField } from '../fields/poem-visibility-field'
  */
 export default function CreatePoemWithAI() {
   // Whether an AI poem has been generated
-  const [isGenerated, setIsGenerated] = useState<boolean>(false)
+  const [isGenerated, setIsGenerated] = useState<boolean>(true)
   // Whether the AI poem generation is in progress
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
+  // Whether the regenerate poem confirmation is open
+  const [isRegenConfirmOpen, setIsRegenConfirmOpen] = useState<boolean>(false)
 
   // Create poem with AI form
   const form = useForm<CreateWithAISchema>({
@@ -42,14 +45,16 @@ export default function CreatePoemWithAI() {
     },
   })
 
+  async function validateAIGenerationFields(): Promise<boolean> {
+    return form.trigger(['type', 'prompt'])
+  }
+
   // Handle generating an AI poem from the current prompt
   async function generate() {
     // Validate the poem type and AI prompt
-    const isValid = await form.trigger(['type', 'prompt'])
-    if (!isValid) return
+    if (!(await validateAIGenerationFields())) return
 
     // Send an API request to generate the poem
-    setIsGenerated(false)
     setIsGenerating(true)
     const { type, prompt } = form.getValues()
     api
@@ -83,12 +88,31 @@ export default function CreatePoemWithAI() {
     console.log(`TODO Submit form: ${JSON.stringify(data)}`)
   }
 
+  async function handleGenerateClick() {
+    if (!isGenerated) {
+      generate()
+      return
+    }
+    // Poem previously generated. Validate fields and open confirmation
+    const isValid = await validateAIGenerationFields()
+    if (isValid) setIsRegenConfirmOpen(true)
+  }
+
   const control = form.control
 
   return (
     <>
       <LoadingDialog isOpen={isGenerating} message="Generating poem..." />
-      <ShadowCard className={`m-auto ${!isGenerated ? 'w-150' : ''}`}>
+      <ConfirmationDialog
+        isOpen={isRegenConfirmOpen}
+        title="Are you sure you want to regenerate?"
+        description="Regenerating will overwrite your current poem."
+        onOpenChange={() => setIsRegenConfirmOpen(false)}
+        onAction={generate}
+      />
+      <ShadowCard
+        className={`m-auto ${!isGenerated ? 'w-full max-w-150' : ''}`}
+      >
         <CardHeader>
           <div className="flex items-center justify-center gap-3">
             <CardTitle className="text-2xl font-bold">Create With AI</CardTitle>
@@ -105,10 +129,12 @@ export default function CreatePoemWithAI() {
               <div className="space-y-3">
                 <PoemTypeField control={control} />
                 <PoemPromptField control={control} />
-                {/* Generate button */}
-                <LargeButton type="button" onClick={generate}>
+
+                {/* Generate/regenerate button */}
+                <LargeButton type="button" onClick={handleGenerateClick}>
                   {isGenerated ? 'Regenerate' : 'Generate'}
                 </LargeButton>
+
                 {isGenerated && <PoemTitleField control={control} />}
               </div>
 
