@@ -2,6 +2,7 @@ import './globals.css'
 
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Toaster } from 'sonner'
 
 import Providers from '@/components/providers'
 
@@ -29,6 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        {/* Toaster is a notification handler */}
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            classNames: {
+              success: '!bg-green-300 !border-green-300',
+              warning: '!bg-amber-300 !border-amber-300',
+              error: '!bg-red-300 !border-red-300',
+            },
+          }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

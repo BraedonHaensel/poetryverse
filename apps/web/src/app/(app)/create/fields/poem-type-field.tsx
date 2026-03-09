@@ -1,4 +1,4 @@
-import { Control } from 'react-hook-form'
+import { Control, Path } from 'react-hook-form'
 
 import { ShadowCard } from '@/components/shadow-card'
 import {
@@ -15,24 +15,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 // TODO Hardcoded example, clean up when we can get the poem types from the backend
 const POEM_TYPES = ['Haiku', 'Couplet', 'Sonnet']
 
-type Props = {
-  control: Control<CreateFromScratchSchema>
+type HasType = { type: string }
+
+type Props<T extends HasType> = {
+  control: Control<T>
 }
 
 /**
  * Poem type field.
  */
-export function PoemTypeField({ control }: Props) {
+export function PoemTypeField<T extends HasType>({ control }: Props<T>) {
   return (
     <ShadowCard className="p-3">
       <FormField
         control={control}
-        name="type"
+        name={'type' as Path<T>}
         render={({ field, fieldState }) => (
           <FormItem>
             <FormLabel>Type</FormLabel>
