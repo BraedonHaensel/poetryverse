@@ -13,22 +13,27 @@ type Props = {
   isOpen: boolean
   title: string
   description: string
-  onOpenChange: (val: boolean) => void
+  onClose: () => void
   onAction: () => void
 }
 
 /**
- * Confirmation dialog.
+ * Standard confirmation dialog. Visibility is handled externally.
+ * @param isOpen Whether the dialog is open.
+ * @param title Title to display within the dialog.
+ * @param description Description to display within the dialog.
+ * @param onClose Callback to handle closing the dialog.
+ * @param onAction Callback to call if the dialog is confirmed.
  */
 export function ConfirmationDialog({
   isOpen,
   title,
   description,
-  onOpenChange,
+  onClose,
   onAction,
 }: Props) {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title} </AlertDialogTitle>

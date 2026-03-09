@@ -107,7 +107,7 @@ export default function CreatePoemWithAI() {
         isOpen={isRegenConfirmOpen}
         title="Are you sure you want to regenerate?"
         description="Regenerating will overwrite your current poem."
-        onOpenChange={() => setIsRegenConfirmOpen(false)}
+        onClose={() => setIsRegenConfirmOpen(false)}
         onAction={generate}
       />
       <ShadowCard
