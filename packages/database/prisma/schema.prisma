@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  relationMode = "prisma"
 }
 
 
@@ -14,7 +13,7 @@ datasource db {
 
 
 
-// Schema Postgresql needs for NextAuth
+// Entities Postgresql needs for NextAuth
 
 model Account {
   id                String  @id @default(cuid())
@@ -47,14 +46,144 @@ model Session {
 }
 
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image    String?
-  username String? @unique
-  accounts Account[]
-  sessions Session[]
+model User { 
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+ 
+  username       String?   @unique
+  role           RoleEnum  @default(USER)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+ 
+  accounts       Account[]
+  sessions       Session[]
+ 
+  authoredPoems  Poem[]
+  likes          PoemLike[]
+  followers      Follow[]  @relation("Followers")
+  following      Follow[]  @relation("Following")
+  reportsMade    Report[]  @relation("ReportsMade")
+  reportsHandled Report[]  @relation("ReportsHandled")
 }
 
+// Other entities
+
+enum RoleEnum {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum ReasonType {
+  CUSTOM
+  AI
+  PLAGIARISM
+}
+
+enum ResolutionType {
+  KEEP
+  REMOVE
+  UPDATE_AI_TAG
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+}
+
+model Poem {
+  id                String     @id @default(cuid())
+  authorId          String
+  title             String
+  typeId            String
+  isPublic          Boolean    @default(true)
+  isAIAssisted      Boolean    @default(false)
+  aiLikelihoodScore Float?
+  body              String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  author            User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  type              PoemType   @relation(fields: [typeId], references: [id])
+  likes             PoemLike[]
+  poemTags          PoemTag[]
+  reports           Report[]
+
+  @@index([typeId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model PoemType {
+  id    String @id
+  name  String @unique
+
+  poems Poem[]
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  poemTags PoemTag[]
+}
+
+model PoemTag {
+  poemId String
+  tagId  String
+
+  poem   Poem @relation(fields: [poemId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([poemId, tagId])
+  @@index([tagId])
+}
+
+model PoemLike {
+  poemId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  poem      Poem     @relation(fields: [poemId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([poemId, userId])
+  @@index([userId])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower    User     @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+model Report {
+  id               Int             @id @default(autoincrement())
+  reporterUserId   String?
+  poemId           String
+  resolvedByUserId String?
+  reasonType       ReasonType
+  reason           String
+  resolution       ResolutionType?
+  status           ReportStatus    @default(OPEN)
+  adminNote        String?
+  createdAt        DateTime        @default(now())
+  resolvedAt       DateTime?
+
+  reporter         User?           @relation("ReportsMade", fields: [reporterUserId], references: [id], onDelete: SetNull)
+  resolver         User?           @relation("ReportsHandled", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+  poem             Poem            @relation(fields: [poemId], references: [id], onDelete: Cascade)
+
+  @@unique([reporterUserId, poemId])
+  @@index([poemId])
+  @@index([reporterUserId])
+  @@index([resolvedByUserId])
+}
