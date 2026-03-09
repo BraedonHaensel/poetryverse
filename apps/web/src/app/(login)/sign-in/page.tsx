@@ -11,7 +11,7 @@ const Page = async () => {
     if (session?.user?.username) {
       redirect('/')
     } else {
-      redirect('/setUsername')
+      redirect('/set-username')
     }
   }
 
