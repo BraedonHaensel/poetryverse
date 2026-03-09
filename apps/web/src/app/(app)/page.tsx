@@ -10,7 +10,7 @@ export default async function Home() {
     return (
       <div className="p-6">
         <h1 className="text-xl font-semibold">Not signed in</h1>
-        <Link className="text-blue-600 underline" href="/signIn">
+        <Link className="text-blue-600 underline" href="/sign-in">
           Sign in
         </Link>
       </div>
