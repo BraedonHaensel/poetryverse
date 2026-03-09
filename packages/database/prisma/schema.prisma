@@ -106,7 +106,7 @@ model Poem {
   authorId          String
   title             String
   typeId            String // FK to PoemType lookup row.
-  isPublic          Boolean    @default(true)
+  isPublic          Boolean    @default(true) // Visibility of the poem
   isAIAssisted      Boolean    @default(false) // True if AI was used to help create poem.
   aiLikelihoodScore Float? // Optional score from moderation/AI detection workflow.
   body              String
@@ -124,7 +124,7 @@ model Poem {
   @@index([createdAt])
 }
 
-// Lookup table for poem type/category values.
+// Lookup table for poem type values.
 model PoemType {
   id    String @id
   name  String @unique
