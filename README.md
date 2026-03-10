@@ -75,7 +75,7 @@ From root:
 
 `docker build -f apps/web/Dockerfile -t seng513-web .`
 
-`docker run -p 3000:3000 -e DATABASE_URL="your-postgres-url" -e NEXT_AUTH_SECRET = "secret-here" -e GOOGLE_CLIENT_ID="secret-here" -e GOOGLE_CLIENT_SECRET="secret-here" seng513-web`
+`docker run --rm -p 3000:3000 -e DATABASE_URL="your-postgres-url" -e NEXT_AUTH_SECRET = "secret-here" -e GOOGLE_CLIENT_ID="secret-here" -e GOOGLE_CLIENT_SECRET="secret-here" seng513-web`
 
 ## Recommended Extensions
 
