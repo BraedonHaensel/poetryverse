@@ -40,8 +40,15 @@ export function ConfirmationDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onAction}>Continue</AlertDialogAction>
+          <AlertDialogCancel className="hover:cursor-pointer">
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="hover:cursor-pointer"
+            onClick={onAction}
+          >
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
