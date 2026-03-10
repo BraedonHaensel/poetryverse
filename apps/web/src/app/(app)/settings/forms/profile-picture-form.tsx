@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { api } from '@/lib/api'
 import { ProfilePictureSchema } from '@/schemas/user-settings-schemas'
 
 type Props = {
@@ -48,8 +49,18 @@ export function ProfilePictureForm({ imageUrl }: Props) {
   })
 
   // Handle submitting the profile picture change
-  function onSubmit(data: ProfilePictureSchema) {
-    console.log(`TODO Submit form: ${JSON.stringify(data)}`)
+  async function onSubmit(data: ProfilePictureSchema) {
+    // Use a FormData to handle uploading the profile picture image file
+    const formData = new FormData()
+    formData.append('image', data.imageFile)
+
+    // TODO sent to backend
+    const _ = await api.patch('/TODO', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${'TODO'}`,
+      },
+    })
     setIsOpen(false)
   }
 
