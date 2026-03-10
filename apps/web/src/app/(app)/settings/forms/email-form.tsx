@@ -27,7 +27,7 @@ export function EmailForm({ email }: Props) {
       <Tooltip open={isTooltipOpen}>
         <TooltipTrigger>
           <Input
-            className="bg-off-white border-2"
+            className="bg-off-white truncate border-2"
             value={email}
             readOnly
             onFocus={() => setIsTooltipOpen(true)}

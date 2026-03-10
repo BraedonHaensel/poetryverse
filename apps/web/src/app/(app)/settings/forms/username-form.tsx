@@ -69,9 +69,9 @@ export function UsernameForm({ username }: Props) {
       <ShadowCard className="gap-2 p-3">
         <Label>Username</Label>
 
-        <DialogTrigger className="relative">
+        <DialogTrigger className="bg-off-white relative">
           <Input
-            className="bg-off-white border-2 hover:cursor-pointer"
+            className="truncate border-2 pr-8 hover:cursor-pointer"
             value={username}
             readOnly
           />
