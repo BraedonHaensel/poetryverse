@@ -21,7 +21,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-poetryverse}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-poetryverse} -d ${POSTGRES_DB:-poetryverse}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -38,9 +38,6 @@ services:
       db:
         condition: service_healthy
 
-    ports:
-      - "3001:3001"
-
     environment:
       PORT: 3001
       NODE_ENV: development
@@ -49,20 +46,8 @@ services:
 
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
 
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/api/node_modules
-      - /app/apps/web/node_modules
-      - /app/packages/database/node_modules
-
-    command: >
-      sh -c "
-        npm install &&
-        npm run db:generate --workspace=packages/database &&
-        npm run db:push --workspace=packages/database &&
-        npm run dev:api
-      "
+    ports:
+      - "3001:3001"
 
 
   web:
@@ -79,25 +64,12 @@ services:
     depends_on:
       - api
 
-    ports:
-      - "3000:3000"
-
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-CHANGE_ME}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
 
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/web/node_modules
-      - /app/apps/api/node_modules
-      - /app/packages/database/node_modules
-
-    command: >
-      sh -c "
-        npm install &&
-        npm run dev
-      "
+    ports:
+      - "3000:3000"
 
 
 volumes:

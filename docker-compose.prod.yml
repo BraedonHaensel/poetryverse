@@ -1,0 +1,32 @@
+services:
+  db:
+    restart: unless-stopped
+
+  api:
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    command: >
+      sh -c "
+        npm install &&
+        npm run db:generate --workspace=packages/database &&
+        npm run db:push --workspace=packages/database &&
+        npm run build --workspace=apps/api &&
+        npm run start --workspace=apps/api
+      "
+
+  web:
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
+    command: >
+      sh -c "
+        npm run db:generate --workspace=packages/database &&
+        npm run build --workspace=apps/web &&
+        npm run start --workspace=apps/web
+      "
