@@ -1,6 +1,7 @@
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { AdvancedSettingsForm } from './forms/advanced-settings-form'
 import { EmailForm } from './forms/email-form'
 import { ProfilePictureForm } from './forms/profile-picture-form'
 import { UsernameForm } from './forms/username-form'
@@ -25,6 +26,7 @@ export default function UserSettings() {
         <ProfilePictureForm imageUrl={IMAGE_URL} />
         <UsernameForm username={USERNAME} />
         <EmailForm email={EMAIL} />
+        <AdvancedSettingsForm />
       </CardContent>
     </ShadowCard>
   )

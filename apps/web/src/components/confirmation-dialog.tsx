@@ -15,6 +15,7 @@ type Props = {
   description: string
   onClose: () => void
   onAction: () => void
+  variant?: 'default' | 'delete'
 }
 
 /**
@@ -31,6 +32,7 @@ export function ConfirmationDialog({
   description,
   onClose,
   onAction,
+  variant = 'default',
 }: Props) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -46,8 +48,9 @@ export function ConfirmationDialog({
           <AlertDialogAction
             className="hover:cursor-pointer"
             onClick={onAction}
+            variant={variant === 'delete' ? 'destructive' : 'default'}
           >
-            Continue
+            {variant === 'delete' ? 'Delete' : 'Continue'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
