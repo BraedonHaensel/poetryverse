@@ -70,10 +70,14 @@ export function UsernameForm({ username }: Props) {
         <Label>Username</Label>
 
         <DialogTrigger className="relative">
-          <Input className="bg-off-white border-2" value={username} readOnly />
+          <Input
+            className="bg-off-white border-2 hover:cursor-pointer"
+            value={username}
+            readOnly
+          />
           <Pencil
             size={20}
-            className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+            className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:cursor-pointer"
           />
         </DialogTrigger>
       </ShadowCard>
@@ -99,11 +103,20 @@ export function UsernameForm({ username }: Props) {
         </Form>
         <DialogFooter className="flex sm:justify-between">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button
+              className="hover:cursor-pointer"
+              type="button"
+              variant="outline"
+            >
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={form.handleSubmit(onSubmit)}>Save</Button>
+          <Button
+            className="hover:cursor-pointer"
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

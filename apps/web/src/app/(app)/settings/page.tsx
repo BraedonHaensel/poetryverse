@@ -2,9 +2,11 @@ import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { EmailForm } from './forms/email-form'
+import { ProfilePictureForm } from './forms/profile-picture-form'
 import { UsernameForm } from './forms/username-form'
 
 // TODO get user data from backend
+const IMAGE_URL = '/sample-profile-image.jpg'
 const USERNAME = 'sampleUsername123'
 const EMAIL = 'myemail@email.com'
 
@@ -20,6 +22,7 @@ export default function UserSettings() {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
+        <ProfilePictureForm imageUrl={IMAGE_URL} />
         <UsernameForm username={USERNAME} />
         <EmailForm email={EMAIL} />
       </CardContent>

@@ -16,3 +16,13 @@ export const UsernameSchema = z.object({
 
 // Type inferred from UsernameSchema
 export type UsernameSchema = z.infer<typeof UsernameSchema>
+
+/**
+ * Schema for validating user profile picture changes.
+ */
+export const ProfilePictureSchema = z.object({
+  imageFile: z.file(),
+})
+
+// Type inferred from UserImageSchema
+export type ProfilePictureSchema = z.infer<typeof ProfilePictureSchema>
