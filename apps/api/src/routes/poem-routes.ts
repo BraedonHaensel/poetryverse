@@ -19,15 +19,15 @@ const router = Router()
 router.post('/generate', requireAuth, asyncHandler(generateAIPoem))
 
 /**
- * Route serving AI generated poem form
+ * Route serving AI Interpretation poem form
  * @name post/api/poems/interpret
  * @function
  * @memberof module:routes/poemRoutes
  * @inner
- * @param {PoemInterpretRequest} req.body - Request body containing poem type,l poem body, and prompt
+ * @param {PoemInterpretRequest} req.body - Request body containing poem title, type, poem body, and prompt
  * @param {Response} res - Express response object
  * @returns {PoemInterpretResponse} JSON response containing generated poem data
  */
-router.post('/Interpret', requireAuth, asyncHandler(InterpretPoem))
+router.post('/interpret', requireAuth, asyncHandler(InterpretPoem))
 
 export default router
