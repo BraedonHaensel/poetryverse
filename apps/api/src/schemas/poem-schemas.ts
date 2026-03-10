@@ -32,3 +32,42 @@ export const aiGenSchema = z.object({
 
 /** Response Type expected from route post/api/generate */
 export type PoemAIResponse = z.infer<typeof aiGenSchema>
+
+/**
+ * AI Interpretation prompt, poem, and type sent to Gemini Model
+ * Describes the type of poem, poem, and interpretation prompt the user requests that is sent to the gemini model.
+ */
+export interface PoemInterpretRequest {
+  /**
+   * The title of poem the user requests to be interpreted
+   */
+  title: string
+  /**
+   * The type of poem the user requests to be interpreted
+   */
+  type: string
+  /**
+   * The interpretation prompt of the poem requested
+   */
+  prompt: string
+  /**
+   * The poem requested to be interprted
+   */
+  poem: string
+}
+
+/**
+ * AI generation JSON Schema response
+ * Describes the type of poem and user prompt used when requesting an AI generated poem response.
+ */
+export const interpretSchema = z.object({
+  /**
+   * The AI generated title of poem returned
+   */
+  interpretation: z
+    .string()
+    .describe('Interpretation provided from interpret call'),
+})
+
+/** Response Type expected from route post/api/generate */
+export type PoemInterpretResponse = z.infer<typeof interpretSchema>
