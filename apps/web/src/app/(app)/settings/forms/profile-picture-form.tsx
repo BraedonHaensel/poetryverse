@@ -5,6 +5,7 @@ import { Pencil } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { ShadowCard } from '@/components/shadow-card'
 import { Button } from '@/components/ui/button'
@@ -136,8 +137,12 @@ export function ProfilePictureForm({ imageUrl }: Props) {
                         onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (file) {
-                            setImagePreviewUrl(URL.createObjectURL(file))
-                            field.onChange(file)
+                            if (file.type.startsWith('image/')) {
+                              setImagePreviewUrl(URL.createObjectURL(file))
+                              field.onChange(file)
+                            } else {
+                              toast.error('File must be an image.')
+                            }
                           }
                         }}
                       />
@@ -155,7 +160,12 @@ export function ProfilePictureForm({ imageUrl }: Props) {
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={form.handleSubmit(onSubmit)}>Save</Button>
+          <Button
+            disabled={!imagePreviewUrl}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

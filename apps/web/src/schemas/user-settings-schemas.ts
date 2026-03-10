@@ -21,7 +21,11 @@ export type UsernameSchema = z.infer<typeof UsernameSchema>
  * Schema for validating user profile picture changes.
  */
 export const ProfilePictureSchema = z.object({
-  imageFile: z.file(),
+  imageFile: z
+    .instanceof(File, { message: 'Image file required.' })
+    .refine((file) => file.type.startsWith('image/'), {
+      message: 'File must be an image.',
+    }),
 })
 
 // Type inferred from UserImageSchema
