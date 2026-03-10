@@ -3,11 +3,12 @@ import type { Request, Response } from 'express'
 import { toJSONSchema } from 'zod'
 
 import config from '../lib/config'
+import { HttpError } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import {
-  aiGenSchema,
   PoemAIRequest,
   PoemAIResponse,
+  PoemAIResponseSchema,
 } from '../schemas/poem-schemas'
 
 /** Init Google Gemini Client */
@@ -17,70 +18,57 @@ if (!geminiApiKey) {
 }
 const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
 
+const getErrorStatus = (err: unknown): number | undefined => {
+  if (typeof err !== 'object' || err === null) {
+    return undefined
+  }
+
+  const status = (err as { status?: unknown }).status
+  return typeof status === 'number' ? status : undefined
+}
+
 /**
- * Controller handling AI generated poems
- *
- * Sends type of poem and the prompt to handler and returns title and poem
- *
- * @param {Request<{}, {}, PoemAIRequest>} req - Express request containing generation request input.
- * @param {Response} res - Express response object containing generation response title and poem.
- * @returns {PoemAIRequest} responseJson - JSON response containing the generated poem.
- *
- * @throws {429} - Gemini API rate limit exceeded.
- * @throws {400} - Request prompts not satisfied.
- * @throws {500} - Poem Generation Request Fails.
+ * Generates a poem from the validated request body.
+ * @param req Express request with `type` and `prompt` in `req.body`.
+ * @param res Express response object.
+ * @returns 200 with `{ data: { title, poem } }`.
+ * @throws {HttpError} 429 when the Gemini API is rate limited.
+ * @throws {HttpError} 500 when generation fails.
  */
+export const generateAIPoem = async (req: Request, res: Response) => {
+  logger.info('AI Poem Generating...')
+  const { type, prompt } = req.body as PoemAIRequest
 
-export const generateAIPoem = async (
-  req: Request<Record<string, never>, Record<string, never>, PoemAIRequest>,
-  res: Response
-) => {
+  const geminiPrompt = `Generate a unique ${type} poem and title based off the following prompt: \n${prompt}`
+  logger.info('Generating Title & Prompt')
+
+  let result: { text?: string | null }
   try {
-    logger.info('AI Poem Generating...')
-    const { type, prompt } = req.body
-
-    if (!type) {
-      logger.warn('Type Not Recieved')
-      return res.status(400).json({ error: 'type not provided' })
-    }
-
-    if (!prompt) {
-      logger.warn('Prompt Not Recieved')
-      return res.status(400).json({ error: 'prompt not provided' })
-    }
-    const geminiPrompt = `Generate a unique ${type} poem and title based off the following prompt: \n${prompt}`
-    logger.info('Generating Title & Prompt')
-    const result = await geminiClient.models.generateContent({
+    result = await geminiClient.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: geminiPrompt,
       config: {
         responseMimeType: 'application/json',
-        responseJsonSchema: toJSONSchema(aiGenSchema),
+        responseJsonSchema: toJSONSchema(PoemAIResponseSchema),
       },
     })
-
-    const responseJSON: PoemAIResponse = aiGenSchema.parse(
-      JSON.parse(result.text ?? '')
-    )
-
-    return res.status(200).json({ data: responseJSON })
   } catch (err: unknown) {
-    logger.error('Error Generating Poem', err)
-    let status = 500
+    const status = getErrorStatus(err)
 
-    if (
-      typeof err === 'object' &&
-      err !== null &&
-      'status' in err &&
-      typeof (err as { status: unknown }).status === 'number'
-    ) {
-      status = (err as { status: number }).status
+    if (status === 429) {
+      throw new HttpError(
+        429,
+        'Rate limit exceeded, please try again later',
+        err
+      )
     }
 
-    const message =
-      status === 429
-        ? 'Rate limit exceeded, please try again later'
-        : 'Poem failed to generate'
-    return res.status(status).json({ error: message })
+    throw new HttpError(500, 'Poem failed to generate', err)
   }
+
+  const responseJSON: PoemAIResponse = PoemAIResponseSchema.parse(
+    JSON.parse(result.text ?? '')
+  )
+
+  return res.status(200).json({ data: responseJSON })
 }
