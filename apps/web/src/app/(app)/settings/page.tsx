@@ -1,5 +1,28 @@
-'use client'
+import { ShadowCard } from '@/components/shadow-card'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { EmailForm } from './forms/email-form'
+import { UsernameForm } from './forms/username-form'
+
+// TODO get user data from backend
+const USERNAME = 'sampleUsername123'
+const EMAIL = 'myemail@email.com'
+
+/**
+ * User settings page.
+ */
 export default function UserSettings() {
-  return <div>settings</div>
+  return (
+    <ShadowCard className="mx-auto w-full max-w-170">
+      <CardHeader>
+        <CardTitle className="mx-auto text-2xl font-bold">
+          User Settings
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-5">
+        <UsernameForm username={USERNAME} />
+        <EmailForm email={EMAIL} />
+      </CardContent>
+    </ShadowCard>
+  )
 }
