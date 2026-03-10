@@ -4,9 +4,19 @@ import { generateAIPoem } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
-import { PoemAIRequestSchema } from '../schemas/poem-schemas'
+import {
+  CreatePoemRequestSchema,
+  PoemAIRequestSchema,
+} from '../schemas/poem-schemas'
 
 const router = Router()
+
+router.post(
+  '/',
+  requireAuth,
+  validate(CreatePoemRequestSchema)
+  // asyncHandler(createPoem)
+)
 
 /**
  * Route for AI poem generation.

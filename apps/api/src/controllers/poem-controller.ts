@@ -5,6 +5,7 @@ import { toJSONSchema } from 'zod'
 import config from '../lib/config'
 import { HttpError } from '../lib/http-errors'
 import { logger } from '../lib/logger'
+import { getErrorStatus } from '../lib/utils'
 import {
   PoemAIRequest,
   PoemAIResponse,
@@ -17,15 +18,6 @@ if (!geminiApiKey) {
   throw new Error('Gemini API failed to retrieve from env')
 }
 const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
-
-const getErrorStatus = (err: unknown): number | undefined => {
-  if (typeof err !== 'object' || err === null) {
-    return undefined
-  }
-
-  const status = (err as { status?: unknown }).status
-  return typeof status === 'number' ? status : undefined
-}
 
 /**
  * Generates a poem from the validated request body.
@@ -58,12 +50,12 @@ export const generateAIPoem = async (req: Request, res: Response) => {
     if (status === 429) {
       throw new HttpError(
         429,
-        'Rate limit exceeded, please try again later',
+        'Rate limit exceeded, please try again later.',
         err
       )
     }
 
-    throw new HttpError(500, 'Poem failed to generate', err)
+    throw new HttpError(500, 'Poem failed to generate.', err)
   }
 
   const responseJSON: PoemAIResponse = PoemAIResponseSchema.parse(
