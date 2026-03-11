@@ -1,8 +1,6 @@
 lint-frontend:
   stage: lint
-  name: Lint frontend
-  runs-on: ubuntu-latest
-  timeout-minutes: 10
+  timeout: 10 minutes
   rules:
     - changes:
       - apps/web/**/*
