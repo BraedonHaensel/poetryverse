@@ -51,13 +51,11 @@ export const PoemAIResponseSchema = z.object({
 /** Validates `POST /api/poems/interpret` request bodies. */
 export const PoemInterpretRequestSchema = z.object({
   body: z.object({
-    title: z.string().nonempty('Poem title is required'),
-    typeId: z.string().nonempty('Poem type is required.'),
     prompt: z
       .string()
       .min(PROMPT_MIN, `Prompt must be at least ${PROMPT_MIN} characters.`)
       .max(PROMPT_MAX, `Prompt must be at most ${PROMPT_MAX} characters.`),
-    poem: z.string().nonempty('Poem is required.'),
+    poemId: z.string().nonempty('Poem is required.'),
   }),
 })
 
