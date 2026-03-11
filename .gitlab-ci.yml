@@ -8,16 +8,17 @@ on:
     branches:
       - main
 
-jobs:
-  lint-web:
-    name: Lint web
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    rules:
-      - changes:
-        - apps/web/**/*
-        - 'package.json'
-        - 'package-lock.json'
-        - '.gitlab-ci.yml'
-    script:
-      - echo "testing lint-frontend"
+
+lint-frontend:
+  stage: lint
+  name: Lint frontend
+  runs-on: ubuntu-latest
+  timeout-minutes: 10
+  rules:
+    - changes:
+      - apps/web/**/*
+      - 'package.json'
+      - 'package-lock.json'
+      - '.gitlab-ci.yml'
+  script:
+    - echo "testing lint-frontend"
