@@ -46,7 +46,16 @@ export const createPoem = async (req: Request, res: Response) => {
     }),
     include: {
       type: true,
-      poemTags: true,
+      poemTags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
     },
   })
 

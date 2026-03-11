@@ -35,6 +35,12 @@ npm run db:generate --workspace=packages/database
 npm run db:push --workspace=packages/database
 ```
 
+Seed the database:
+
+```bash
+npm run db:seed --workspace=packages/database
+```
+
 ## Run
 
 In separate terminals:
