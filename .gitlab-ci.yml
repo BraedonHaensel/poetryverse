@@ -1,3 +1,8 @@
+stages:
+  - lint
+  - build
+  - test
+
 lint-frontend:
   stage: lint
   timeout: 10 minutes
