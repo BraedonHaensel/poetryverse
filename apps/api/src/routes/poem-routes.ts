@@ -1,9 +1,14 @@
 import { Router } from 'express'
 
-import { createPoem, generateAIPoem } from '../controllers/poem-controller'
+import {
+  createPoem,
+  generateAIPoem,
+  interpretPoem,
+} from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
+import { PoemInterpretRequestSchema } from '../schemas/poem-schemas'
 import {
   CreatePoemRequestSchema,
   PoemAIRequestSchema,
@@ -29,6 +34,23 @@ router.post(
   requireAuth,
   validate(PoemAIRequestSchema),
   asyncHandler(generateAIPoem)
+)
+
+/**
+ * Route serving AI Interpretation poem form
+ * @name post/api/poems/interpret
+ * @function
+ * @memberof module:routes/poemRoutes
+ * @inner
+ * @param {PoemInterpretRequest} req.body - Request body containing poem title, type, poem body, and prompt
+ * @param {Response} res - Express response object
+ * @returns {PoemInterpretResponse} JSON response containing generated poem data
+ */
+router.post(
+  '/interpret',
+  requireAuth,
+  validate(PoemInterpretRequestSchema),
+  asyncHandler(interpretPoem)
 )
 
 export default router

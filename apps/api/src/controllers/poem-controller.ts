@@ -1,8 +1,8 @@
 import { GoogleGenAI } from '@google/genai'
 import { prisma } from '@seng513/database'
 import type { Request, Response } from 'express'
-import { toJSONSchema } from 'zod'
 
+import { generateGeminiJSONResponse } from '../lib/ai'
 import config from '../lib/config'
 import { badRequest, HttpError } from '../lib/http-errors'
 import { logger } from '../lib/logger'
@@ -11,9 +11,10 @@ import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import type { AuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
+  interpretSchema,
   PoemAIRequest,
-  PoemAIResponse,
   PoemAIResponseSchema,
+  PoemInterpretRequest,
 } from '../schemas/poem-schemas'
 
 /** Init Google Gemini Client */
@@ -88,22 +89,21 @@ export const createPoem = async (req: Request, res: Response) => {
  * @throws {HttpError} 500 when generation fails.
  */
 export const generateAIPoem = async (req: Request, res: Response) => {
-  logger.info('AI Poem Generating...')
+  const authReq = req as AuthRequest
+  logger.info(`Generating AI Poem for user with ID: ${authReq.auth.userId}`)
+
   const { type, prompt } = req.body as PoemAIRequest
 
-  const geminiPrompt = `Generate a unique ${type} poem and title based off the following prompt: \n${prompt}`
-  logger.info('Generating Title & Prompt')
+  const geminiPrompt = `Generate a unique ${type} poem and title based off the following prompt: \n${prompt}. \n Add new line characters (\n) to show line breaks.`
+  logger.info('Generating title & prompt')
 
-  let result: { text?: string | null }
   try {
-    result = await geminiClient.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: geminiPrompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseJsonSchema: toJSONSchema(PoemAIResponseSchema),
-      },
-    })
+    const responseJSON = await generateGeminiJSONResponse(
+      geminiPrompt,
+      PoemAIResponseSchema
+    )
+
+    return res.status(200).json({ data: responseJSON })
   } catch (err: unknown) {
     const status = getErrorStatus(err)
 
@@ -117,10 +117,48 @@ export const generateAIPoem = async (req: Request, res: Response) => {
 
     throw new HttpError(500, 'Poem failed to generate.', err)
   }
+}
 
-  const responseJSON: PoemAIResponse = PoemAIResponseSchema.parse(
-    JSON.parse(result.text ?? '')
-  )
+/**
+ * Controller handling interpretation of poems.
+ * Sends type of poem, title, poem, and the prompt to handler and returns an interpretation.
+ * @param req - Express request containing generation request input.
+ * @param res - Express response object containing generation response title and poem.
+ * @returns responseJson - JSON response containing the generated poem.
+ * @throws {429} - Gemini API rate limit exceeded.
+ * @throws {400} - Request prompts not satisfied.
+ * @throws {500} - Poem Generation Request Fails.
+ */
+export const interpretPoem = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    logger.info('Poem interpretation generating...')
+    const { title, type, prompt, poem } = req.body as PoemInterpretRequest
 
-  return res.status(200).json({ data: responseJSON })
+    const geminiPrompt = `Provide a short interpretation of the following poem. Only include the interpretation in your response. Poem type: ${type}. Poem title: ${title}. Poem: ${poem}. User interpretation prompt: ${prompt}.`
+    const responseJSON = await generateGeminiJSONResponse(
+      geminiPrompt,
+      interpretSchema
+    )
+
+    return res.status(200).json({ data: responseJSON })
+  } catch (err: unknown) {
+    logger.error('Error interpreting poem: ', err)
+    let status = 500
+
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      'status' in err &&
+      typeof (err as { status: unknown }).status === 'number'
+    ) {
+      status = (err as { status: number }).status
+    }
+
+    const message =
+      status === 429 ? 'AI usage limit exceeded.' : 'Poem failed to generate.'
+    return res.status(status).json({ error: message })
+  }
 }
