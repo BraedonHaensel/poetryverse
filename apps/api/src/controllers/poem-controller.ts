@@ -23,7 +23,7 @@ export const generateAIPoem = async (
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   req: Request<{}, {}, PoemAIRequest>,
   res: Response
-) => {
+): Promise<Response> => {
   try {
     logger.info('AI poem generating...')
     const { type, prompt } = req.body
