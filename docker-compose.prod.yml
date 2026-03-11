@@ -4,11 +4,10 @@ services:
 
   api:
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: 3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+
+    env_file:
+      - apps/api/.env.production
+
     command: >
       sh -c "
         npm install &&
@@ -20,10 +19,10 @@ services:
 
   web:
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
+    
+    env_file:
+      - apps/web/.env.production
+
     command: >
       sh -c "
         npm run db:generate --workspace=packages/database &&
