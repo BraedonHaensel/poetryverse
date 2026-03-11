@@ -11,16 +11,28 @@ stages:
       when: manual
       allow_failure: true
 
-lint-frontend:
-  stage: lint
-  timeout: 10 minutes
+.frontend_detect_changes_rules:
   rules:
-    - !reference [.default_rules, rules]
     - changes:
       - apps/web/**/*
       - 'package.json'
       - 'package-lock.json'
       - '.gitlab-ci.yml'
+
+.backend_detect_changes_rules:
+  rules:
+    - changes:
+      - apps/api/**/*
+      - 'package.json'
+      - 'package-lock.json'
+      - '.gitlab-ci.yml'
+
+lint-frontend:
+  stage: lint
+  timeout: 10 minutes
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.frontend_detect_changes_rules, rules]
   script:
     - npm ci
     - cd apps/web
@@ -31,15 +43,9 @@ lint-backend:
   timeout: 10 minutes
   rules:
     - !reference [.default_rules, rules]
-    - changes:
-      - apps/api/**/*
-      - 'package.json'
-      - 'package-lock.json'
-      - '.gitlab-ci.yml'
+    - !reference [.backend_detect_changes_rules, rules]
   script:
     - npm ci
     - npm run db:generate --workspace=packages/
     - cd apps/api
     - npm run lint
-
-# todo: can you create a variable for shared files?
