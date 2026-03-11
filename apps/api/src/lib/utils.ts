@@ -1,3 +1,4 @@
+//** Helper function for extracting an error status from an error message. */
 export const getErrorStatus = (err: unknown): number | undefined => {
   if (typeof err !== 'object' || err === null) {
     return undefined
