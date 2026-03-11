@@ -5,10 +5,17 @@ stages:
   - build
   - test
 
+.default_rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH != "main"
+      when: manual
+      allow_failure: true
+
 lint-frontend:
   stage: lint
   timeout: 10 minutes
   rules:
+    - !reference [.default_rules, rules]
     - changes:
       - apps/web/**/*
       - 'package.json'
@@ -23,6 +30,7 @@ lint-backend:
   stage: lint
   timeout: 10 minutes
   rules:
+    - !reference [.default_rules, rules]
     - changes:
       - apps/api/**/*
       - 'package.json'
@@ -33,3 +41,5 @@ lint-backend:
     - npm run db:generate --workspace=packages/
     - cd apps/api
     - npm run lint
+
+# todo: can you create a variable for shared files?
