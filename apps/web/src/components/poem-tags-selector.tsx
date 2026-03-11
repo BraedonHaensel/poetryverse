@@ -15,23 +15,32 @@ import {
   useComboboxAnchor,
 } from '@/components/ui/combobox'
 
-// TODO Hardcoded example, clean up when we can get the poem tags from the backend
-const POEM_TAGS = ['Nature', 'Romance', 'Comedy', 'Parody']
+// TODO Hardcoded example, clean up when we can get poem tags from the backend.
+const POEM_TAGS = [
+  { id: 'nature', name: 'Nature' },
+  { id: 'romance', name: 'Romance' },
+  { id: 'comedy', name: 'Comedy' },
+  { id: 'parody', name: 'Parody' },
+]
+const POEM_TAG_IDS = POEM_TAGS.map((tag) => tag.id)
+const POEM_TAG_NAMES_BY_ID = Object.fromEntries(
+  POEM_TAGS.map((tag) => [tag.id, tag.name])
+) as Record<string, string>
 
 type Props = {
-  selectedTags: string[]
+  selectedTagIds: string[]
   onChange: (selection: string[]) => void
   isInvalid: boolean
 }
 
 /**
  * Poem tags multi-select.
- * @param selectedTags The list of currently selected tags.
+ * @param selectedTagIds The list of currently selected tag ids.
  * @param onChange Callback for handling selection changes.
  * @param isInvalid Whether the validation styles should be displayed.
  */
 export function PoemTagsSelector({
-  selectedTags,
+  selectedTagIds,
   onChange,
   isInvalid = false,
 }: Props) {
@@ -41,8 +50,8 @@ export function PoemTagsSelector({
     <Combobox
       multiple
       autoHighlight
-      items={POEM_TAGS}
-      value={selectedTags}
+      items={POEM_TAG_IDS}
+      value={selectedTagIds}
       onValueChange={onChange}
     >
       <ComboboxChips
@@ -53,18 +62,18 @@ export function PoemTagsSelector({
         }`}
       >
         <ComboboxValue>
-          {selectedTags.map((tag) => (
-            <ComboboxChip key={tag} className="bg-gray-300 text-sm">
-              {tag}
+          {selectedTagIds.map((tagId) => (
+            <ComboboxChip key={tagId} className="bg-gray-300 text-sm">
+              {POEM_TAG_NAMES_BY_ID[tagId] ?? tagId}
             </ComboboxChip>
           ))}
         </ComboboxValue>
         <ComboboxChipsInput
           className="h-6"
-          placeholder={selectedTags.length === 0 ? 'Add poem tags...' : ''}
+          placeholder={selectedTagIds.length === 0 ? 'Add poem tags...' : ''}
         />
         {/* Clear button */}
-        {selectedTags.length > 0 && (
+        {selectedTagIds.length > 0 && (
           <X
             className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2"
             size={18}
@@ -76,13 +85,13 @@ export function PoemTagsSelector({
       <ComboboxContent anchor={anchor} className="bg-off-white">
         <ComboboxEmpty>No tags found.</ComboboxEmpty>
         <ComboboxList>
-          {(tag) => (
+          {(tagId) => (
             <ComboboxItem
-              key={tag}
+              key={tagId}
               className="data-highlighted:bg-gray-200"
-              value={tag}
+              value={tagId}
             >
-              {tag}
+              {POEM_TAG_NAMES_BY_ID[tagId] ?? tagId}
             </ComboboxItem>
           )}
         </ComboboxList>

@@ -12,7 +12,12 @@ const poemTypes = [
   { id: 'sonnet', name: 'Sonnet' },
 ]
 
-const tags = ['Nature', 'Romance', 'Comedy', 'Parody']
+const tags = [
+  { id: 'nature', name: 'Nature' },
+  { id: 'romance', name: 'Romance' },
+  { id: 'comedy', name: 'Comedy' },
+  { id: 'parody', name: 'Parody' },
+]
 
 async function main() {
   const poemTypeResult = await prisma.poemType.createMany({
@@ -21,7 +26,7 @@ async function main() {
   })
 
   const tagResult = await prisma.tag.createMany({
-    data: tags.map((name) => ({ name })),
+    data: tags,
     skipDuplicates: true,
   })
 

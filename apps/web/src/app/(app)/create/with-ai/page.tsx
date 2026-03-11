@@ -36,17 +36,17 @@ export default function CreatePoemWithAI() {
   const form = useForm<CreateWithAISchema>({
     resolver: zodResolver(CreateWithAISchema),
     defaultValues: {
-      type: '',
+      typeId: '',
       prompt: '',
       title: '',
       poem: '',
-      tags: [],
+      tagIds: [],
       publicVisibility: true,
     },
   })
 
   async function validateAIGenerationFields(): Promise<boolean> {
-    return form.trigger(['type', 'prompt'])
+    return form.trigger(['typeId', 'prompt'])
   }
 
   // Handle generating an AI poem from the current prompt
@@ -56,11 +56,11 @@ export default function CreatePoemWithAI() {
 
     // Send an API request to generate the poem
     setIsGenerating(true)
-    const { type, prompt } = form.getValues()
+    const { typeId, prompt } = form.getValues()
     api
       .post(
         '/api/poems/generate',
-        { type, prompt },
+        { typeId, prompt },
         {
           headers: {
             Authorization: `Bearer ${'<TODO GET AUTH TOKEN>'}`,

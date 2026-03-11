@@ -10,27 +10,27 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-type HasTags = { tags: string[] }
+type HasTagIds = { tagIds: string[] }
 
-type Props<T extends HasTags> = {
+type Props<T extends HasTagIds> = {
   control: Control<T>
 }
 
 /**
  * Poem tags field.
  */
-export function PoemTagsField<T extends HasTags>({ control }: Props<T>) {
+export function PoemTagsField<T extends HasTagIds>({ control }: Props<T>) {
   return (
     <ShadowCard className="p-3">
       <FormField
         control={control}
-        name={'tags' as Path<T>}
+        name={'tagIds' as Path<T>}
         render={({ field, fieldState }) => (
           <FormItem>
             <FormLabel>Tags</FormLabel>
             <FormControl>
               <PoemTagsSelector
-                selectedTags={field.value as string[]}
+                selectedTagIds={field.value as string[]}
                 onChange={field.onChange}
                 isInvalid={!!fieldState.error}
               />
