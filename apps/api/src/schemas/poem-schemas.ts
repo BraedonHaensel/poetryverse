@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-// Validation limits
+// Validation limits.
 const TITLE_MIN = 3
 const TITLE_MAX = 30
 const POEM_MIN = 20
@@ -10,9 +10,7 @@ const MAX_TAGS = 5
 const PROMPT_MIN = 20
 const PROMPT_MAX = 1000
 
-/**
- * Schema for validating poem creation requests.
- */
+/** Validates `POST /api/poems` request bodies. */
 export const CreatePoemRequestSchema = z.object({
   body: z.object({
     typeId: z.string().nonempty('Poem type is required.'),
@@ -33,9 +31,7 @@ export const CreatePoemRequestSchema = z.object({
   }),
 })
 
-/**
- * Schema for validating poem ai generation requests.
- */
+/** Validates `POST /api/poems/generate` request bodies. */
 export const PoemAIRequestSchema = z.object({
   body: z.object({
     type: z.string().nonempty('Poem type is required.'),
@@ -46,23 +42,14 @@ export const PoemAIRequestSchema = z.object({
   }),
 })
 
-/**
- * AI generation JSON Schema response.
- * Describes the type of poem and user prompt used when requesting an AI generated poem response.
- */
+/** Validates structured AI generation responses. */
 export const PoemAIResponseSchema = z.object({
-  // The AI generated title of poem returned.
   title: z.string().describe('Title of the poem.'),
-
-  // The AI generated poem returned.
   poem: z.string().describe('The generated poem text.'),
 })
 
-/**
- * AI interpretation title, prompt, poem, and type sent to gemini model.
- * Describes the title, type of poem, poem, and interpretation prompt the user requests that is sent to the gemini model.
- */
-export const poemInterpretRequestSchema = z.object({
+/** Validates `POST /api/poems/interpret` request bodies. */
+export const PoemInterpretRequestSchema = z.object({
   body: z.object({
     title: z.string().nonempty('Poem type is required'),
     type: z.string().nonempty('Poem title is required.'),
@@ -74,30 +61,25 @@ export const poemInterpretRequestSchema = z.object({
   }),
 })
 
-/**
- * AI interpretation JSON schema response.
- * Describes interepretation response expected schema.
- */
+/** Validates structured AI interpretation responses. */
 export const interpretSchema = z.object({
-  /**
-   * The interpretation of poem recieved.
-   */
   interpretation: z
     .string()
     .describe('Interpretation provided from interpret call'),
 })
 
-/** Response Type expected from route api/poems/interpret */
+/** Type returned by `interpretSchema`. */
 export type PoemInterpretResponse = z.infer<typeof interpretSchema>
-// Response Type expected from route post/api/generate.
+/** Type returned by `PoemAIResponseSchema`. */
 export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
 
-// Type inferred from PoemAIRequestSchema.
+/** Request body type for `PoemAIRequestSchema`. */
 export type PoemAIRequest = z.infer<typeof PoemAIRequestSchema>['body']
 
-// Type inferred from CreatePoemRequestSchema.
+/** Request body type for `CreatePoemRequestSchema`. */
 export type CreatePoemRequest = z.infer<typeof CreatePoemRequestSchema>['body']
 
+/** Request body type for `PoemInterpretRequestSchema`. */
 export type PoemInterpretRequest = z.infer<
-  typeof poemInterpretRequestSchema
+  typeof PoemInterpretRequestSchema
 >['body']

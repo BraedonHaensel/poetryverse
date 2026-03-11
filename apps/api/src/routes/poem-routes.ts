@@ -16,6 +16,7 @@ import {
 
 const router = Router()
 
+/** POST /api/poems */
 router.post(
   '/',
   requireAuth,
@@ -23,12 +24,7 @@ router.post(
   asyncHandler(createPoem)
 )
 
-/**
- * Route for AI poem generation.
- * Request body is validated by `PoemAIRequestSchema` before controller logic.
- * @name post/api/poems/generate
- * @returns 200 with `{ data: { title, poem } }`.
- */
+/** POST /api/poems/generate */
 router.post(
   '/generate',
   requireAuth,
@@ -36,16 +32,7 @@ router.post(
   asyncHandler(generateAIPoem)
 )
 
-/**
- * Route serving AI Interpretation poem form
- * @name post/api/poems/interpret
- * @function
- * @memberof module:routes/poemRoutes
- * @inner
- * @param {PoemInterpretRequest} req.body - Request body containing poem title, type, poem body, and prompt
- * @param {Response} res - Express response object
- * @returns {PoemInterpretResponse} JSON response containing generated poem data
- */
+/** POST /api/poems/interpret */
 router.post(
   '/interpret',
   requireAuth,

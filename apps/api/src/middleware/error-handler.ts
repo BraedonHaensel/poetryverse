@@ -4,13 +4,12 @@ import { HttpError } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 
 /**
- * Express error middleware that maps `HttpError` instances to structured
- * client responses and falls back to a generic 500 for unknown errors.
- * @param err Error passed from route handlers or middleware.
- * @param _req Incoming Express request.
- * @param res Express response used to send the error payload.
- * @param _next Next middleware function (unused in this handler).
- * @returns Sends an HTTP error response.
+ * Central API error middleware.
+ * @param err Error passed from routes or middleware.
+ * @param _req Incoming Express request (unused).
+ * @param res Express response object.
+ * @param _next Express next callback (unused).
+ * @returns Sends a structured HTTP error response.
  */
 export function errorHandler(
   err: unknown,

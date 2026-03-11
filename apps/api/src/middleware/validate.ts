@@ -5,9 +5,9 @@ import { z } from 'zod'
 import { badRequest } from '../lib/http-errors'
 
 /**
- * Returns middleware that validates request input with a provided Zod schema.
- * @param schema Zod schema intended to validate request data.
- * @returns Express middleware for request validation.
+ * Creates request validation middleware from a Zod schema.
+ * @param schema Zod schema that validates `{ body, params, query }`.
+ * @returns Express middleware that forwards a 400 error when validation fails.
  */
 export const validate =
   (schema: ZodType) => (req: Request, _res: Response, next: NextFunction) => {

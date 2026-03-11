@@ -7,11 +7,11 @@ import { unauthorized } from '../lib/http-errors'
 export type AuthRequest = Request & { auth: { userId: string } }
 
 /**
- * Authentication guard.
+ * Verifies the NextAuth token and attaches `auth.userId` to the request.
  * @param req Incoming Express request.
- * @param _res Express response object (currently unused).
- * @param next Next middleware function.
- * @returns Calls `next` to continue request processing.
+ * @param _res Express response object (unused).
+ * @param next Express next callback.
+ * @returns Calls `next` with `unauthorized()` on auth failure; otherwise continues.
  */
 export const requireAuth = async (
   req: Request,

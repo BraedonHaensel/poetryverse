@@ -6,9 +6,7 @@ interface CreatePoemMapperInput {
   tagIds: string[]
 }
 
-/**
- * Maps the validated create-poem request into Prisma's create payload.
- */
+/** Maps a validated create-poem request to Prisma create input. */
 export const mapCreatePoemRequestToPrismaInput = ({
   authorId,
   data,

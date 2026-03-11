@@ -1,9 +1,7 @@
-import { GoogleGenAI } from '@google/genai'
 import { prisma } from '@seng513/database'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
-import config from '../lib/config'
 import { badRequest, HttpError } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
@@ -17,18 +15,12 @@ import {
   PoemInterpretRequest,
 } from '../schemas/poem-schemas'
 
-/** Init Google Gemini Client */
-const geminiApiKey = config.GEMINI_API_KEY
-if (!geminiApiKey) {
-  throw new Error('Gemini API failed to retrieve from env')
-}
-const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
-
 /**
- * Creates a poem from validated request data.
- * @param req Express request containing the authenticated user and create payload.
+ * Creates a poem for the authenticated user.
+ * @param req Express request with a validated create-poem body.
  * @param res Express response object.
- * @returns 201 with the created poem and related type/tags.
+ * @returns A 201 response containing the created poem.
+ * @throws {HttpError} 400 if the poem type or any tag ID is invalid.
  */
 export const createPoem = async (req: Request, res: Response) => {
   const authReq = req as AuthRequest
@@ -85,8 +77,8 @@ export const createPoem = async (req: Request, res: Response) => {
  * @param req Express request with `type` and `prompt` in `req.body`.
  * @param res Express response object.
  * @returns 200 with `{ data: { title, poem } }`.
- * @throws {HttpError} 429 when the Gemini API is rate limited.
- * @throws {HttpError} 500 when generation fails.
+ * @throws {HttpError} 429 if the Gemini API is rate limited.
+ * @throws {HttpError} 500 if the generation fails.
  */
 export const generateAIPoem = async (req: Request, res: Response) => {
   const authReq = req as AuthRequest
@@ -125,9 +117,8 @@ export const generateAIPoem = async (req: Request, res: Response) => {
  * @param req - Express request containing generation request input.
  * @param res - Express response object containing generation response title and poem.
  * @returns responseJson - JSON response containing the generated poem.
- * @throws {429} - Gemini API rate limit exceeded.
- * @throws {400} - Request prompts not satisfied.
- * @throws {500} - Poem Generation Request Fails.
+ * @throws {HttpError} 429 if Gemini rate limits the request.
+ * @throws {HttpError} 500 if interpretation fails.
  */
 export const interpretPoem = async (
   req: Request,
@@ -145,20 +136,16 @@ export const interpretPoem = async (
 
     return res.status(200).json({ data: responseJSON })
   } catch (err: unknown) {
-    logger.error('Error interpreting poem: ', err)
-    let status = 500
+    const status = getErrorStatus(err)
 
-    if (
-      typeof err === 'object' &&
-      err !== null &&
-      'status' in err &&
-      typeof (err as { status: unknown }).status === 'number'
-    ) {
-      status = (err as { status: number }).status
+    if (status === 429) {
+      throw new HttpError(
+        429,
+        'Rate limit exceeded, please try again later.',
+        err
+      )
     }
 
-    const message =
-      status === 429 ? 'AI usage limit exceeded.' : 'Poem failed to generate.'
-    return res.status(status).json({ error: message })
+    throw new HttpError(500, 'Poem failed to generate.', err)
   }
 }

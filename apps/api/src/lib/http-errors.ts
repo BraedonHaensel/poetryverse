@@ -1,7 +1,4 @@
-/**
- * HTTP-aware error type used to pass status codes and optional metadata
- * through the centralized API error handler.
- */
+/** Error with an HTTP status and optional details payload. */
 export class HttpError extends Error {
   constructor(
     public status: number,
