@@ -18,3 +18,17 @@ lint-frontend:
     - cd apps/web
     - npm ci
     - npm run lint
+
+lint-backend:
+  stage: lint
+  timeout: 10 minutes
+  rules:
+    - changes:
+      - apps/api/**/*
+      - 'package.json'
+      - 'package-lock.json'
+      - '.gitlab-ci.yml'
+  script:
+    - cd apps/api
+    - npm ci
+    - npm run lint
