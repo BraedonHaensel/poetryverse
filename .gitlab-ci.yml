@@ -15,8 +15,8 @@ lint-frontend:
       - 'package-lock.json'
       - '.gitlab-ci.yml'
   script:
-    - cd apps/web
     - npm ci
+    - cd apps/web
     - npm run lint
 
 lint-backend:
@@ -29,6 +29,7 @@ lint-backend:
       - 'package-lock.json'
       - '.gitlab-ci.yml'
   script:
-    - cd apps/api
     - npm ci
+    - npm run db:generate --workspace=packages/
+    - cd apps/api
     - npm run lint
