@@ -109,11 +109,17 @@ export const generateAIPoem = async (req: Request, res: Response) => {
       throw new HttpError(
         429,
         'Rate limit exceeded, please try again later.',
-        err
+        err,
+        'AI is busy right now. Please try again in a moment.'
       )
     }
 
-    throw new HttpError(500, 'Poem failed to generate.', err)
+    throw new HttpError(
+      500,
+      'Poem failed to generate.',
+      err,
+      'We could not generate your poem right now. Please try again.'
+    )
   }
 }
 
@@ -162,11 +168,17 @@ export const interpretPoem = async (
       throw new HttpError(
         429,
         'Rate limit exceeded, please try again later.',
-        err
+        err,
+        'AI is busy right now. Please try again in a moment.'
       )
     }
 
-    throw new HttpError(500, 'Poem failed to generate.', err)
+    throw new HttpError(
+      500,
+      'Poem failed to generate.',
+      err,
+      'We could not interpret this poem right now. Please try again.'
+    )
   }
 }
 

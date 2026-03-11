@@ -24,10 +24,14 @@ export function errorHandler(
     )
     return res.status(err.status).json({
       message: err.message,
+      displayMessage: err.displayMessage ?? undefined,
       details: err.details ?? undefined,
     })
   }
 
   logger.error('Unhandled error', err)
-  res.status(500).json({ message: 'Internal Server Error' })
+  res.status(500).json({
+    message: 'Internal Server Error',
+    displayMessage: 'Something went wrong. Please try again.',
+  })
 }
