@@ -15,12 +15,13 @@ COPY packages/database packages/database
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
-# Generate Prisma client
+# Generate Prisma client and then build web
 RUN npm run db:generate --workspace=packages/database
+RUN npm run build --workspace=apps/web
 
 # Set correct WORKDIR
 WORKDIR /app/apps/web
 
 # Expose port 3000 and run the web application
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
