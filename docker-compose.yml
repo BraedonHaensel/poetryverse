@@ -1,19 +1,15 @@
 services:
 
   db:
-    image: postgres:17 #Change version if needed
     container_name: poetryverse-db
+    image: postgres:17
     restart: unless-stopped
 
-    environment: #Discuss 
+    environment:
       POSTGRES_USER: ${POSTGRES_USER:-poetryverse}
       POSTGRES_DB: ${POSTGRES_DB:-poetryverse}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg-2}
-
-      #TODO: implement secure password strategy before final review
-      #Options: local-only .env.docker (gitignored) or Docker secrets
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-poetryverse-pg-2}
     
-
     ports:
       - "5432:5432"
 
@@ -28,45 +24,33 @@ services:
 
 
   api:
+    container_name: poetryverse-api
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
-
-    container_name: poetryverse-api
+      dockerfile: apps/api/Dockerfile.api
 
     depends_on:
       db:
         condition: service_healthy
 
-    environment:
-      PORT: 3001
-      NODE_ENV: development
-
-      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
-
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    env_file:
+      - apps/api/.env
 
     ports:
       - "3001:3001"
 
 
   web:
+    container_name: poetryverse-web
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
-
-      args:
-        DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
-        NEXT_PUBLIC_API_URL: http://localhost:3001
-
-    container_name: poetryverse-web
+      dockerfile: apps/web/Dockerfile.web
 
     depends_on:
       - api
 
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}?schema=public
+    env_file:
+      - apps/web/.env
 
     ports:
       - "3000:3000"

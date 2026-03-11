@@ -1,13 +1,7 @@
 services:
   api:
-    environment:
-      NODE_ENV: development
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/api/node_modules
-      - /app/apps/web/node_modules
-      - /app/packages/database/node_modules
+      - ./apps/api:/app/apps/api
 
     command: >
       sh -c "
@@ -18,15 +12,9 @@ services:
       "
     
   web:
-    environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3001
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/web/node_modules
-      - /app/apps/api/node_modules
-      - /app/packages/database/node_modules
+      - ./apps/web:/app/apps/web
+
     command: >
       sh -c "
         npm install &&
