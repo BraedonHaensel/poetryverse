@@ -34,7 +34,7 @@ export const CreatePoemRequestSchema = z.object({
 /** Validates `POST /api/poems/generate` request bodies. */
 export const PoemAIRequestSchema = z.object({
   body: z.object({
-    type: z.string().nonempty('Poem type is required.'),
+    typeId: z.string().nonempty('Poem type is required.'),
     prompt: z
       .string()
       .min(PROMPT_MIN, `Prompt must be at least ${PROMPT_MIN} characters.`)
@@ -51,8 +51,8 @@ export const PoemAIResponseSchema = z.object({
 /** Validates `POST /api/poems/interpret` request bodies. */
 export const PoemInterpretRequestSchema = z.object({
   body: z.object({
-    title: z.string().nonempty('Poem type is required'),
-    type: z.string().nonempty('Poem title is required.'),
+    title: z.string().nonempty('Poem title is required'),
+    typeId: z.string().nonempty('Poem type is required.'),
     prompt: z
       .string()
       .min(PROMPT_MIN, `Prompt must be at least ${PROMPT_MIN} characters.`)
@@ -62,14 +62,14 @@ export const PoemInterpretRequestSchema = z.object({
 })
 
 /** Validates structured AI interpretation responses. */
-export const interpretSchema = z.object({
+export const PoemInterpretResponseSchema = z.object({
   interpretation: z
     .string()
     .describe('Interpretation provided from interpret call'),
 })
 
 /** Type returned by `interpretSchema`. */
-export type PoemInterpretResponse = z.infer<typeof interpretSchema>
+export type PoemInterpretResponse = z.infer<typeof PoemInterpretResponseSchema>
 /** Type returned by `PoemAIResponseSchema`. */
 export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
 

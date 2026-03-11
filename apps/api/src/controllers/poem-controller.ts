@@ -9,10 +9,10 @@ import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import type { AuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
-  interpretSchema,
   PoemAIRequest,
   PoemAIResponseSchema,
   PoemInterpretRequest,
+  PoemInterpretResponseSchema,
 } from '../schemas/poem-schemas'
 
 /**
@@ -32,35 +32,17 @@ export const createPoem = async (req: Request, res: Response) => {
   const poemData = req.body as CreatePoemRequest
 
   // Get poem tags and type from db first.
-  const uniqueTagIds = [...new Set(poemData.tagIds)]
-  const [poemType, existingTags] = await Promise.all([
-    prisma.poemType.findUnique({
-      where: { id: poemData.typeId },
-      select: { id: true },
-    }),
-    prisma.tag.findMany({
-      where: { id: { in: uniqueTagIds } },
-      select: { id: true },
-    }),
+  const [_poemType, existingTags] = await Promise.all([
+    validateAndReturnPoemType(poemData.typeId),
+    validateAndReturnPoemTags(poemData.tagIds),
   ])
-
-  // Check poem type and tags in request are all valid.
-  if (!poemType) {
-    throw badRequest('Invalid poem type.')
-  }
-
-  if (existingTags.length !== uniqueTagIds.length) {
-    const foundTagIds = new Set(existingTags.map((tag) => tag.id))
-    const missingTagIds = uniqueTagIds.filter((id) => !foundTagIds.has(id))
-    throw badRequest('One or more tags are invalid.', { missingTagIds })
-  }
 
   // Create the poem.
   const createdPoem = await prisma.poem.create({
     data: mapCreatePoemRequestToPrismaInput({
       authorId: authReq.auth.userId,
       data: poemData,
-      tagIds: uniqueTagIds,
+      tagIds: existingTags.map((tag) => tag.id),
     }),
     include: {
       type: true,
@@ -84,9 +66,11 @@ export const generateAIPoem = async (req: Request, res: Response) => {
   const authReq = req as AuthRequest
   logger.info(`Generating AI Poem for user with ID: ${authReq.auth.userId}`)
 
-  const { type, prompt } = req.body as PoemAIRequest
+  const { typeId, prompt } = req.body as PoemAIRequest
 
-  const geminiPrompt = `Generate a unique ${type} poem and title based off the following prompt: \n${prompt}. \n Add new line characters (\n) to show line breaks.`
+  const type = await validateAndReturnPoemType(typeId)
+
+  const geminiPrompt = `Generate a unique ${type.name} poem and title based off the following prompt: \n${prompt}. \n Add new line characters (\n) to show line breaks.`
   logger.info('Generating title & prompt')
 
   try {
@@ -126,12 +110,14 @@ export const interpretPoem = async (
 ): Promise<Response> => {
   try {
     logger.info('Poem interpretation generating...')
-    const { title, type, prompt, poem } = req.body as PoemInterpretRequest
+    const { title, typeId, prompt, poem } = req.body as PoemInterpretRequest
 
-    const geminiPrompt = `Provide a short interpretation of the following poem. Only include the interpretation in your response. Poem type: ${type}. Poem title: ${title}. Poem: ${poem}. User interpretation prompt: ${prompt}.`
+    const type = await validateAndReturnPoemType(typeId)
+
+    const geminiPrompt = `Provide a short interpretation of the following poem. Only include the interpretation in your response. Poem type: ${type.name}. Poem title: ${title}. Poem: ${poem}. User interpretation prompt: ${prompt}.`
     const responseJSON = await generateGeminiJSONResponse(
       geminiPrompt,
-      interpretSchema
+      PoemInterpretResponseSchema
     )
 
     return res.status(200).json({ data: responseJSON })
@@ -148,4 +134,32 @@ export const interpretPoem = async (
 
     throw new HttpError(500, 'Poem failed to generate.', err)
   }
+}
+
+/** Validates the typeId against poem types in the database  */
+const validateAndReturnPoemType = async (typeId: string) => {
+  const poemType = await prisma.poemType.findUnique({
+    where: { id: typeId },
+  })
+  if (!poemType) {
+    throw badRequest('Invalid poem type.')
+  }
+  return poemType
+}
+
+/** Validates tagIds against poem tags in the database. */
+const validateAndReturnPoemTags = async (tagIds: string[]) => {
+  // Get tags from database.
+  const uniqueTagIds = [...new Set(tagIds)]
+  const existingTags = await prisma.tag.findMany({
+    where: { id: { in: uniqueTagIds } },
+  })
+
+  // Check for any invalid tags.
+  if (existingTags.length !== uniqueTagIds.length) {
+    const foundTagIds = new Set(existingTags.map((tag) => tag.id))
+    const missingTagIds = uniqueTagIds.filter((id) => !foundTagIds.has(id))
+    throw badRequest('One or more tags are invalid.', { missingTagIds })
+  }
+  return existingTags
 }
