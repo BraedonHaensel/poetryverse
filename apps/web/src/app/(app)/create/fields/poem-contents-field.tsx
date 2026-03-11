@@ -15,7 +15,7 @@ type HasPoem = { poem: string }
 
 type Props<T extends HasPoem> = {
   control: Control<T>
-  showAIDescription: boolean
+  showAIDescription?: boolean
 }
 
 /**
@@ -23,7 +23,7 @@ type Props<T extends HasPoem> = {
  */
 export function PoemContentsField<T extends HasPoem>({
   control,
-  showAIDescription,
+  showAIDescription = false,
 }: Props<T>) {
   return (
     <ShadowCard className="p-3">
