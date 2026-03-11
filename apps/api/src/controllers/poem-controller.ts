@@ -50,6 +50,8 @@ export const createPoem = async (req: Request, res: Response) => {
     validateAndReturnPoemTags(poemData.tagIds),
   ])
 
+  // TODO: add AI-likelihood scoring & plagiarism check steps in here
+
   // Create the poem.
   const createdPoem = await prisma.poem.create({
     data: mapCreatePoemRequestToPrismaInput({
