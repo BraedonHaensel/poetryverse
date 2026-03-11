@@ -15,10 +15,6 @@ COPY packages/database packages/database
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
-# Include NEXT_PUBLIC_API_URL for the backend API url
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
 # Generate Prisma client
 RUN npm run db:generate --workspace=packages/database
 
