@@ -1,13 +1,16 @@
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
 
+import config from './lib/config'
 import { errorHandler } from './middleware/error-handler'
 import apiRouter from './routes/api-router'
 
 const app = express()
 
 // Middleware
-app.use(cors())
+app.use(cookieParser())
+app.use(cors({ origin: config.NEXT_PUBLIC_FRONTEND_URL, credentials: true }))
 app.use(express.json())
 
 // Health check

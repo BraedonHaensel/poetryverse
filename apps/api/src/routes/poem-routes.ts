@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { generateAIPoem } from '../controllers/poem-controller'
+import { createPoem, generateAIPoem } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
@@ -14,8 +14,8 @@ const router = Router()
 router.post(
   '/',
   requireAuth,
-  validate(CreatePoemRequestSchema)
-  // asyncHandler(createPoem)
+  validate(CreatePoemRequestSchema),
+  asyncHandler(createPoem)
 )
 
 /**

@@ -4,7 +4,7 @@ import { getToken } from 'next-auth/jwt'
 import config from '../lib/config'
 import { unauthorized } from '../lib/http-errors'
 
-type AuthRequest = Request & { auth: { userId: string } }
+export type AuthRequest = Request & { auth: { userId: string } }
 
 /**
  * Authentication guard.
@@ -21,7 +21,7 @@ export const requireAuth = async (
   try {
     const token = await getToken({
       req: req,
-      secret: config.NEXTAUTH_SECRET, // must match NextAuth secret
+      secret: config.NEXT_AUTH_SECRET, // must match NextAuth secret
       secureCookie: config.nodeEnv === 'production',
     })
 
