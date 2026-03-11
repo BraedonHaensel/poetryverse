@@ -73,7 +73,7 @@ From root:
 
 From root:
 
-`docker build -f apps/web/Dockerfile -t seng513-web .`
+`docker build -f apps/web/Dockerfile.web -t seng513-web .`
 
 `docker run --rm -p 3000:3000 --env-file ./apps/web/.env seng513-web`
 
