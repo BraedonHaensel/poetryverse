@@ -103,34 +103,10 @@ export const generateAIPoem = async (
  * @throws {500} - Poem Generation Request Fails.
  */
 
-export const InterpretPoem = async (
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  req: Request<{}, {}, PoemInterpretRequest>,
-  res: Response
-) => {
+export const InterpretPoem = async (req: Request, res: Response) => {
   try {
     logger.info('Poem Interpretation Generating...')
-    const { title, type, prompt, poem } = req.body
-
-    if (!title) {
-      logger.warn('Title Not Recieved')
-      return res.status(400).json({ error: 'Title Not Provided' })
-    }
-
-    if (!type) {
-      logger.warn('Type Not Recieved')
-      return res.status(400).json({ error: 'Type Not Provided' })
-    }
-
-    if (!prompt) {
-      logger.warn('Prompt Not Recieved')
-      return res.status(400).json({ error: 'Prompt Not Provided' })
-    }
-
-    if (!poem) {
-      logger.warn('Poem Not Recieved')
-      return res.status(400).json({ error: 'Poem Not Provided' })
-    }
+    const { title, type, prompt, poem } = req.body as PoemInterpretRequest
 
     const geminiPrompt = `Provide a short interpretation of the following poem and title based off the type and user request. Please note that the response should only contain the interpretation. \n Poem type: ${type} \n poem title: ${title} \n poem: ${poem} \n user request: ${prompt}`
     logger.info('Generating Poem Interpretation')

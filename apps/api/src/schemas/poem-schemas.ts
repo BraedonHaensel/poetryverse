@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+const PROMPT_MIN = 20
+const PROMPT_MAX = 1000
+
 /**
  * AI generation prompt and type sent to Gemini Model
  * Describes the type of poem and user prompt used when requesting an AI generated poem response.
@@ -30,31 +33,28 @@ export const aiGenSchema = z.object({
   poem: z.string().describe('The generated poem text.'),
 })
 
-/** Response Type expected from route api/poems/generate */
+/** Response Type expected from route api/poems/generate*/
 export type PoemAIResponse = z.infer<typeof aiGenSchema>
 
 /**
  * AI Interpretation title, prompt, poem, and type sent to Gemini Model
  * Describes the title, type of poem, poem, and interpretation prompt the user requests that is sent to the gemini model.
  */
-export interface PoemInterpretRequest {
-  /**
-   * The title of poem the user requests to be interpreted
-   */
-  title: string
-  /**
-   * The type of poem the user requests to be interpreted
-   */
-  type: string
-  /**
-   * The interpretation prompt of the poem requested
-   */
-  prompt: string
-  /**
-   * The poem requested to be interprted
-   */
-  poem: string
-}
+export const PoemInterpretRequestSchema = z.object({
+  body: z.object({
+    title: z.string().nonempty('Poem type is required'),
+    type: z.string().nonempty('Poem title is required.'),
+    prompt: z
+      .string()
+      .min(PROMPT_MIN, `Prompt must be at least ${PROMPT_MIN} characters.`)
+      .max(PROMPT_MAX, `Prompt must be at most ${PROMPT_MAX} characters.`),
+    poem: z.string().nonempty('Poem is required.'),
+  }),
+})
+
+export type PoemInterpretRequest = z.infer<
+  typeof PoemInterpretRequestSchema
+>['body']
 
 /**
  * AI Interpretation JSON Schema response

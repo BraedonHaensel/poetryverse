@@ -3,6 +3,8 @@ import { Router } from 'express'
 import { generateAIPoem, InterpretPoem } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
+import { validate } from '../middleware/validate'
+import { PoemInterpretRequestSchema } from '../schemas/poem-schemas'
 
 const router = Router()
 
@@ -28,6 +30,11 @@ router.post('/generate', requireAuth, asyncHandler(generateAIPoem))
  * @param {Response} res - Express response object
  * @returns {PoemInterpretResponse} JSON response containing generated poem data
  */
-router.post('/interpret', requireAuth, asyncHandler(InterpretPoem))
+router.post(
+  '/interpret',
+  requireAuth,
+  validate(PoemInterpretRequestSchema),
+  asyncHandler(InterpretPoem)
+)
 
 export default router
