@@ -16,6 +16,5 @@ lint-frontend:
       - '.gitlab-ci.yml'
   script:
     - cd apps/web
-    - npm install -g eslint
-    - eslint --init
-    - eslint src/**/*.ts
+    - npm ci
+    - npm run lint
