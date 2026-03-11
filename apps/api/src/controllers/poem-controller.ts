@@ -108,9 +108,9 @@ export const generateAIPoem = async (req: Request, res: Response) => {
       )
       throw new HttpError(
         429,
-        'Rate limit exceeded, please try again later.',
+        'Rate limit exceeded.',
         err,
-        'AI is busy right now. Please try again in a moment.'
+        'AI usage limit exceeded. Please try again in a moment.'
       )
     }
 
@@ -167,9 +167,9 @@ export const interpretPoem = async (
       )
       throw new HttpError(
         429,
-        'Rate limit exceeded, please try again later.',
+        'Rate limit exceeded.',
         err,
-        'AI is busy right now. Please try again in a moment.'
+        'AI usage limit exceeded. Please try again in a moment.'
       )
     }
 
