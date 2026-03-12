@@ -26,7 +26,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-Fill in the missing env var values by following the instructions in each respective .env
+Fill in the missing env var values by following the instructions in each respective `.env` file. Please add the values directly; do not enclose them with double quotes (e.g. do `NEXT_AUTH_SECRET=secret-here` rather than `NEXT_AUTH_SECRET="secret-here"`).
 
 Initialize Prisma:
 
@@ -58,15 +58,24 @@ npm run db:studio --workspace=packages/database
 
 **TODO: Replace this with docker-compose steps once docker-compose is created**
 
-Follow these steps to build and run the backend docker image
+An important caveat: You must replace "localhost" in the db url with host.docker.internal. This is because host.docker.internal tells the docker container to use the host OS instead of localhost from within the container itself.  Also, make sure your apps/api/.env and apps/web/.env are configured correctly.
+
+#### Follow these steps to build and run the backend docker image:
 
 From root:
 
 `docker build -f apps/api/Dockerfile.api -t seng513-api .`
 
-`docker run --rm -p 3001:3001 --env-file apps/api/.env seng513-api`
+`docker run --rm -p 3001:3001 -e DATABASE_URL="your-postgres-url" --env-file apps/api/.env seng513-api`
 
-An important caveat: You must replace "localhost" in the db url with host.docker.internal. This is because host.docker.internal tells the docker container to use the host OS instead of localhost from within the container itself. Also, make sure your apps/api/.env is configured correctly.
+#### Follow these steps to build and run the frontend docker image:
+(Before running these commands, please ensure you have stopped your local Next.js process if there is already one running on port 3000.)
+
+From root:
+
+`docker build -f apps/web/Dockerfile.web -t seng513-web .`
+
+`docker run --rm -p 3000:3000 -e DATABASE_URL="your-postgres-url" --env-file ./apps/web/.env seng513-web`
 
 ## Recommended Extensions
 
