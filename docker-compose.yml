@@ -28,6 +28,8 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile.api
+      args:
+        - DATABASE_URL=postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-poetryverse-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}
 
     depends_on:
       db:
@@ -35,9 +37,6 @@ services:
 
     env_file:
       - apps/api/.env
-
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-poetryverse-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}
 
     ports:
       - "3001:3001"
@@ -48,16 +47,15 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile.web
+      args:
+        - DATABASE_URL=postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-poetryverse-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}
 
     depends_on:
       - api
 
     env_file:
       - apps/web/.env
-
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-poetryverse-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}
-
+    
     ports:
       - "3000:3000"
 
