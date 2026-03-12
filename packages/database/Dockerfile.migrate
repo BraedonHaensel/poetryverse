@@ -2,7 +2,6 @@ FROM node:lts-bookworm
 
 WORKDIR /app
 
-
 # Install workspace dependencies needed to run Prisma CLI.
 COPY package.json package-lock.json ./
 COPY packages/database/package.json packages/database/package.json
