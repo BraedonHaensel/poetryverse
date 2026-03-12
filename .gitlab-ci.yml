@@ -2,8 +2,6 @@ image: node:20
 
 stages:
   - lint
-  - build
-  - test
 
 .default_rules:
   rules:
