@@ -36,6 +36,9 @@ services:
     env_file:
       - apps/api/.env
 
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-poetryverse-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}
+
     ports:
       - "3001:3001"
 
@@ -51,6 +54,9 @@ services:
 
     env_file:
       - apps/web/.env
+
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-poetryverse-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}
 
     ports:
       - "3000:3000"
