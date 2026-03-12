@@ -80,7 +80,7 @@ Run this command from root to build and run the containers: `docker compose up`
 #### To use Compose in Production: 
 Ensure that your `apps/api/.env.production` and `apps/web/.env.production` are configured correctly.
 
-Then, run this command from root: `docker compose -f docker-compose.prod.yml up` . 
+Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` . 
   - This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`. 
 
 <br />
