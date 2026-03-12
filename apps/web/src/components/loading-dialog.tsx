@@ -15,7 +15,11 @@ type Props = {
 export function LoadingDialog({ message, isOpen }: Props) {
   return (
     <Dialog open={isOpen}>
-      <DialogContent className="w-fit justify-center" showCloseButton={false}>
+      <DialogContent
+        className="w-fit justify-center"
+        showCloseButton={false}
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle className="text-base font-semibold sm:text-xl">
             {message}

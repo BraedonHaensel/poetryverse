@@ -60,7 +60,7 @@ export default function CreatePoemFromScratch() {
             {/* Left column fields */}
             <div className="space-y-3">
               <PoemTypeField control={control} />
-              <PoemContentsField control={control} showAIDescription={false}/>
+              <PoemContentsField control={control} />
             </div>
 
             {/* Right column fields */}
