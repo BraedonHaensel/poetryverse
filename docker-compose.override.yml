@@ -1,10 +1,13 @@
 services:
+  migrate:
+    command: sh -c "npm run db:push --workspace=packages/database" # Using db:push for dev workflow.
+
   api:
     volumes:
       - ./apps/api:/app/apps/api
 
-    command: sh -c "npm run dev"
-    
+    command: sh -c "npm run dev" # Using "npm run dev" for dev workflow.
+
   web:
     volumes:
       - ./apps/web:/app/apps/web

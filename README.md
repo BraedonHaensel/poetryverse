@@ -55,19 +55,21 @@ npm run db:studio --workspace=packages/database
 ```
 
 ## Building and Running Docker Images
+
 Notes:
 
 - Make sure your `apps/api/.env` and `apps/web/.env` are configured correctly.
-- When running the application with Docker, you must replace `localhost` in the `DATABASE_URL` with `host.docker.internal` in all `.env` files. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself. 
+- When running the application with Docker, you must replace `localhost` in the `DATABASE_URL` with `host.docker.internal` in all `.env` files. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself.
 
 To build and run the docker images, you can run the docker compose file, or build and run them individually with the Dockerfiles.
 
 ### Using Docker Compose:
+
 - We have the following docker compose files:
   - `docker-compose.yml` (default configuration)
   - `docker-compose.override.yml` (overrides docker-compose with local development customizations)
   - `docker-compose.prod.yaml` (for production environment)
-- When Docker Compose is run, these 3 containers will be started: 
+- When Docker Compose is run, these 3 containers will be started:
   - `poetryverse-db`
   - `poetryverse-api`
   - `poetryverse-web`
@@ -75,13 +77,16 @@ To build and run the docker images, you can run the docker compose file, or buil
 #### To use Compose in Development:
 
 Run this command from root to build and run the containers: `docker compose up`
-- This will run the configurations of the `docker-compose.yml` and the `docker-compose.override.yml`. 
 
-#### To use Compose in Production: 
+- This will run the configurations of the `docker-compose.yml` and the `docker-compose.override.yml`.
+
+#### To use Compose in Production:
+
 Ensure that your `apps/api/.env.production` and `apps/web/.env.production` are configured correctly.
 
-Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` . 
-  - This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`. 
+Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` .
+
+- This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`.
 
 <br />
 
@@ -98,6 +103,7 @@ From root:
 `docker run --rm -p 3001:3001 -e DATABASE_URL="your-postgres-url" --env-file apps/api/.env seng513-api`
 
 #### Follow these steps to build and run the frontend docker image:
+
 (Before running these commands, please ensure you have stopped your local Next.js process if there is already one running on port 3000.)
 
 From root:
