@@ -55,10 +55,39 @@ npm run db:studio --workspace=packages/database
 ```
 
 ## Building and Running Docker Images
+Notes:
 
-**TODO: Replace this with docker-compose steps once docker-compose is created**
+- Make sure your `apps/api/.env` and `apps/web/.env` are configured correctly.
+- When running the application with Docker, you must replace `localhost` in the `DATABASE_URL` with `host.docker.internal` in all `.env` files. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself. 
 
-An important caveat: You must replace "localhost" in the db url with host.docker.internal. This is because host.docker.internal tells the docker container to use the host OS instead of localhost from within the container itself.  Also, make sure your apps/api/.env and apps/web/.env are configured correctly.
+To build and run the docker images, you can run the docker compose file, or build and run them individually with the Dockerfiles.
+
+### Using Docker Compose:
+- We have the following docker compose files:
+  - `docker-compose.yml` (default configuration)
+  - `docker-compose.override.yml` (overrides docker-compose with local development customizations)
+  - `docker-compose.prod.yaml` (for production environment)
+- When Docker Compose is run, these 3 containers will be started: 
+  - `poetryverse-db`
+  - `poetryverse-api`
+  - `poetryverse-web`
+
+#### To use Compose in Development:
+
+Run this command from root to build and run the containers: `docker compose up`
+- This will run the configurations of the `docker-compose.yml` and the `docker-compose.override.yml`. 
+
+#### To use Compose in Production: 
+Ensure that your `apps/api/.env.production` and `apps/web/.env.production` are configured correctly.
+
+Then, run this command from root: `docker compose -f docker-compose.prod.yml up` . 
+  - This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`. 
+
+<br />
+
+To stop the containers, run `docker compose down`. If you would like to remove the database volume as well, run `docker compose down -v`.
+
+### Using the Dockerfiles:
 
 #### Follow these steps to build and run the backend docker image:
 
