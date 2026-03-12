@@ -3,20 +3,10 @@ services:
     volumes:
       - ./apps/api:/app/apps/api
 
-    command: >
-      sh -c "
-        npm install &&
-        npm run db:generate --workspace=packages/database &&
-        npm run db:push --workspace=packages/database &&
-        npm run dev:api
-      "
+    command: sh -c "npm run dev"
     
   web:
     volumes:
       - ./apps/web:/app/apps/web
 
-    command: >
-      sh -c "
-        npm install &&
-        npm run dev --workspace=apps/web
-      "
+    command: sh -c "npm run dev"
