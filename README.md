@@ -78,9 +78,10 @@ To build and run the docker images, you can run the docker compose file, or buil
 
 #### To use Compose in Development:
 
-Run this command from root to build and run the containers: `docker compose up`
+Run this command from root to build and run the containers: `docker compose up --watch`
 
 - This will run the configurations of the `docker-compose.yml` and the `docker-compose.override.yml`.
+- `--watch` is used to automatically sync source file changes to the running services.
 
 #### To use Compose in Production:
 
