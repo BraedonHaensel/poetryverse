@@ -69,10 +69,12 @@ To build and run the docker images, you can run the docker compose file, or buil
   - `docker-compose.yml` (default configuration)
   - `docker-compose.override.yml` (overrides docker-compose with local development customizations)
   - `docker-compose.prod.yaml` (for production environment)
-- When Docker Compose is run, these 3 containers will be started:
+- When Docker Compose is run, these 4 containers will be started:
   - `poetryverse-db`
   - `poetryverse-api`
   - `poetryverse-web`
+  - `poetryverse-migrate-{suffix}`
+    - This one exits after applying Prisma migrations.
 
 #### To use Compose in Development:
 
