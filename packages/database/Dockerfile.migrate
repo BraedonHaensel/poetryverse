@@ -1,5 +1,9 @@
-FROM node:24-bookworm-slim
+FROM node:lts-bookworm
+
 WORKDIR /app
+
+# Prisma needs OpenSSL available in the runtime image.
+RUN apk add --no-cache openssl
 
 # Install workspace dependencies needed to run Prisma CLI.
 COPY package.json package-lock.json ./
