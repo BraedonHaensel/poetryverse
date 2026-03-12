@@ -12,7 +12,7 @@ services:
       sh -c "
         npm install &&
         npm run db:generate --workspace=packages/database &&
-        npm run db:push --workspace=packages/database &&
+        npm run db:deploy --workspace=packages/database &&
         npm run build --workspace=apps/api &&
         npm run start --workspace=apps/api
       "
