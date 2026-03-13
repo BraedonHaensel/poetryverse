@@ -6,14 +6,13 @@
 - `apps/api`: Express API (`http://localhost:3001`)
 - `packages/database`: shared Prisma + PostgreSQL client
 
-## Prerequisites
+## Local Development Setup
+
+### Prerequisites
 
 - Node.js `>=18`
 - npm
 - PostgreSQL running locally
-- Docker (if you would like to run the app using Docker Compose)
-
-## Development Setup
 
 ```bash
 npm install
@@ -60,7 +59,7 @@ npm run db:studio --workspace=packages/database
 
 Notes:
 
-- Make sure your environment files are configured correctly (`.env` files for a development environment, or `.env.production` files for a production environment).
+- Make sure your environment files are configured correctly (`.env` files mentioned above for a development environment, or `.env.production` files for a production environment).
 - When running the application with Docker, you must replace `localhost` in the `DATABASE_URL` with `host.docker.internal` in all `.env` files. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself.
 
 To build and run the docker images, you can run the docker compose file, or build and run them individually with the Dockerfiles.
