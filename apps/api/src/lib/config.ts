@@ -6,7 +6,7 @@ interface Config {
 
 const config: Config = {
   port: Number(process.env.PORT) || 3001,
-  nodeEnv: process.env.NODE_ENV ?? 'dev',
+  nodeEnv: process.env.NODE_ENV ?? 'development',
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 }
 
