@@ -2,7 +2,7 @@ name: poetryverse-dev
 
 services:
   migrate:
-    command: sh -c "npm run db:push --workspace=packages/database" # Using db:push for dev workflow.
+    command: sh -c "npm run db:push --workspace=packages/database && npm run db:seed --workspace=packages/database" # Using db:push + db:seed for dev workflow.
 
   api:
     develop:

@@ -10,6 +10,7 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:migrate:reset": "prisma migrate reset",
+    "db:seed": "prisma db seed",
     "db:deploy": "prisma migrate deploy"
   },
   "dependencies": {
