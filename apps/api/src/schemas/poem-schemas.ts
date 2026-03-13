@@ -1,73 +1,83 @@
 import { z } from 'zod'
 
+// Validation limits.
+const TITLE_MIN = 3
+const TITLE_MAX = 30
+const POEM_MIN = 20
+const POEM_MAX = 1000
+const MIN_TAGS = 1
+const MAX_TAGS = 5
 const PROMPT_MIN = 20
 const PROMPT_MAX = 1000
 
-/**
- * AI generation prompt and type sent to gemini model.
- * Describes the type of poem and user prompt used when requesting an AI generated poem response.
- */
-export interface PoemAIRequest {
-  /**
-   * The type of poem the user requests to be generated.
-   */
-  type: string
-  /**
-   * The description prompt of the poem requested.
-   */
-  prompt: string
-}
-
-/**
- * AI generation JSON Schema response.
- * Describes the type of poem and user prompt used when requesting an AI generated poem response.
- */
-export const aiGenSchema = z.object({
-  /**
-   * The AI generated title of poem returned.
-   */
-  title: z.string().describe('Title of the poem.'),
-  /**
-   * The AI generated poem returned
-   */
-  poem: z.string().describe('The generated poem text.'),
+/** Validates `POST /api/poems` request bodies. */
+export const CreatePoemRequestSchema = z.object({
+  body: z.object({
+    typeId: z.string().nonempty('Poem type is required.'),
+    poem: z
+      .string()
+      .min(POEM_MIN, `Poem must be at least ${POEM_MIN} characters.`)
+      .max(POEM_MAX, `Poem must be at most ${POEM_MAX} characters.`),
+    title: z
+      .string()
+      .min(TITLE_MIN, `Title must be at least ${TITLE_MIN} characters.`)
+      .max(TITLE_MAX, `Poem must be at most ${TITLE_MAX} characters.`),
+    tagIds: z
+      .array(z.string())
+      .min(MIN_TAGS, `Poem must have at least ${MIN_TAGS} tag.`)
+      .max(MAX_TAGS, `Poem can have at most ${MAX_TAGS} tags`),
+    publicVisibility: z.boolean(),
+    createdWithAI: z.boolean(),
+  }),
 })
 
-/** Response Type expected from route api/poems/generate*/
-export type PoemAIResponse = z.infer<typeof aiGenSchema>
-
-/**
- * AI interpretation title, prompt, poem, and type sent to gemini model.
- * Describes the title, type of poem, poem, and interpretation prompt the user requests that is sent to the gemini model.
- */
-export const PoemInterpretRequestSchema = z.object({
+/** Validates `POST /api/poems/generate` request bodies. */
+export const PoemAIRequestSchema = z.object({
   body: z.object({
-    title: z.string().nonempty('Poem type is required'),
-    type: z.string().nonempty('Poem title is required.'),
+    typeId: z.string().nonempty('Poem type is required.'),
     prompt: z
       .string()
       .min(PROMPT_MIN, `Prompt must be at least ${PROMPT_MIN} characters.`)
       .max(PROMPT_MAX, `Prompt must be at most ${PROMPT_MAX} characters.`),
-    poem: z.string().nonempty('Poem is required.'),
   }),
 })
 
-export type PoemInterpretRequest = z.infer<
-  typeof PoemInterpretRequestSchema
->['body']
+/** Validates structured AI generation responses. */
+export const PoemAIResponseSchema = z.object({
+  title: z.string().describe('Title of the poem.'),
+  poem: z.string().describe('The generated poem text.'),
+})
 
-/**
- * AI interpretation JSON schema response.
- * Describes interepretation response expected schema.
- */
-export const interpretSchema = z.object({
-  /**
-   * The interpretation of poem recieved.
-   */
+/** Validates `POST /api/poems/interpret` request bodies. */
+export const PoemInterpretRequestSchema = z.object({
+  body: z.object({
+    prompt: z
+      .string()
+      .min(PROMPT_MIN, `Prompt must be at least ${PROMPT_MIN} characters.`)
+      .max(PROMPT_MAX, `Prompt must be at most ${PROMPT_MAX} characters.`),
+    poemId: z.string().nonempty('Poem is required.'),
+  }),
+})
+
+/** Validates structured AI interpretation responses. */
+export const PoemInterpretResponseSchema = z.object({
   interpretation: z
     .string()
     .describe('Interpretation provided from interpret call'),
 })
 
-/** Response Type expected from route api/poems/interpret */
-export type PoemInterpretResponse = z.infer<typeof interpretSchema>
+/** Type returned by `interpretSchema`. */
+export type PoemInterpretResponse = z.infer<typeof PoemInterpretResponseSchema>
+/** Type returned by `PoemAIResponseSchema`. */
+export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
+
+/** Request body type for `PoemAIRequestSchema`. */
+export type PoemAIRequest = z.infer<typeof PoemAIRequestSchema>['body']
+
+/** Request body type for `CreatePoemRequestSchema`. */
+export type CreatePoemRequest = z.infer<typeof CreatePoemRequestSchema>['body']
+
+/** Request body type for `PoemInterpretRequestSchema`. */
+export type PoemInterpretRequest = z.infer<
+  typeof PoemInterpretRequestSchema
+>['body']

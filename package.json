@@ -21,8 +21,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "@google/genai": "^1.44.0"
   }
 }

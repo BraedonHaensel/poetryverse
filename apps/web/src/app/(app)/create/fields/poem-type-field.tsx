@@ -17,23 +17,27 @@ import {
 } from '@/components/ui/select'
 
 // TODO Hardcoded example, clean up when we can get the poem types from the backend
-const POEM_TYPES = ['Haiku', 'Couplet', 'Sonnet']
+const POEM_TYPES = [
+  { id: 'haiku', name: 'Haiku' },
+  { id: 'couplet', name: 'Couplet' },
+  { id: 'sonnet', name: 'Sonnet' },
+]
 
-type HasType = { type: string }
+type HasTypeId = { typeId: string }
 
-type Props<T extends HasType> = {
+type Props<T extends HasTypeId> = {
   control: Control<T>
 }
 
 /**
  * Poem type field.
  */
-export function PoemTypeField<T extends HasType>({ control }: Props<T>) {
+export function PoemTypeField<T extends HasTypeId>({ control }: Props<T>) {
   return (
     <ShadowCard className="p-3">
       <FormField
         control={control}
-        name={'type' as Path<T>}
+        name={'typeId' as Path<T>}
         render={({ field, fieldState }) => (
           <FormItem>
             <FormLabel>Type</FormLabel>
@@ -50,11 +54,11 @@ export function PoemTypeField<T extends HasType>({ control }: Props<T>) {
                 <SelectContent className="bg-off-white">
                   {POEM_TYPES.map((type) => (
                     <SelectItem
-                      key={type}
-                      value={type}
+                      key={type.name}
+                      value={type.id}
                       className="data-highlighted:bg-gray-200"
                     >
-                      {type}
+                      {type.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

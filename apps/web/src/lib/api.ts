@@ -6,10 +6,14 @@ import { toast } from 'sonner'
  */
 export const api = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}`,
+  withCredentials: true, // Include cookies for auth
 })
 
 interface ApiErrorResponse {
-  error: string
+  error?: string
+  message?: string
+  displayMessage?: string
+  details?: unknown
 }
 
 /**
@@ -23,7 +27,9 @@ export function displayApiError(
   prefix: string
 ) {
   const toastPrefix = prefix ? prefix + ': ' : ''
-  const apiError = error?.response?.data?.error
+  const apiErrorData = error?.response?.data
+  const apiError =
+    apiErrorData?.displayMessage ?? apiErrorData?.message ?? apiErrorData?.error
   if (apiError) {
     console.error(`API error: ${apiError}`)
     toast.error(`${toastPrefix}${apiError}`)

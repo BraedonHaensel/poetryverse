@@ -1,40 +1,43 @@
 import { Router } from 'express'
 
-import { generateAIPoem, InterpretPoem } from '../controllers/poem-controller'
+import {
+  createPoem,
+  generateAIPoem,
+  interpretPoem,
+} from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import { PoemInterpretRequestSchema } from '../schemas/poem-schemas'
+import {
+  CreatePoemRequestSchema,
+  PoemAIRequestSchema,
+} from '../schemas/poem-schemas'
 
 const router = Router()
 
-/**
- * Route serving AI generated poem form
- * @name post/api/poems/generate
- * @function
- * @memberof module:routes/poemRoutes
- * @inner
- * @param {PoemAIRequest} req.body - Request body containing poem type and prompt
- * @param {Response} res - Express response object
- * @returns {PoemAIResponse} JSON response containing generated poem data
- */
-router.post('/generate', requireAuth, asyncHandler(generateAIPoem))
+/** POST /api/poems */
+router.post(
+  '/',
+  requireAuth,
+  validate(CreatePoemRequestSchema),
+  asyncHandler(createPoem)
+)
 
-/**
- * Route serving AI Interpretation poem form
- * @name post/api/poems/interpret
- * @function
- * @memberof module:routes/poemRoutes
- * @inner
- * @param {PoemInterpretRequest} req.body - Request body containing poem title, type, poem body, and prompt
- * @param {Response} res - Express response object
- * @returns {PoemInterpretResponse} JSON response containing generated poem data
- */
+/** POST /api/poems/generate */
+router.post(
+  '/generate',
+  requireAuth,
+  validate(PoemAIRequestSchema),
+  asyncHandler(generateAIPoem)
+)
+
+/** POST /api/poems/interpret */
 router.post(
   '/interpret',
   requireAuth,
   validate(PoemInterpretRequestSchema),
-  asyncHandler(InterpretPoem)
+  asyncHandler(interpretPoem)
 )
 
 export default router

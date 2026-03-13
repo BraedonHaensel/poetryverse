@@ -1,69 +1,125 @@
+import { prisma } from '@seng513/database'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
+import { badRequest, HttpError, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
+import { getErrorStatus } from '../lib/utils'
+import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
+import type { AuthRequest } from '../middleware/auth'
 import {
-  aiGenSchema,
-  interpretSchema,
+  CreatePoemRequest,
   PoemAIRequest,
+  PoemAIResponseSchema,
   PoemInterpretRequest,
+  PoemInterpretResponseSchema,
 } from '../schemas/poem-schemas'
 
+// Include statement for fetching poems from the database with Prisma.
+const poemIncludeStatement = {
+  type: true,
+  poemTags: {
+    select: {
+      tag: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  },
+}
+
 /**
- * Controller handling AI generated poems.
- * Sends type of poem and the prompt to handler and returns title and poem.
- * @param req - Express request containing generation request input.
- * @param res - Express response object containing generation response title and poem.
- * @returns {PoemAIRequest} responseJson - JSON response containing the generated poem.
- * @throws {429} - Gemini API rate limit exceeded.
- * @throws {400} - Request prompts not satisfied.
- * @throws {500} - Poem Generation Request Fails.
+ * Creates a poem for the authenticated user.
+ * @param req Express request with a validated create-poem body.
+ * @param res Express response object.
+ * @returns A 201 response containing the created poem.
+ * @throws {HttpError} 400 if the poem type or any tag ID is invalid.
  */
-export const generateAIPoem = async (
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  req: Request<{}, {}, PoemAIRequest>,
-  res: Response
-): Promise<Response> => {
+export const createPoem = async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest
+
+  logger.info(`Creating poem for userId=${authReq.auth.userId}`)
+
+  const poemData = req.body as CreatePoemRequest
+
+  // Get poem tags and type from db first.
+  const [_poemType, existingTags] = await Promise.all([
+    validateAndReturnPoemType(poemData.typeId),
+    validateAndReturnPoemTags(poemData.tagIds),
+  ])
+
+  // TODO: add AI-likelihood scoring & plagiarism check steps in here
+
+  // Create the poem.
+  const createdPoem = await prisma.poem.create({
+    data: mapCreatePoemRequestToPrismaInput({
+      authorId: authReq.auth.userId,
+      data: poemData,
+      tagIds: existingTags.map((tag) => tag.id),
+    }),
+    include: poemIncludeStatement,
+  })
+
+  logger.info(
+    `Created poem id=${createdPoem.id} userId=${authReq.auth.userId} typeId=${createdPoem.typeId} tagCount=${createdPoem.poemTags.length}`
+  )
+
+  // Return the created poem
+  return res.status(201).json({ data: createdPoem })
+}
+
+/**
+ * Generates a poem from the validated request body.
+ * @param req Express request with `type` and `prompt` in `req.body`.
+ * @param res Express response object.
+ * @returns 200 with `{ data: { title, poem } }`.
+ * @throws {HttpError} 429 if the Gemini API is rate limited.
+ * @throws {HttpError} 500 if the generation fails.
+ */
+export const generateAIPoem = async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest
+  const { typeId, prompt } = req.body as PoemAIRequest
+  logger.info(
+    `Generating AI poem for userId=${authReq.auth.userId} typeId=${typeId} promptLength=${prompt.length}`
+  )
+
+  const type = await validateAndReturnPoemType(typeId)
+  const startedAt = Date.now()
+  const geminiPrompt = `Generate a unique ${type.name} poem and title based off the following prompt: \n${prompt}. \n Add new line characters (\n) to show line breaks.`
+
   try {
-    logger.info('AI poem generating...')
-    const { type, prompt } = req.body
-
-    if (!type) {
-      logger.warn('Type not recieved.')
-      return res.status(400).json({ error: 'Type not provided' })
-    }
-
-    if (!prompt) {
-      logger.warn('Prompt not recieved')
-      return res.status(400).json({ error: 'Prompt not provided' })
-    }
-    const geminiPrompt = `Generate a unique ${type} poem and title based off the following prompt: \n${prompt}. \n Add new line characters (\n) to show line breaks.`
-    logger.info('Generating title & prompt')
-
     const responseJSON = await generateGeminiJSONResponse(
       geminiPrompt,
-      aiGenSchema
+      PoemAIResponseSchema
+    )
+    logger.info(
+      `Generated AI poem for userId=${authReq.auth.userId} typeId=${typeId} durationMs=${Date.now() - startedAt}`
     )
 
     return res.status(200).json({ data: responseJSON })
   } catch (err: unknown) {
-    logger.error('Error generating poem: ', err)
-    let status = 500
+    const status = getErrorStatus(err)
 
-    if (
-      typeof err === 'object' &&
-      err !== null &&
-      'status' in err &&
-      typeof (err as { status: unknown }).status === 'number'
-    ) {
-      status = (err as { status: number }).status
+    if (status === 429) {
+      logger.warn(
+        `AI poem generation rate limited for userId=${authReq.auth.userId} typeId=${typeId}`
+      )
+      throw new HttpError(
+        429,
+        'Rate limit exceeded.',
+        err,
+        'AI usage limit exceeded. Please try again in a moment.'
+      )
     }
 
-    const message =
-      status === 429
-        ? 'AI usage limit exceeded, please try again later.'
-        : 'Poem failed to generate.'
-    return res.status(status).json({ error: message })
+    throw new HttpError(
+      500,
+      'Poem failed to generate.',
+      err,
+      'We could not generate your poem right now. Please try again.'
+    )
   }
 }
 
@@ -73,41 +129,99 @@ export const generateAIPoem = async (
  * @param req - Express request containing generation request input.
  * @param res - Express response object containing generation response title and poem.
  * @returns responseJson - JSON response containing the generated poem.
- * @throws {429} - Gemini API rate limit exceeded.
- * @throws {400} - Request prompts not satisfied.
- * @throws {500} - Poem Generation Request Fails.
+ * @throws {HttpError} 429 if Gemini rate limits the request.
+ * @throws {HttpError} 500 if interpretation fails.
  */
-
-export const InterpretPoem = async (
+export const interpretPoem = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const authReq = req as AuthRequest
   try {
-    logger.info('Poem interpretation generating...')
-    const { title, type, prompt, poem } = req.body as PoemInterpretRequest
+    const { prompt, poemId } = req.body as PoemInterpretRequest
+    logger.info(
+      `Generating interpretation for userId=${authReq.auth.userId} poemId=${poemId} promptLength=${prompt.length}`
+    )
 
-    const geminiPrompt = `Provide a short interpretation of the following poem. Only include the interpretation in your response. Poem type: ${type}. Poem title: ${title}. Poem: ${poem}. User interpretation prompt: ${prompt}.`
+    const poem = await validateAndReturnPoem(poemId)
+    const startedAt = Date.now()
+
+    const geminiPrompt = `Provide a short interpretation of the following poem. Only include the interpretation in your response. 
+                          Poem type: ${poem.type.name}. Poem title: ${poem.title}. Poem: ${poem.body}. User interpretation prompt: ${prompt}.`
+
     const responseJSON = await generateGeminiJSONResponse(
       geminiPrompt,
-      interpretSchema
+      PoemInterpretResponseSchema
+    )
+    logger.info(
+      `Generated interpretation for userId=${authReq.auth.userId} poemId=${poemId} durationMs=${Date.now() - startedAt}`
     )
 
     return res.status(200).json({ data: responseJSON })
   } catch (err: unknown) {
-    logger.error('Error interpreting poem: ', err)
-    let status = 500
+    const status = getErrorStatus(err)
 
-    if (
-      typeof err === 'object' &&
-      err !== null &&
-      'status' in err &&
-      typeof (err as { status: unknown }).status === 'number'
-    ) {
-      status = (err as { status: number }).status
+    if (status === 429) {
+      logger.warn(
+        `Poem interpretation rate limited for userId=${authReq.auth.userId}`
+      )
+      throw new HttpError(
+        429,
+        'Rate limit exceeded.',
+        err,
+        'AI usage limit exceeded. Please try again in a moment.'
+      )
     }
 
-    const message =
-      status === 429 ? 'AI usage limit exceeded.' : 'Poem failed to generate.'
-    return res.status(status).json({ error: message })
+    throw new HttpError(
+      500,
+      'Poem failed to generate.',
+      err,
+      'We could not interpret this poem right now. Please try again.'
+    )
   }
+}
+
+/** Validates the typeId against poem types in the database  */
+const validateAndReturnPoemType = async (typeId: string) => {
+  const poemType = await prisma.poemType.findUnique({
+    where: { id: typeId },
+  })
+  if (!poemType) {
+    logger.warn(`Invalid poem type: typeId=${typeId}`)
+    throw badRequest('Invalid poem type.')
+  }
+  return poemType
+}
+
+/** Validates tagIds against poem tags in the database. */
+const validateAndReturnPoemTags = async (tagIds: string[]) => {
+  // Get tags from database.
+  const uniqueTagIds = [...new Set(tagIds)]
+  const existingTags = await prisma.tag.findMany({
+    where: { id: { in: uniqueTagIds } },
+  })
+
+  // Check for any invalid tags.
+  if (existingTags.length !== uniqueTagIds.length) {
+    const foundTagIds = new Set(existingTags.map((tag) => tag.id))
+    const missingTagIds = uniqueTagIds.filter((id) => !foundTagIds.has(id))
+    logger.warn(`Invalid poem tags: missingTagIds=${missingTagIds.join(',')}`)
+    throw badRequest('One or more tags are invalid.', { missingTagIds })
+  }
+  return existingTags
+}
+
+/** validates poemId against poems in the database */
+const validateAndReturnPoem = async (poemId: string) => {
+  const poem = await prisma.poem.findUnique({
+    where: { id: poemId },
+    include: poemIncludeStatement,
+  })
+
+  if (!poem) {
+    logger.warn(`Poem not found: poemId=${poemId}`)
+    throw notFound('Invalid poem ID')
+  }
+  return poem
 }

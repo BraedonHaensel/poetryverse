@@ -25,10 +25,10 @@ export default function CreatePoemFromScratch() {
   const form = useForm<CreateFromScratchSchema>({
     resolver: zodResolver(CreateFromScratchSchema),
     defaultValues: {
-      type: '',
+      typeId: '',
       poem: '',
       title: '',
-      tags: [],
+      tagIds: [],
       publicVisibility: true,
       createdWithAI: false,
     },

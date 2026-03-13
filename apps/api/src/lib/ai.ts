@@ -4,7 +4,7 @@ import { ZodSchema } from 'zod'
 
 import config from './config'
 
-/** Init Google Gemini Client. */
+/** Initializes the Gemini client. */
 const geminiApiKey = config.GEMINI_API_KEY
 if (!geminiApiKey) {
   throw new Error('Gemini API failed to retrieve from env')
@@ -12,10 +12,12 @@ if (!geminiApiKey) {
 const geminiClient = new GoogleGenAI({ apiKey: geminiApiKey })
 
 /**
- * Send an AI prompt to Google Gemini.
- * @param prompt AI promp that is sent.
- * @param schema Schema for AI response.
- * @returns The AI response.
+ * Sends a prompt to Gemini and validates the JSON response with Zod.
+ * @param prompt Prompt text sent to Gemini.
+ * @param schema Zod schema used to validate and type the response.
+ * @returns Parsed response typed to the provided schema.
+ * @throws {ZodError} If the Gemini response does not match the schema.
+ * @throws {SyntaxError} If the Gemini response is not valid JSON.
  */
 export const generateGeminiJSONResponse = async <T>(
   prompt: string,
