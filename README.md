@@ -1,6 +1,6 @@
 # PoetryVerse Monorepo
 
-## What Is In This Repo
+## Repo Organization
 
 - `apps/web`: Next.js frontend (`http://localhost:3000`)
 - `apps/api`: Express API (`http://localhost:3001`)
@@ -11,8 +11,9 @@
 - Node.js `>=18`
 - npm
 - PostgreSQL running locally
+- Docker (if you would like to run the app using Docker Compose)
 
-## Setup
+## Development Setup
 
 ```bash
 npm install
@@ -24,6 +25,7 @@ Create env files:
 cp .env.example .env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
+cp packages/database/.env.example packages/database/.env
 ```
 
 Fill in the missing env var values by following the instructions in each respective `.env` file. Please add the values directly; do not enclose them with double quotes (e.g. do `NEXT_AUTH_SECRET=secret-here` rather than `NEXT_AUTH_SECRET="secret-here"`).
@@ -58,7 +60,7 @@ npm run db:studio --workspace=packages/database
 
 Notes:
 
-- Make sure your `apps/api/.env` and `apps/web/.env` are configured correctly.
+- Make sure your environment files are configured correctly (`.env` files for a development environment, or `.env.production` files for a production environment).
 - When running the application with Docker, you must replace `localhost` in the `DATABASE_URL` with `host.docker.internal` in all `.env` files. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself.
 
 To build and run the docker images, you can run the docker compose file, or build and run them individually with the Dockerfiles.
@@ -85,7 +87,12 @@ Run this command from root to build and run the containers: `docker compose up -
 
 #### To use Compose in Production:
 
-Ensure that your `apps/api/.env.production` and `apps/web/.env.production` are configured correctly.
+If running this application in a production environment, create production env files:
+```bash
+cp .env.production.example .env.production
+cp apps/api/.env.production.example apps/api/.env.production
+cp apps/web/.env.production.example apps/web/.env.production
+```
 
 Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` .
 
