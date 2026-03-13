@@ -1,0 +1,96 @@
+x-database-url: &database_url postgresql://${POSTGRES_USER:-poetryverse}:${POSTGRES_PASSWORD:-poetryverse-pg-2}@db:5432/${POSTGRES_DB:-poetryverse}
+
+services:
+  db:
+    container_name: poetryverse-db
+    image: postgres:17
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-poetryverse}
+      POSTGRES_DB: ${POSTGRES_DB:-poetryverse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-poetryverse-pg-2}
+
+    ports:
+      - '5432:5432'
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-poetryverse} -d ${POSTGRES_DB:-poetryverse}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      dockerfile: packages/database/Dockerfile.migrate
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      DATABASE_URL: *database_url
+
+    env_file:
+      - .env
+
+    restart: 'no'
+
+  api:
+    container_name: poetryverse-api
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.api
+      args:
+        DATABASE_URL: *database_url
+
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+    environment:
+      DATABASE_URL: *database_url
+
+    env_file:
+      - .env
+      - apps/api/.env
+
+    ports:
+      - '3001:3001'
+
+  web:
+    container_name: poetryverse-web
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.web
+      args:
+        DATABASE_URL: *database_url
+
+    depends_on:
+      - api
+
+    environment:
+      DATABASE_URL: *database_url
+
+    env_file:
+      - .env
+      - apps/web/.env
+
+    ports:
+      - '3000:3000'
+
+volumes:
+  postgres_data:

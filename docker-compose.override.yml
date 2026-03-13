@@ -1,0 +1,25 @@
+name: poetryverse-dev
+
+services:
+  migrate:
+    command: sh -c "npm run db:push --workspace=packages/database" # Using db:push for dev workflow.
+
+  api:
+    develop:
+      # Use Compose Watch instead of volumes to automatically sync source file changes to the running service.
+      watch:
+        - action: sync
+          path: ./apps/api
+          target: /app/apps/api
+
+    command: sh -c "npm run dev" # Using "npm run dev" for dev workflow.
+
+  web:
+    develop:
+      # Use Compose Watch instead of volumes to automatically sync source file changes to the running service.
+      watch:
+        - action: sync
+          path: ./apps/web
+          target: /app/apps/web
+
+    command: sh -c "npm run dev"
