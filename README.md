@@ -60,7 +60,6 @@ npm run db:studio --workspace=packages/database
 Notes:
 
 - Make sure your environment files are configured correctly (`.env` files mentioned above for a development environment, or `.env.production` files for a production environment).
-- When running the application with Docker, you must replace `localhost` in the `DATABASE_URL` with `host.docker.internal` in all `.env` files. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself.
 
 To build and run the docker images, you can run the docker compose file, or build and run them individually with the Dockerfiles.
 
@@ -82,11 +81,13 @@ To build and run the docker images, you can run the docker compose file, or buil
 Run this command from root to build and run the containers: `docker compose up --watch`
 
 - This will run the configurations of the `docker-compose.yml` and the `docker-compose.override.yml`.
+
 - `--watch` is used to automatically sync source file changes to the running services.
 
 #### To use Compose in Production:
 
-If running this application in a production environment, create production env files:
+If running this application in a production environment, create and configure the production env files:
+
 ```bash
 cp .env.production.example .env.production
 cp apps/api/.env.production.example apps/api/.env.production
@@ -103,6 +104,12 @@ To stop the containers, run `docker compose down`. If you would like to remove t
 
 ### Using the Dockerfiles:
 
+Notes:
+
+- Before running these commands, please ensure you have stopped any running PoetryVerse services to avoid port conflicts.
+
+- In the `DATABASE_URL`, you must replace `localhost` with `host.docker.internal`. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself.
+
 #### Follow these steps to build and run the backend docker image:
 
 From root:
@@ -112,8 +119,6 @@ From root:
 `docker run --rm -p 3001:3001 -e DATABASE_URL="your-postgres-url" --env-file apps/api/.env seng513-api`
 
 #### Follow these steps to build and run the frontend docker image:
-
-(Before running these commands, please ensure you have stopped your local Next.js process if there is already one running on port 3000.)
 
 From root:
 
