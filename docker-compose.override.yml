@@ -1,3 +1,5 @@
+name: poetryverse-dev
+
 services:
   migrate:
     command: sh -c "npm run db:push --workspace=packages/database" # Using db:push for dev workflow.

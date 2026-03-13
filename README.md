@@ -68,7 +68,7 @@ To build and run the docker images, you can run the docker compose file, or buil
 - We have the following docker compose files:
   - `docker-compose.yml` (default configuration)
   - `docker-compose.override.yml` (overrides docker-compose with local development customizations)
-  - `docker-compose.prod.yaml` (for production environment)
+  - `docker-compose.prod.yml` (for production environment)
 - When Docker Compose is run, these 4 containers will be started:
   - `poetryverse-db`
   - `poetryverse-api`
@@ -81,6 +81,7 @@ To build and run the docker images, you can run the docker compose file, or buil
 Run this command from root to build and run the containers: `docker compose up --watch`
 
 - This will run the configurations of the `docker-compose.yml` and the `docker-compose.override.yml`.
+- `docker-compose.override.yml` sets the Compose project name to `poetryverse-dev`, which keeps development Docker resources (containers, networks, volumes) isolated from production resources.
 
 - `--watch` is used to automatically sync source file changes to the running services.
 
@@ -97,10 +98,15 @@ cp apps/web/.env.production.example apps/web/.env.production
 Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` .
 
 - This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`.
+- `docker-compose.prod.yml` sets the Compose project name to `poetryverse-prod`, which keeps production Docker resources isolated from development resources.
 
-<br />
+### Stopping the Containers:
 
-To stop the containers, run `docker compose down`. If you would like to remove the database volume as well, run `docker compose down -v`.
+To stop development containers, run `docker compose down`.
+
+To stop production containers, run `docker compose -f docker-compose.yml -f docker-compose.prod.yml down`.
+
+If you would like to remove the database volume for a given environment as well, add `-v` to the matching `down` command.
 
 ### Using the Dockerfiles:
 
