@@ -1,0 +1,27 @@
+FROM node:24-bookworm-slim
+WORKDIR /app
+
+# Install necessary dependencies
+COPY package.json package-lock.json ./
+COPY apps/web/package.json apps/web/package.json
+COPY packages/database/package.json packages/database/package.json
+RUN npm ci
+
+# Copy web application and preserve file structure for npm workspaces
+COPY apps/web apps/web
+COPY packages/database packages/database
+
+# Include DATABASE_URL for Prisma
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+# Generate Prisma client and then build web
+RUN npm run db:generate --workspace=packages/database
+RUN npm run build --workspace=apps/web
+
+# Set correct WORKDIR
+WORKDIR /app/apps/web
+
+# Expose port 3000 and run the web application
+EXPOSE 3000
+CMD ["npm", "start"]

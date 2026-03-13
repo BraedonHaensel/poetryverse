@@ -1,0 +1,25 @@
+name: poetryverse-prod
+
+services:
+  db:
+    restart: unless-stopped
+    env_file:
+      - .env.production
+
+  migrate:
+    env_file:
+      - .env.production
+
+  api:
+    restart: unless-stopped
+
+    env_file:
+      - .env.production
+      - apps/api/.env.production
+
+  web:
+    restart: unless-stopped
+
+    env_file:
+      - .env.production
+      - apps/web/.env.production

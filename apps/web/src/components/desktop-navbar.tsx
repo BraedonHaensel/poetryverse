@@ -57,13 +57,20 @@ export default function DesktopNavbar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button
-            aria-label="Settings"
-            className="rounded-full p-2 hover:bg-black/5 active:bg-black/10"
+        <div className="flex items-center gap-8">
+          <Link
+            href={'/settings'}
+            className="relative rounded-full py-1 hover:bg-black/5 active:bg-black/10"
           >
-            <Settings size={22} strokeWidth={2} className="text-black" />
-          </button>
+            <Settings
+              size={32}
+              strokeWidth={pathname === '/settings' ? 2.8 : 2}
+              className="text-black"
+            />
+            {pathname === '/settings' && (
+              <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
+            )}
+          </Link>
           <SignOutButton text="Sign Out" />
         </div>
       </div>
