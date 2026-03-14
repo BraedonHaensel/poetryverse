@@ -4,14 +4,17 @@ import {
   createPoem,
   generateAIPoem,
   interpretPoem,
+  likePoem,
+  unlikePoem,
 } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
-import { PoemInterpretRequestSchema } from '../schemas/poem-schemas'
 import {
   CreatePoemRequestSchema,
+  LikePoemRequestSchema,
   PoemAIRequestSchema,
+  PoemInterpretRequestSchema,
 } from '../schemas/poem-schemas'
 
 const router = Router()
@@ -38,6 +41,22 @@ router.post(
   requireAuth,
   validate(PoemInterpretRequestSchema),
   asyncHandler(interpretPoem)
+)
+
+/** PUT /api/poems/like */
+router.put(
+  '/like',
+  requireAuth,
+  validate(LikePoemRequestSchema),
+  asyncHandler(likePoem)
+)
+
+/** DELETE /api/poems/like */
+router.delete(
+  '/like',
+  requireAuth,
+  validate(LikePoemRequestSchema),
+  asyncHandler(unlikePoem)
 )
 
 export default router

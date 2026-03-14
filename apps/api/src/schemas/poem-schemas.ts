@@ -59,6 +59,13 @@ export const PoemInterpretRequestSchema = z.object({
   }),
 })
 
+/** Validates `PUT /api/poems/like` request bodies. */
+export const LikePoemRequestSchema = z.object({
+  body: z.object({
+    poemId: z.string().nonempty('Poem is required.'),
+  }),
+})
+
 /** Validates structured AI interpretation responses. */
 export const PoemInterpretResponseSchema = z.object({
   interpretation: z
@@ -81,3 +88,6 @@ export type CreatePoemRequest = z.infer<typeof CreatePoemRequestSchema>['body']
 export type PoemInterpretRequest = z.infer<
   typeof PoemInterpretRequestSchema
 >['body']
+
+/** Request body type for `LikePoemRequestSchema`. */
+export type LikePoemRequest = z.infer<typeof LikePoemRequestSchema>['body']
