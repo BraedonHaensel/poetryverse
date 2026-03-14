@@ -15,6 +15,7 @@ import {
   LikePoemRequestSchema,
   PoemAIRequestSchema,
   PoemInterpretRequestSchema,
+  UnlikePoemRequestSchema,
 } from '../schemas/poem-schemas'
 
 const router = Router()
@@ -55,7 +56,7 @@ router.put(
 router.delete(
   '/like',
   requireAuth,
-  validate(LikePoemRequestSchema),
+  validate(UnlikePoemRequestSchema),
   asyncHandler(unlikePoem)
 )
 

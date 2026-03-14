@@ -66,6 +66,9 @@ export const LikePoemRequestSchema = z.object({
   }),
 })
 
+/** Validates `DELETE /api/poems/like` request bodies. */
+export const UnlikePoemRequestSchema = LikePoemRequestSchema
+
 /** Validates structured AI interpretation responses. */
 export const PoemInterpretResponseSchema = z.object({
   interpretation: z
@@ -91,3 +94,6 @@ export type PoemInterpretRequest = z.infer<
 
 /** Request body type for `LikePoemRequestSchema`. */
 export type LikePoemRequest = z.infer<typeof LikePoemRequestSchema>['body']
+
+/** Request body type for `UnlikePoemRequestSchema`. */
+export type UnlikePoemRequest = z.infer<typeof UnlikePoemRequestSchema>['body']

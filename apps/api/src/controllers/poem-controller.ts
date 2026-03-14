@@ -14,6 +14,7 @@ import {
   PoemAIResponseSchema,
   PoemInterpretRequest,
   PoemInterpretResponseSchema,
+  UnlikePoemRequest,
 } from '../schemas/poem-schemas'
 
 // Include statement for fetching poems from the database with Prisma.
@@ -238,7 +239,7 @@ export const likePoem = async (req: Request, res: Response) => {
  */
 export const unlikePoem = async (req: Request, res: Response) => {
   const authReq = req as AuthRequest
-  const { poemId } = req.body as LikePoemRequest
+  const { poemId } = req.body as UnlikePoemRequest
 
   logger.info(
     `Unliking poem for userId=${authReq.auth.userId} poemId=${poemId}`
