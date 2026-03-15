@@ -9,10 +9,12 @@ import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import type { AuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
+  LikePoemRequest,
   PoemAIRequest,
   PoemAIResponseSchema,
   PoemInterpretRequest,
   PoemInterpretResponseSchema,
+  UnlikePoemRequest,
 } from '../schemas/poem-schemas'
 
 // Include statement for fetching poems from the database with Prisma.
@@ -180,6 +182,93 @@ export const interpretPoem = async (
       'We could not interpret this poem right now. Please try again.'
     )
   }
+}
+
+/**
+ * Likes a poem for the authenticated user.
+ * @param req Express request with a validated poem ID.
+ * @param res Express response object.
+ * @returns A 200 response confirming the liked state and current like count.
+ * @throws {HttpError} 404 if the poem does not exist.
+ */
+export const likePoem = async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest
+  const { poemId } = req.body as LikePoemRequest
+
+  logger.info(`Liking poem for userId=${authReq.auth.userId} poemId=${poemId}`)
+
+  await validateAndReturnPoem(poemId)
+
+  await prisma.poemLike.upsert({
+    where: {
+      poemId_userId: {
+        poemId,
+        userId: authReq.auth.userId,
+      },
+    },
+    update: {},
+    create: {
+      poemId,
+      userId: authReq.auth.userId,
+    },
+  })
+
+  const likesCount = await prisma.poemLike.count({
+    where: { poemId },
+  })
+
+  logger.info(
+    `Liked poem for userId=${authReq.auth.userId} poemId=${poemId} likesCount=${likesCount}`
+  )
+
+  return res.status(200).json({
+    data: {
+      poemId,
+      liked: true,
+      likesCount,
+    },
+  })
+}
+
+/**
+ * Unlikes a poem for the authenticated user.
+ * @param req Express request with a validated poem ID.
+ * @param res Express response object.
+ * @returns A 200 response confirming the unliked state and current like count.
+ * @throws {HttpError} 404 if the poem does not exist.
+ */
+export const unlikePoem = async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest
+  const { poemId } = req.body as UnlikePoemRequest
+
+  logger.info(
+    `Unliking poem for userId=${authReq.auth.userId} poemId=${poemId}`
+  )
+
+  await validateAndReturnPoem(poemId)
+
+  await prisma.poemLike.deleteMany({
+    where: {
+      poemId,
+      userId: authReq.auth.userId,
+    },
+  })
+
+  const likesCount = await prisma.poemLike.count({
+    where: { poemId },
+  })
+
+  logger.info(
+    `Unliked poem for userId=${authReq.auth.userId} poemId=${poemId} likesCount=${likesCount}`
+  )
+
+  return res.status(200).json({
+    data: {
+      poemId,
+      liked: false,
+      likesCount,
+    },
+  })
 }
 
 /** Validates the typeId against poem types in the database  */
