@@ -1,93 +1,182 @@
-# seng513-202601-pg-2
+# PoetryVerse Monorepo
 
+## Repo Organization
 
+- `apps/web`: Next.js frontend (`http://localhost:3000`)
+- `apps/api`: Express API (`http://localhost:3001`)
+- `packages/database`: shared Prisma + PostgreSQL client
 
-## Getting started
+## Local Development Setup
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Prerequisites
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- Node.js `>=18`
+- npm
+- PostgreSQL running locally
 
-## Add your files
-
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://csgit.ucalgary.ca/rohan.kapila/seng513-202601-pg-2.git
-git branch -M main
-git push -uf origin main
+```bash
+npm install
 ```
 
-## Integrate with your tools
+Create env files:
 
-* [Set up project integrations](https://csgit.ucalgary.ca/rohan.kapila/seng513-202601-pg-2/-/settings/integrations)
+```bash
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+cp packages/database/.env.example packages/database/.env
+```
 
-## Collaborate with your team
+Fill in the missing env var values by following the instructions in each respective `.env` file. Please add the values directly; do not enclose them with double quotes (e.g. do `NEXT_AUTH_SECRET=secret-here` rather than `NEXT_AUTH_SECRET="secret-here"`).
 
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Initialize Prisma:
 
-## Test and Deploy
+```bash
+npm run db:generate --workspace=packages/database
+npm run db:push --workspace=packages/database
+```
 
-Use the built-in continuous integration in GitLab.
+Seed the database:
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```bash
+npm run db:seed --workspace=packages/database
+```
 
-***
+## Run
 
-# Editing this README
+In separate terminals:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+npm run dev:api
+npm run dev
+```
 
-## Suggestions for a good README
+## Useful Commands
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+npm run build
+npm run build:api
+npm run build:web
+npm run db:migrate --workspace=packages/database
+npm run db:studio --workspace=packages/database
+```
 
-## Name
-Choose a self-explaining name for your project.
+## Building and Running Docker Images
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Notes:
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+- Make sure your environment files are configured correctly (`.env` files mentioned above for a development environment, or `.env.production` files for a production environment).
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+To build and run the docker images, you can run the docker compose file, or build and run them individually with the Dockerfiles.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Using Docker Compose:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+- We have the following docker compose files:
+  - `docker-compose.yml` (default configuration)
+  - `docker-compose.override.yml` (overrides docker-compose with local development customizations)
+  - `docker-compose.prod.yml` (for production environment)
+- When Docker Compose is run, these 4 containers will be started:
+  - `poetryverse-db`
+  - `poetryverse-api`
+  - `poetryverse-web`
+  - `poetryverse-migrate-{suffix}`
+    - This one exits after applying Prisma migrations.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+#### To use Compose in Development:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Run this command from root to build and run the containers: `docker compose up --watch`
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+- This will run the configurations of the `docker-compose.yml` and the `docker-compose.override.yml`.
+- `docker-compose.override.yml` sets the Compose project name to `poetryverse-dev`, which keeps development Docker resources (containers, networks, volumes) isolated from production resources.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+- `--watch` is used to automatically sync source file changes to the running services.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+#### To use Compose in Production:
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+If running this application in a production environment, create and configure the production env files:
 
-## License
-For open source projects, say how it is licensed.
+```bash
+cp .env.production.example .env.production
+cp apps/api/.env.production.example apps/api/.env.production
+cp apps/web/.env.production.example apps/web/.env.production
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` .
+
+- This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`.
+- `docker-compose.prod.yml` sets the Compose project name to `poetryverse-prod`, which keeps production Docker resources isolated from development resources.
+
+### Stopping the Containers:
+
+To stop development containers, run `docker compose down`.
+
+To stop production containers, run `docker compose -f docker-compose.yml -f docker-compose.prod.yml down`.
+
+If you would like to remove the database volume for a given environment as well, add `-v` to the matching `down` command.
+
+### Using the Dockerfiles:
+
+Notes:
+
+- Before running these commands, please ensure you have stopped any running PoetryVerse services to avoid port conflicts.
+
+- In the `DATABASE_URL`, you must replace `localhost` with `host.docker.internal`. This is because `host.docker.internal` tells the docker container to use the host OS instead of localhost from within the container itself.
+
+#### Follow these steps to build and run the backend docker image:
+
+From root:
+
+`docker build -f apps/api/Dockerfile.api -t seng513-api .`
+
+`docker run --rm -p 3001:3001 -e DATABASE_URL="your-postgres-url" --env-file apps/api/.env seng513-api`
+
+#### Follow these steps to build and run the frontend docker image:
+
+From root:
+
+`docker build -f apps/web/Dockerfile.web -t seng513-web .`
+
+`docker run --rm -p 3000:3000 -e DATABASE_URL="your-postgres-url" --env-file ./apps/web/.env seng513-web`
+
+## Recommended Extensions
+
+ESLint
+
+- Analyze all files with `npm run lint`
+
+GitLens
+
+Path Intellisense
+
+Prettier - Code formatter
+
+- Format all files with `npx prettier . --write`
+
+Tailwind CSS IntelliSense
+
+## Recommended VSCode Settings
+
+Create a `.vscode/settings.json` file with the following configuration:
+
+```json
+{
+  "editor.tabSize": 2,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "files.insertFinalNewline": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "workbench.editor.customLabels.patterns": {
+    "**/page.tsx": "${dirname}/${filename}.${extname}"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.scss": "tailwindcss"
+  }
+}
+```
+
+Restart VSCode to apply the new configuration.

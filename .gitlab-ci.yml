@@ -1,0 +1,53 @@
+image: node:20
+
+stages:
+  - lint
+
+.default_rules:
+  rules:
+    # Only run pipelines for merge requests or when pushing to main
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event" && $CI_COMMIT_BRANCH != "main"
+      when: never
+
+.frontend_detect_changes_rules:
+  rules:
+    changes:
+      - apps/web/**/*
+      - 'package.json'
+      - 'package-lock.json'
+      - '.gitlab-ci.yml'
+
+.backend_detect_changes_rules:
+  rules:
+    - changes:
+      - apps/api/**/*
+      - 'package.json'
+      - 'package-lock.json'
+      - '.gitlab-ci.yml'
+
+lint-frontend:
+  stage: lint
+  timeout: 10 minutes
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.frontend_detect_changes_rules, rules]
+    - when: manual
+      allow_failure: true
+  script:
+    - npm ci
+    - cd apps/web
+    - npm run lint
+
+lint-backend:
+  stage: lint
+  timeout: 10 minutes
+  rules:
+    - !reference [.default_rules, rules]
+    - !reference [.backend_detect_changes_rules, rules]
+    - when: manual
+      allow_failure: true
+  script:
+    - npm ci
+    - npm run db:generate --workspace=packages/
+    - cd apps/api
+    - npm run lint
