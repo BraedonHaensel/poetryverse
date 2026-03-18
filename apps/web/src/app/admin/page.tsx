@@ -3,6 +3,58 @@
 import { useState } from 'react'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DataTable, Column } from '@/components/admin-table/data-table'
+import { Trash2, Check } from 'lucide-react'
+type ReportedPoem = {
+  id: number
+  title: string
+  reportType: string
+  poem: string
+  reason: string
+}
+
+const reportedPoems: ReportedPoem[] = [
+  {
+    id: 12,
+    title: 'My Haiku',
+    reportType: 'AI Usage',
+    poem: 'AI writing poetry is made a lot easier when you use AI.',
+    reason: 'Clearly written using AI with repeated phrasing.',
+  },
+  {
+    id: 24,
+    title: 'When I Was One',
+    reportType: 'Inappropriate Content',
+    poem: 'No man is an island, entire of itself...',
+    reason: 'Contains inappropriate and sensitive content.',
+  },
+]
+
+const columns: Column<ReportedPoem>[] = [
+  { key: 'id', label: 'ID' },
+  { key: 'title', label: 'Title' },
+  { key: 'reportType', label: 'Report Type' },
+
+  {
+    key: 'poem',
+    label: 'Poem',
+    render: (row) => (
+      <div className="min-w-0 line-clamp-2">
+        {row.poem}
+      </div>
+    ),
+  },
+
+  {
+    key: 'reason',
+    label: 'Reason',
+    render: (row) => (
+      <div className="min-w-0 line-clamp-2">
+        {row.reason}
+      </div>
+    ),
+  },
+]
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
@@ -85,9 +137,16 @@ function AnalyticsView() {
         </CardHeader>
 
         <CardContent>
-          <p className="text-black/70">
-            Table here
-          </p>
+          <DataTable
+            columns={columns}
+            data={reportedPoems}
+            renderActions={(row) => (
+              <>
+                <Trash2 size={18} className="cursor-pointer" />
+                <Check size={18} className="cursor-pointer" />
+              </>
+            )}
+    />
         </CardContent>
       </ShadowCard>
     </div>
