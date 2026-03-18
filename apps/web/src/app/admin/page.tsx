@@ -8,35 +8,36 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
   
   return (
-  <div className="flex gap-6">
-    <ShadowCard className="w-72 p-4">
-      <div className="flex flex-col gap-2">
-        <SidebarItem
-          label="Analytics"
-          active={activeTab === 'analytics'}
-          onClick={() => setActiveTab('analytics')}
-        />
-        <SidebarItem
-          label="General User Management"
-          active={activeTab === 'general'}
-          onClick={() => setActiveTab('general')}
-        />
-        <SidebarItem
-          label="Admin User Management"
-          active={activeTab === 'admin'}
-          onClick={() => setActiveTab('admin')}
-        />
+    <ShadowCard className="p-0 overflow-hidden">
+      <div className="flex">
+        <div className="w-72 p-4 border-r border-black/10">
+          <div className="flex flex-col gap-2">
+            <SidebarItem
+              label="Analytics"
+              active={activeTab === 'analytics'}
+              onClick={() => setActiveTab('analytics')}
+            />
+            <SidebarItem
+              label="General User Management"
+              active={activeTab === 'general'}
+              onClick={() => setActiveTab('general')}
+            />
+            <SidebarItem
+              label="Admin User Management"
+              active={activeTab === 'admin'}
+              onClick={() => setActiveTab('admin')}
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 p-6">
+          {activeTab === 'analytics' && <AnalyticsView />}
+          {activeTab === 'general' && <div>General User Management</div>}
+          {activeTab === 'admin' && <div>Admin User Management</div>}
+        </div>
       </div>
     </ShadowCard>
-
-    <div className="flex-1">
-      {activeTab === 'analytics' && <AnalyticsView />}
-      {activeTab === 'general' && <div>General User Management</div>}
-      {activeTab === 'admin' && <div>Admin User Management</div>}
-    </div>
-  </div>
-)
-  
+  )
 }
 
 function SidebarItem({label, active, onClick,}: {
@@ -49,8 +50,8 @@ function SidebarItem({label, active, onClick,}: {
       onClick={onClick}
       className={`w-full rounded-lg px-4 py-3 text-left transition ${
         active
-          ? 'bg-black text-white font-medium'
-          : 'text-black/70 hover:bg-black/5'
+          ? 'bg-off-white text-black font-medium'
+          : 'text-black hover:bg-off-white'
       }`}
     >
       {label}
@@ -67,7 +68,8 @@ function AnalyticsView() {
         </CardTitle>
       </CardHeader>
 
-      <ShadowCard>
+      <ShadowCard className='bg-off-white'>
+        {/* Hardcoded values matching figma designs */}
         <CardContent className="flex gap-6">
           <StatCard title="Number of Poems" value="50" />
           <StatCard title="Number of AI Poems" value="23" />
@@ -88,7 +90,6 @@ function AnalyticsView() {
           </p>
         </CardContent>
       </ShadowCard>
-
     </div>
   )
 }
@@ -98,9 +99,9 @@ function StatCard({title, value,}: {
   value: string
 }) {
   return (
-    <div className="flex-1 rounded-xl bg-off-white p-6 text-center">
-      <div className="mb-2 text-sm">{title}</div>
-      <div className="text-4xl font-bold">{value}</div>
+    <div className="flex-1 rounded-xl bg-white p-6 text-center shadow-md">
+      <div className="mb-2 text-sm font-medium text-black">{title}</div>
+      <div className="text-5xl font-bold">{value}</div>
     </div>
   )
 }
