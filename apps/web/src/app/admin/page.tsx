@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Trash2 } from 'lucide-react'
+import { CircleCheckBig, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { Column, DataTable } from '@/components/admin-table/data-table'
@@ -139,7 +139,7 @@ function AnalyticsView() {
             renderActions={(_row) => (
               <>
                 <Trash2 size={18} className="cursor-pointer" />
-                <Check size={18} className="cursor-pointer" />
+                <CircleCheckBig size={18} className="cursor-pointer" />
               </>
             )}
           />
