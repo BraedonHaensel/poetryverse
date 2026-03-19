@@ -16,7 +16,7 @@ type Props = {
 /**
  * Button for logging in with a Google account using NextAuth.js.
  */
-export function GoogleLoginButton({ className = '' }: Props) {
+export default function GoogleLoginButton({ className = '' }: Props) {
   const [isLoading, setLoading] = useState(false)
 
   // Launch the Google login page using NextAuth.js

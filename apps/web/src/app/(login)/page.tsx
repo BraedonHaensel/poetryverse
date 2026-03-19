@@ -4,9 +4,9 @@ import { redirect } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { getAuthSession } from '@/lib/nextauth'
 
-import { FeatureHighlights } from './components/feature-highlights'
-import { GoogleLoginButton } from './components/google-login-button'
-import { GuestLoginButton } from './components/guest-login-button'
+import FeatureHighlights from './components/feature-highlights'
+import GoogleLoginButton from './components/google-login-button'
+import GuestLoginButton from './components/guest-login-button'
 
 export default async function Login() {
   // Redirect to the Home page if the user is already signed in
@@ -68,7 +68,7 @@ export default async function Login() {
           <Separator className="flex-1 bg-black" />
         </div>
         <GuestLoginButton className="w-full" />
-        <div>TODO carousel</div>
+        <FeatureHighlights />
       </div>
     </div>
   )

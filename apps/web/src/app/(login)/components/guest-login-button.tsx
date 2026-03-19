@@ -13,7 +13,7 @@ type Props = {
 /**
  * Button for logging in as a guest user.
  */
-export function GuestLoginButton({ className = '' }: Props) {
+export default function GuestLoginButton({ className = '' }: Props) {
   return (
     <Button
       className={cn('border-2 border-black py-6', className)}
