@@ -1,10 +1,11 @@
 'use client'
 
+import { Check, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+
+import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DataTable, Column } from '@/components/admin-table/data-table'
-import { Trash2, Check } from 'lucide-react'
 type ReportedPoem = {
   id: number
   title: string
@@ -35,34 +36,27 @@ const columns: Column<ReportedPoem>[] = [
   { key: 'title', label: 'Title' },
   { key: 'reportType', label: 'Report Type' },
 
+  // use row later for deletion
   {
     key: 'poem',
     label: 'Poem',
-    render: (row) => (
-      <div className="min-w-0 line-clamp-2">
-        {row.poem}
-      </div>
-    ),
+    render: (row) => <div className="line-clamp-2 min-w-0">{row.poem}</div>,
   },
 
   {
     key: 'reason',
     label: 'Reason',
-    render: (row) => (
-      <div className="min-w-0 line-clamp-2">
-        {row.reason}
-      </div>
-    ),
+    render: (row) => <div className="line-clamp-2 min-w-0">{row.reason}</div>,
   },
 ]
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
-  
+
   return (
-    <ShadowCard className="p-0 overflow-hidden">
+    <ShadowCard className="overflow-hidden p-0">
       <div className="flex">
-        <div className="w-72 p-4 border-r border-black/10">
+        <div className="w-72 border-r border-black/10 p-4">
           <div className="flex flex-col gap-2">
             <SidebarItem
               label="Analytics"
@@ -92,7 +86,11 @@ export default function AdminPage() {
   )
 }
 
-function SidebarItem({label, active, onClick,}: {
+function SidebarItem({
+  label,
+  active,
+  onClick,
+}: {
   label: string
   active: boolean
   onClick: () => void
@@ -102,8 +100,8 @@ function SidebarItem({label, active, onClick,}: {
       onClick={onClick}
       className={`w-full rounded-lg px-4 py-3 text-left transition ${
         active
-          ? 'bg-off-white text-black font-medium'
-          : 'text-black hover:bg-off-white'
+          ? 'bg-off-white font-medium text-black'
+          : 'hover:bg-off-white text-black'
       }`}
     >
       {label}
@@ -115,12 +113,10 @@ function AnalyticsView() {
   return (
     <div className="flex flex-col gap-6">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">
-          Statistics
-        </CardTitle>
+        <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
       </CardHeader>
 
-      <ShadowCard className='bg-off-white'>
+      <ShadowCard className="bg-off-white">
         {/* Hardcoded values matching figma designs */}
         <CardContent className="flex gap-6">
           <StatCard title="Number of Poems" value="50" />
@@ -140,23 +136,20 @@ function AnalyticsView() {
           <DataTable
             columns={columns}
             data={reportedPoems}
-            renderActions={(row) => (
+            renderActions={(_row) => (
               <>
                 <Trash2 size={18} className="cursor-pointer" />
                 <Check size={18} className="cursor-pointer" />
               </>
             )}
-    />
+          />
         </CardContent>
       </ShadowCard>
     </div>
   )
 }
 
-function StatCard({title, value,}: {
-  title: string
-  value: string
-}) {
+function StatCard({ title, value }: { title: string; value: string }) {
   return (
     <div className="flex-1 rounded-xl bg-white p-6 text-center shadow-md">
       <div className="mb-2 text-sm font-medium text-black">{title}</div>

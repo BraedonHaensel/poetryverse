@@ -2,7 +2,6 @@
 
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
 import { ShadowCard } from '@/components/shadow-card'
@@ -16,7 +15,6 @@ import { Label } from '@/components/ui/label'
 export function AdvancedSettingsForm() {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isDeleteConfrimOpen, setIsDeleteConfirmOpen] = useState<boolean>(false)
-  const router = useRouter()
 
   function deleteAccount() {
     console.log("TODO Delete the user's account and refresh the page.")
@@ -32,12 +30,6 @@ export function AdvancedSettingsForm() {
         onAction={deleteAccount}
         variant="delete"
       />
-      <Button
-        className="w-full bg-black text-white hover:bg-black/90"
-        onClick={() => router.push('/admin')}
-      >
-        Enter Admin Mode
-      </Button>
       <ShadowCard className="gap-4 p-3">
         <CardHeader
           className="hover:text-muted-foreground flex items-center justify-between px-0 hover:cursor-pointer"
