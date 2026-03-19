@@ -29,6 +29,14 @@ const reportedPoems: ReportedPoem[] = [
     poem: 'No man is an island, entire of itself...',
     reason: 'Contains inappropriate and sensitive content.',
   },
+  {
+    id: 45,
+    title: 'Simple Haiku',
+    reportType: 'AI Usage',
+    poem: 'This is a haiku demonstrating a sample poem creation.',
+    reason:
+      'Low effort poem, clearly written by AI. Admins please take this low quality content off of the platform.',
+  },
 ]
 
 const columns: Column<ReportedPoem>[] = [
@@ -40,13 +48,21 @@ const columns: Column<ReportedPoem>[] = [
   {
     key: 'poem',
     label: 'Poem',
-    render: (row) => <div className="line-clamp-2 min-w-0">{row.poem}</div>,
+    render: (row) => (
+      <div className="line-clamp-4 max-w-[300px] text-sm leading-6 break-words whitespace-pre-line">
+        {row.poem}
+      </div>
+    ),
   },
 
   {
     key: 'reason',
     label: 'Reason',
-    render: (row) => <div className="line-clamp-2 min-w-0">{row.reason}</div>,
+    render: (row) => (
+      <div className="line-clamp-4 max-w-[320px] text-sm leading-6 break-words">
+        {row.reason}
+      </div>
+    ),
   },
 ]
 
@@ -54,35 +70,33 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
 
   return (
-    <ShadowCard className="overflow-hidden p-0">
-      <div className="flex">
-        <div className="w-72 border-r border-black/10 p-4">
-          <div className="flex flex-col gap-2">
-            <SidebarItem
-              label="Analytics"
-              active={activeTab === 'analytics'}
-              onClick={() => setActiveTab('analytics')}
-            />
-            <SidebarItem
-              label="General User Management"
-              active={activeTab === 'general'}
-              onClick={() => setActiveTab('general')}
-            />
-            <SidebarItem
-              label="Admin User Management"
-              active={activeTab === 'admin'}
-              onClick={() => setActiveTab('admin')}
-            />
-          </div>
+    <div className="flex min-h-[calc(100vh-72px)] w-full bg-white">
+      <aside className="w-[278px] border-r border-black/10">
+        <div className="flex flex-col pt-0">
+          <SidebarItem
+            label="Analytics"
+            active={activeTab === 'analytics'}
+            onClick={() => setActiveTab('analytics')}
+          />
+          <SidebarItem
+            label="General User Management"
+            active={activeTab === 'general'}
+            onClick={() => setActiveTab('general')}
+          />
+          <SidebarItem
+            label="Admin User Management"
+            active={activeTab === 'admin'}
+            onClick={() => setActiveTab('admin')}
+          />
         </div>
+      </aside>
 
-        <div className="flex-1 p-6">
-          {activeTab === 'analytics' && <AnalyticsView />}
-          {activeTab === 'general' && <div>General User Management</div>}
-          {activeTab === 'admin' && <div>Admin User Management</div>}
-        </div>
-      </div>
-    </ShadowCard>
+      <main className="flex-1 px-9 py-10">
+        {activeTab === 'analytics' && <AnalyticsView />}
+        {activeTab === 'general' && <div>General User Management</div>}
+        {activeTab === 'admin' && <div>Admin User Management</div>}
+      </main>
+    </div>
   )
 }
 
@@ -98,11 +112,12 @@ function SidebarItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full rounded-lg px-4 py-3 text-left transition ${
+      className={[
+        'w-full border-b border-black/10 px-7 py-6 text-left text-[18px] font-semibold transition',
         active
-          ? 'bg-off-white font-medium text-black'
-          : 'hover:bg-off-white text-black'
-      }`}
+          ? 'bg-admin-sidebar-active text-black'
+          : 'hover:bg-admin-hover bg-white text-black',
+      ].join(' ')}
     >
       {label}
     </button>
@@ -111,49 +126,69 @@ function SidebarItem({
 
 function AnalyticsView() {
   return (
-    <div className="flex flex-col gap-6">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
-      </CardHeader>
+    <div className="flex flex-col gap-10">
+      <section>
+        <CardHeader className="px-0 pt-0 pb-5">
+          <CardTitle className="text-2xl font-bold text-black">
+            Statistics
+          </CardTitle>
+        </CardHeader>
 
-      <ShadowCard className="bg-off-white">
-        {/* Hardcoded values matching figma designs */}
-        <CardContent className="flex gap-6">
-          <StatCard title="Number of Poems" value="50" />
-          <StatCard title="Number of AI Poems" value="23" />
-          <StatCard title="Number of Handwritten Poems" value="27" />
-        </CardContent>
-      </ShadowCard>
+        <ShadowCard className="bg-admin-panel rounded-[20px] px-10 py-12">
+          <CardContent className="grid grid-cols-1 gap-8 p-0 md:grid-cols-3">
+            <StatCard title="Number of Poems" value="50" />
+            <StatCard title="Number of AI Poems" value="23" />
+            <StatCard title="Number of Handwritten Poems" value="27" />
+          </CardContent>
+        </ShadowCard>
+      </section>
 
-      <ShadowCard>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">
+      <section>
+        <CardHeader className="px-0 pt-0 pb-5">
+          <CardTitle className="text-2xl font-bold text-black">
             Reported Poems
           </CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={reportedPoems}
-            renderActions={(_row) => (
-              <>
-                <Trash2 size={18} className="cursor-pointer" />
-                <CircleCheckBig size={18} className="cursor-pointer" />
-              </>
-            )}
-          />
-        </CardContent>
-      </ShadowCard>
+        <ShadowCard className="rounded-[20px] bg-admin-panel p-3">
+          <CardContent className="max-h-[470px] overflow-y-auto p-0">
+            <DataTable
+              columns={columns}
+              data={reportedPoems}
+              renderActions={(_row) => (
+                <div className="flex items-center justify-center gap-5">
+                  <button
+                    type="button"
+                    className="text-black transition hover:opacity-70"
+                    aria-label="Delete report"
+                  >
+                    <Trash2 size={28} strokeWidth={2.25} />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="text-black transition hover:opacity-70"
+                    aria-label="Approve report"
+                  >
+                    <CircleCheckBig size={30} strokeWidth={2.25} />
+                  </button>
+                </div>
+              )}
+            />
+          </CardContent>
+        </ShadowCard>
+      </section>
     </div>
   )
 }
 
 function StatCard({ title, value }: { title: string; value: string }) {
   return (
-    <div className="flex-1 rounded-xl bg-white p-6 text-center shadow-md">
-      <div className="mb-2 text-sm font-medium text-black">{title}</div>
-      <div className="text-5xl font-bold">{value}</div>
+    <div className="flex min-h-[px] flex-col items-center justify-center rounded-[20px] bg-white px-6 py-8 text-center shadow-md">
+      <div className="mb-5 text-xl font-semibold text-black">{title}</div>
+      <div className="text-6xl leading-none font-bold text-black">
+        {value}
+      </div>
     </div>
   )
 }
