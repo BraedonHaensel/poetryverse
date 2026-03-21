@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
@@ -34,7 +35,9 @@ export default function UserSettings() {
         <ProfilePictureForm imageUrl={IMAGE_URL} />
         <UsernameForm username={USERNAME} />
         <EmailForm email={EMAIL} />
-        <Button onClick={() => router.push('/admin')}>Enter Admin Mode</Button>
+        <Button asChild>
+          <Link href="/admin">Enter Admin Mode</Link>
+        </Button>
         <AdvancedSettingsForm />
         {/* Mobile-only sign out button */}
         <SignOutButton className="mt-auto sm:hidden" text="Sign Out" />
