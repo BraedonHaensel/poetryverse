@@ -30,7 +30,10 @@ type Props = {
   className?: string
 }
 
-export default function FeatureHighlights({ className = '' }: Props) {
+/**
+ * Features carousel for mobile displays.
+ */
+export function FeaturesCarousel({ className = '' }: Props) {
   const [index, setIndex] = useState(0)
 
   // Handle swiping through the carousel
@@ -48,13 +51,13 @@ export default function FeatureHighlights({ className = '' }: Props) {
     >
       {/* Features carousel */}
       <div
-        className="flex flex-1 items-center text-center select-none"
+        className="flex flex-1 items-center text-center duration-300 select-none"
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
         {features.map((feature, i) => (
           <div key={i} className="flex w-full shrink-0 flex-col items-center">
-            <feature.icon size={100} className="mb-6" />
-            <span className="mb-4 text-3xl font-bold">{feature.title}</span>
+            <feature.icon size={90} className="mb-6" />
+            <span className="mb-4 text-2xl font-bold">{feature.title}</span>
             <span className="text-lg">{feature.description}</span>
           </div>
         ))}
@@ -77,6 +80,27 @@ export default function FeatureHighlights({ className = '' }: Props) {
         <div className="h-0.5 w-full bg-[linear-gradient(to_right,transparent,rgba(0,0,0,0.15),transparent)]" />
         <p className="text-muted-foreground">Swipe to learn more</p>
       </div>
+    </div>
+  )
+}
+
+/**
+ * Features list for desktop displays.
+ */
+export function FeaturesList() {
+  return (
+    <div className="space-y-8">
+      {features.map((feature, i) => (
+        <div key={i} className="flex gap-4">
+          <div>
+            <feature.icon className="h-15 w-15" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold">{feature.title}</span>
+            <span className="text-lg">{feature.description}</span>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
