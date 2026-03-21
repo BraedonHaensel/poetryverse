@@ -47,7 +47,7 @@ export default async function Login() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center gap-4">
         <Image
           src="/feather-logo.svg"
           alt="PoetryVerse logo"
@@ -68,7 +68,7 @@ export default async function Login() {
           <Separator className="flex-1 bg-black" />
         </div>
         <GuestLoginButton className="w-full" />
-        <FeatureHighlights />
+        <FeatureHighlights className="flex-1" />
       </div>
     </div>
   )

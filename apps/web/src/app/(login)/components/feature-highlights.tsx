@@ -8,25 +8,29 @@ import { cn } from '@/lib/utils'
 
 const features = [
   {
-    icon: <ShieldUser />,
+    icon: ShieldUser,
     title: 'Human-Verified Content',
     description:
       'Improving AI transparency in poetry by verifying authentic human writing.',
   },
   {
-    icon: <Globe />,
+    icon: Globe,
     title: 'Global Community',
     description:
       'Breaking down language barriers, one poem at a time, with translation and interpretation.',
   },
   {
-    icon: <ShieldPlus />,
+    icon: ShieldPlus,
     title: 'Safe Creative Space',
     description: 'Active moderation supports a respectful creative space.',
   },
 ]
 
-export default function FeatureHighlights() {
+type Props = {
+  className?: string
+}
+
+export default function FeatureHighlights({ className = '' }: Props) {
   const [index, setIndex] = useState(0)
 
   // Handle swiping through the carousel
@@ -38,37 +42,40 @@ export default function FeatureHighlights() {
   })
 
   return (
-    <div {...swipeHandlers} className="w-full space-y-4 overflow-hidden">
-      {/* Features */}
+    <div
+      {...swipeHandlers}
+      className={cn('flex flex-col gap-4 overflow-hidden', className)}
+    >
+      {/* Features carousel */}
       <div
-        className={cn(
-          'flex duration-300 select-none',
-          `translate-x-[-${index * 100}%]`
-        )}
+        className="flex flex-1 items-center text-center select-none"
+        style={{ transform: `translateX(-${index * 100}%)` }}
       >
         {features.map((feature, i) => (
-          <div
-            key={i}
-            className="flex h-20 w-full shrink-0 flex-col items-center text-center"
-          >
-            {feature.icon}
-            <span className="text-md">{feature.title}</span>
-            <span className="text-sm">{feature.description}</span>
+          <div key={i} className="flex w-full shrink-0 flex-col items-center">
+            <feature.icon size={100} className="mb-6" />
+            <span className="mb-4 text-3xl font-bold">{feature.title}</span>
+            <span className="text-lg">{feature.description}</span>
           </div>
         ))}
       </div>
 
-      {/* Carousel dots */}
-      <div className="flex w-full justify-center gap-4">
-        {features.map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              'h-3 w-3 rounded-full',
-              i === index ? 'bg-muted-foreground' : 'bg-gray-300'
-            )}
-          />
-        ))}
+      <div className="flex flex-col items-center gap-4">
+        {/* Carousel dots */}
+        <div className="flex gap-4">
+          {features.map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                'h-3 w-3 rounded-full',
+                i === index ? 'bg-muted-foreground' : 'bg-gray-300'
+              )}
+            />
+          ))}
+        </div>
+        {/* Divider line */}
+        <div className="h-0.5 w-full bg-[linear-gradient(to_right,transparent,rgba(0,0,0,0.15),transparent)]" />
+        <p className="text-muted-foreground">Swipe to learn more</p>
       </div>
     </div>
   )
