@@ -3,6 +3,7 @@ import { Router } from 'express'
 import {
   createPoem,
   generateAIPoem,
+  GetDailyPoem,
   interpretPoem,
   likePoem,
   unlikePoem,
@@ -59,5 +60,8 @@ router.delete(
   validate(UnlikePoemRequestSchema),
   asyncHandler(unlikePoem)
 )
+
+/** GET /api/poems/daily-poem */
+router.get('/daily-poem', asyncHandler(GetDailyPoem))
 
 export default router

@@ -314,3 +314,91 @@ const validateAndReturnPoem = async (poemId: string) => {
   }
   return poem
 }
+
+/** retrieves daily poem from database by validating greatest like count over the past 24 hours*/
+export const GetPoemOfDay = async () => {
+  const now = new Date()
+  const lastDayTimestamp = new Date(now.getTime() - 24 * 3600 * 1000)
+
+  const topLikedPoem = await prisma.poemLike.groupBy({
+    by: ['poemId'],
+    where: {
+      createdAt: {
+        gte: lastDayTimestamp,
+      },
+    },
+    _count: {
+      poemId: true,
+    },
+    orderBy: {
+      _count: {
+        poemId: 'desc',
+      },
+    },
+    take: 1,
+  })
+
+  if (topLikedPoem.length > 0) {
+    const poem = await prisma.poem.findFirst({
+      where: {
+        id: topLikedPoem[0].poemId,
+        isPublic: true,
+      },
+      include: {
+        author: true,
+        likes: true,
+        poemTags: {
+          include: { tag: true },
+        },
+      },
+    })
+    if (poem) {
+      return poem
+    }
+  }
+
+  const count = await prisma.poem.count({
+    where: { isPublic: true },
+  })
+  if (count === 0) {
+    return null
+  }
+  const randIndex = Math.floor(Math.random() * count)
+
+  const randPoem = await prisma.poem.findFirst({
+    skip: randIndex,
+    take: 1,
+    where: { isPublic: true },
+    include: {
+      author: true,
+      likes: true,
+      poemTags: { include: { tag: true } },
+    },
+  })
+  return randPoem
+}
+
+/**
+ * Determine poem of the day from poetryverse database.
+ * @param req Express request.
+ * @param res Express response object.
+ * @returns A 200 response with the poem of the day information.
+ * @throws {HttpError} 404 if the poem does not exist.
+ */
+export const GetDailyPoem = async (req: Request, res: Response) => {
+  logger.info('Fetch new poem of the day.')
+  const poem = await GetPoemOfDay()
+  if (!poem) {
+    logger.warn('Poem of the day failed to retrieve')
+    throw new HttpError(
+      404,
+      'No poems found',
+      null,
+      'There are no poems available right now.'
+    )
+  }
+
+  logger.info(`Poem of the day: ${poem.id}`)
+
+  return res.status(200).json({ data: poem })
+}
