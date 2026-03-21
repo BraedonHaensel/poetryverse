@@ -11,7 +11,7 @@ export default function AdminNavbar() {
 
   return (
     <header className="w-full border-b border-black/10 bg-white">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 items-center justify-between px-8">
         <Link href="/" className="flex items-center gap-4">
           <Feather size={22} strokeWidth={2} className="text-black" />
           <span className="pb-1.5 text-2xl font-bold">PoetryVerse</span>
