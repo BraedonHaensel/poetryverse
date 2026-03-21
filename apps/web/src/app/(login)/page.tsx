@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 
+import { ShadowCard } from '@/components/shadow-card'
 import { Separator } from '@/components/ui/separator'
 import { getAuthSession } from '@/lib/nextauth'
 
@@ -16,38 +17,9 @@ export default async function Login() {
   }
 
   return (
-    <div className="mt-5 grid flex-1 gap-8 md:grid-cols-2">
-      {/* Left column on desktop */}
-      <div className="hidden flex-col justify-between gap-4 md:flex">
-        <div>
-          <div className="mb-8 flex gap-4">
-            <Image
-              src="/feather-logo.svg"
-              alt="PoetryVerse logo"
-              width={40}
-              height={40}
-            />
-            <h1 className="text-2xl font-bold">PoetryVerse</h1>
-          </div>
-          <h2 className="mb-4 text-2xl">Welcome to PoetryVerse.</h2>
-          <p className="mb-8 font-light">
-            Join an international community of poets and poetry enthusiasts
-            where human creativity can flourish in the age of AI
-          </p>
-          <FeaturesList />
-        </div>
-
-        <div className="relative h-100 w-full">
-          <Image
-            className="object-contain object-left"
-            src="/poem-writing-hand.svg"
-            alt="Hand writing poem"
-            fill
-          />
-        </div>
-      </div>
-
-      <div className="flex w-full flex-col items-center gap-4">
+    <div className="flex flex-1 flex-col gap-8">
+      {/* Mobile layout */}
+      <div className="mt-5 flex w-full flex-1 flex-col items-center gap-4 md:hidden">
         <div className="flex w-full flex-1 flex-col items-center justify-end gap-8 pb-8">
           <Image
             src="/feather-logo.svg"
@@ -55,10 +27,7 @@ export default async function Login() {
             width={60}
             height={60}
           />
-          <div className="text-center text-3xl">
-            <h1 className="block md:hidden">Welcome to PoetryVerse</h1>
-            <h2 className="hidden md:block">Log into PoetryVerse</h2>
-          </div>
+          <h1 className="text-center text-3xl">Welcome to PoetryVerse</h1>
           <p className="text-center">
             Sign in with your Google account or browse poetry as a guest.
           </p>
@@ -76,6 +45,64 @@ export default async function Login() {
         </div>
 
         <FeaturesCarousel className="flex-1" />
+      </div>
+
+      {/* Desktop layout */}
+      <div className="mx-auto mt-5 hidden flex-1 gap-8 md:grid md:grid-cols-2 xl:m-20 xl:gap-20">
+        {/* Left column on desktop */}
+        <div className="flex flex-col justify-between gap-4">
+          <div>
+            <div className="mb-8 flex gap-6">
+              <Image
+                src="/feather-logo.svg"
+                alt="PoetryVerse logo"
+                width={50}
+                height={50}
+              />
+              <h1 className="text-4xl font-bold">PoetryVerse</h1>
+            </div>
+            <h2 className="mb-4 text-3xl">Welcome to PoetryVerse.</h2>
+            <p className="mb-8 text-xl font-light">
+              Join an international community of poets and poetry enthusiasts
+              where human creativity can flourish in the age of AI.
+            </p>
+            <FeaturesList />
+          </div>
+
+          <div className="relative w-full flex-1">
+            <Image
+              className="object-contain object-left"
+              src="/poem-writing-hand.svg"
+              alt="Hand writing poem"
+              fill
+            />
+          </div>
+        </div>
+
+        {/* Right column on desktop */}
+        <ShadowCard className="my-auto flex w-full flex-1 flex-col items-center justify-end gap-8 px-10 py-20">
+          <Image
+            src="/feather-logo.svg"
+            alt="PoetryVerse logo"
+            width={60}
+            height={60}
+          />
+          <h2 className="text-center text-3xl">Log into PoetryVerse</h2>
+          <p className="text-center">
+            Sign in with your Google account or browse poetry as a guest.
+          </p>
+
+          {/* Login buttons */}
+          <div className="flex w-full flex-col">
+            <GoogleLoginButton className="w-full" />
+            <div className="my-2 flex w-full items-center gap-4">
+              <Separator className="flex-1 bg-black" />
+              <span>or</span>
+              <Separator className="flex-1 bg-black" />
+            </div>
+            <GuestLoginButton className="w-full" />
+          </div>
+        </ShadowCard>
       </div>
     </div>
   )
