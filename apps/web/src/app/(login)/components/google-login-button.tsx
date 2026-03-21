@@ -31,7 +31,7 @@ export default function GoogleLoginButton({ className = '' }: Props) {
 
   return (
     <Button
-      className={cn('cursor-pointer py-6', className)}
+      className={cn('cursor-pointer py-8 text-xl', className)}
       disabled={isLoading}
       onClick={handleLogin}
     >

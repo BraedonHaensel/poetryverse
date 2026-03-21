@@ -16,7 +16,7 @@ type Props = {
 export default function GuestLoginButton({ className = '' }: Props) {
   return (
     <Button
-      className={cn('border-2 border-black py-6', className)}
+      className={cn('border-2 border-black py-8 text-xl', className)}
       variant={'outline'}
       asChild
     >

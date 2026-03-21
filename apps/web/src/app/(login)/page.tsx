@@ -8,43 +8,61 @@ import { getAuthSession } from '@/lib/nextauth'
 import { FeaturesCarousel, FeaturesList } from './components/feature-highlights'
 import GoogleLoginButton from './components/google-login-button'
 import GuestLoginButton from './components/guest-login-button'
+import UsernameForm from './components/usrname-form'
 
 export default async function Login() {
   // Redirect to the Home page if the user is already signed in
   const session = await getAuthSession()
   if (session?.user) {
-    return redirect('/home')
+    if (session?.user?.username) {
+      redirect('/home')
+    }
   }
+  const isSettingUsername = session?.user !== undefined
 
   return (
     <div className="flex flex-1 flex-col gap-8">
       {/* Mobile layout */}
       <div className="mt-5 flex w-full flex-1 flex-col items-center gap-4 md:hidden">
-        <div className="flex w-full flex-1 flex-col items-center justify-end gap-8 pb-8">
+        <div className="flex w-full flex-1 flex-col items-center justify-end gap-8">
           <Image
             src="/feather-logo.svg"
             alt="PoetryVerse logo"
-            width={60}
-            height={60}
+            width={80}
+            height={80}
           />
-          <h1 className="text-center text-3xl">Welcome to PoetryVerse</h1>
-          <p className="text-center">
-            Sign in with your Google account or browse poetry as a guest.
-          </p>
+          <h1 className="text-center text-5xl">Welcome to PoetryVerse</h1>
+          {isSettingUsername ? (
+            <p className="mt-4 pb-4 text-center text-3xl">
+              Create Your Username
+            </p>
+          ) : (
+            <p className="text-center text-2xl">
+              Sign in with your Google account or browse poetry as a guest.
+            </p>
+          )}
 
-          {/* Login buttons */}
-          <div className="flex w-full flex-col">
-            <GoogleLoginButton className="w-full" />
-            <div className="my-2 flex w-full items-center gap-4">
-              <Separator className="flex-1 bg-black" />
-              <span>or</span>
-              <Separator className="flex-1 bg-black" />
+          {!isSettingUsername && (
+            // Login buttons
+            <div className="flex w-full flex-col">
+              <GoogleLoginButton className="w-full" />
+              <div className="my-2 flex w-full items-center gap-4">
+                <Separator className="flex-1 bg-black" />
+                <span>or</span>
+                <Separator className="flex-1 bg-black" />
+              </div>
+              <GuestLoginButton className="w-full pb-8" />
             </div>
-            <GuestLoginButton className="w-full" />
-          </div>
+          )}
         </div>
 
-        <FeaturesCarousel className="flex-1" />
+        {isSettingUsername ? (
+          <div className="w-full flex-1">
+            <UsernameForm />
+          </div>
+        ) : (
+          <FeaturesCarousel className="flex-1" />
+        )}
       </div>
 
       {/* Desktop layout */}
