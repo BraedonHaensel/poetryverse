@@ -19,7 +19,9 @@ export default function AdminNavbar() {
 
         <div className="flex items-center gap-6">
           <span className="font-bold text-black/80">Super Admin</span>
-          <Button onClick={() => router.push('/')}>Exit Admin Mode</Button>
+          <Button asChild>
+            <Link href="/">Exit Admin Mode</Link>
+          </Button>
         </div>
       </div>
     </header>
