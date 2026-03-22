@@ -20,6 +20,9 @@ type Props = {
   className?: string
 }
 
+/**
+ * Bottom navigation bar for mobile layouts.
+ */
 export default function MobileNavbar({ className = '' }: Props) {
   const pathname = usePathname()
 
@@ -29,9 +32,8 @@ export default function MobileNavbar({ className = '' }: Props) {
     >
       <nav className="flex h-full w-full items-center justify-center gap-3 min-[380px]:gap-4 min-[450px]:gap-6 sm:gap-8">
         {links.map((link) => {
-          const isActive = pathname.startsWith(link.href)
           if (link.href === '/create') {
-            // Poem creation method method dropdown
+            // Navbar item that displays a bottom sheet for selecting the poem creation mode
             return (
               <CreateSheet
                 key={link.href}
@@ -41,7 +43,9 @@ export default function MobileNavbar({ className = '' }: Props) {
             )
           }
 
+          const isActive = pathname.startsWith(link.href)
           return (
+            // Return a link for each navbar item
             <Link
               key={link.href}
               href={link.href}
@@ -53,6 +57,7 @@ export default function MobileNavbar({ className = '' }: Props) {
                 className="h-12 w-12 min-[380px]:h-13 min-[380px]:w-13"
                 strokeWidth={isActive ? 2.8 : 2}
               />
+              {/* Underline the navbar item for the current page */}
               {isActive && (
                 <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
               )}

@@ -20,12 +20,16 @@ type Props = {
   className?: string
 }
 
+/**
+ * Top navigation bar for desktop layouts.
+ */
 export default function DesktopNavbar({ className = '' }: Props) {
   const pathname = usePathname()
 
   return (
     <header className={cn('border-b-2 border-black/30 bg-white', className)}>
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
+        {/* Main navbar items on the left side */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3" aria-label="Home">
             <Feather size={22} strokeWidth={2} className="text-black" />
@@ -34,7 +38,7 @@ export default function DesktopNavbar({ className = '' }: Props) {
           <nav className="flex items-center gap-8 text-[20px]">
             {links.map((link) => {
               if (link.label === 'Create') {
-                // Poem creation method method dropdown
+                // Navbar item that displays a dropdown for selecting the poem creation mode
                 return (
                   <CreateDropdown
                     key={link.href}
@@ -45,6 +49,7 @@ export default function DesktopNavbar({ className = '' }: Props) {
 
               const isActive = pathname.startsWith(link.href)
               return (
+                // Return a link for each navbar item
                 <Link
                   key={link.href}
                   href={link.href}
@@ -53,6 +58,7 @@ export default function DesktopNavbar({ className = '' }: Props) {
                   }`}
                 >
                   {link.label}
+                  {/* Underline the navbar item for the current page */}
                   {isActive && (
                     <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
                   )}
@@ -62,6 +68,7 @@ export default function DesktopNavbar({ className = '' }: Props) {
           </nav>
         </div>
 
+        {/* Extra navbar items on the right side */}
         <div className="flex items-center gap-8">
           <Link
             href={'/settings'}
@@ -76,7 +83,7 @@ export default function DesktopNavbar({ className = '' }: Props) {
               <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
             )}
           </Link>
-          <SignOutButton text="Sign Out" />
+          <SignOutButton />
         </div>
       </div>
     </header>

@@ -3,9 +3,9 @@ import { signOut } from 'next-auth/react'
 
 import { Button } from '../ui/button'
 
-type Props = { text: string; className?: string }
+type Props = { text?: string; className?: string }
 
-const SignOutButton = ({ text, className = '' }: Props) => {
+const SignOutButton = ({ text = 'Sign Out', className = '' }: Props) => {
   return (
     <Button
       className={className}

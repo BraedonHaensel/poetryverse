@@ -33,7 +33,7 @@ export default function UserSettings() {
           <EmailForm email={EMAIL} />
           <AdvancedSettingsForm />
           {/* Mobile-only sign out button */}
-          <SignOutButton className="mt-auto sm:hidden" text="Sign Out" />
+          <SignOutButton className="mt-auto sm:hidden" />
         </CardContent>
       </ShadowCard>
     </div>
