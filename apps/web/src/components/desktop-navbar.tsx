@@ -5,22 +5,27 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
+import { cn } from '@/lib/utils'
 
 import CreateDropdown from './create-nav-dropdown'
 
 const links = [
-  { label: 'Home', href: '/' },
+  { label: 'Home', href: '/home' },
   { label: 'Poem of the Day', href: '/poem-of-the-day' },
   { label: 'Create', href: '/create' },
   { label: 'My Profile', href: '/profile' },
 ]
 
-export default function DesktopNavbar() {
+type Props = {
+  className?: string
+}
+
+export default function DesktopNavbar({ className = '' }: Props) {
   const pathname = usePathname()
 
   return (
-    <header className="w-full border-b border-black/10 bg-white">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className={cn('border-b-2 border-black/30 bg-white', className)}>
+      <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3" aria-label="Home">
             <Feather size={22} strokeWidth={2} className="text-black" />
@@ -38,7 +43,7 @@ export default function DesktopNavbar() {
                 )
               }
 
-              const isActive = pathname === link.href
+              const isActive = pathname.startsWith(link.href)
               return (
                 <Link
                   key={link.href}
@@ -49,7 +54,7 @@ export default function DesktopNavbar() {
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
+                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
                   )}
                 </Link>
               )

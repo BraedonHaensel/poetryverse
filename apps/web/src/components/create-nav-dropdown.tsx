@@ -18,7 +18,7 @@ type Props = {
 }
 
 /**
- * Dropdown for the Create link in the navigation bar.
+ * Dropdown for the Create link in the desktop navigation bar.
  * @param isActive Whether the Create page is open.
  */
 export default function CreateDropdown({ isActive }: Props) {
@@ -37,7 +37,7 @@ export default function CreateDropdown({ isActive }: Props) {
         >
           Create
           {isActive && (
-            <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
+            <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
           )}
         </Link>
       </DropdownMenuTrigger>
