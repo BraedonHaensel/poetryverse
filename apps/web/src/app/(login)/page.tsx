@@ -23,7 +23,7 @@ export default async function Login() {
   return (
     <div className="flex flex-1 flex-col gap-8">
       {/* Mobile layout */}
-      <div className="mt-5 flex w-full flex-1 flex-col items-center gap-4 md:hidden">
+      <div className="flex w-full flex-1 flex-col items-center gap-4 p-15 md:hidden">
         <div className="flex w-full flex-1 flex-col items-center justify-end gap-8">
           <Image
             src="/feather-logo.svg"
@@ -66,7 +66,7 @@ export default async function Login() {
       </div>
 
       {/* Desktop layout */}
-      <div className="mx-auto mt-5 hidden flex-1 gap-8 md:grid md:grid-cols-2 xl:m-20 xl:gap-20">
+      <div className="bg-off-white mx-auto hidden w-full flex-1 gap-8 p-15 md:grid md:grid-cols-2 xl:gap-20 xl:px-30">
         {/* Left column on desktop */}
         <div className="flex flex-col justify-between gap-4">
           <div>
@@ -105,21 +105,30 @@ export default async function Login() {
             width={60}
             height={60}
           />
-          <h2 className="text-center text-3xl">Log into PoetryVerse</h2>
-          <p className="text-center">
-            Sign in with your Google account or browse poetry as a guest.
-          </p>
+          {isSettingUsername ? (
+            <>
+              <h2 className="text-center text-3xl">Create a Username</h2>
+              <UsernameForm />
+            </>
+          ) : (
+            <>
+              <h2 className="text-center text-3xl">Log into PoetryVerse</h2>
+              <p className="text-center">
+                Sign in with your Google account or browse poetry as a guest.
+              </p>
 
-          {/* Login buttons */}
-          <div className="flex w-full flex-col">
-            <GoogleLoginButton className="w-full" />
-            <div className="my-2 flex w-full items-center gap-4">
-              <Separator className="flex-1 bg-black" />
-              <span>or</span>
-              <Separator className="flex-1 bg-black" />
-            </div>
-            <GuestLoginButton className="w-full" />
-          </div>
+              {/* Login buttons */}
+              <div className="flex w-full flex-col">
+                <GoogleLoginButton className="w-full" />
+                <div className="my-2 flex w-full items-center gap-4">
+                  <Separator className="flex-1 bg-black" />
+                  <span>or</span>
+                  <Separator className="flex-1 bg-black" />
+                </div>
+                <GuestLoginButton className="w-full" />
+              </div>
+            </>
+          )}
         </ShadowCard>
       </div>
     </div>

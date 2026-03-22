@@ -1,7 +1,10 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { LoaderCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
@@ -13,12 +16,17 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { displayApiError } from '@/lib/api'
 import { UsernameSchema } from '@/schemas/user-settings-schemas'
+import axios from 'axios'
 
 /**
  * Set username form.
  */
 export default function UsernameForm() {
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
   // Username form
   const form = useForm<UsernameSchema>({
     resolver: zodResolver(UsernameSchema),
@@ -29,7 +37,14 @@ export default function UsernameForm() {
 
   // Handle submitting the form
   function onSubmit(data: UsernameSchema) {
-    console.log(`TODO Submit form: ${JSON.stringify(data)}`)
+    setIsLoading(true)
+    axios
+      .post('/api/username', { username: data.username })
+      .then(() => router.push('/home'))
+      .catch((error) => {
+        displayApiError(error, 'Failed to set username')
+      })
+      .finally(() => setIsLoading(false))
   }
 
   return (
@@ -49,7 +64,7 @@ export default function UsernameForm() {
             <FormItem>
               <FormControl>
                 <Input
-                  className="h-20 border-4 text-2xl"
+                  className="h-20 border-4 text-2xl!"
                   placeholder="Enter a username..."
                   {...field}
                 />
@@ -65,12 +80,18 @@ export default function UsernameForm() {
         <Button
           className="h-auto w-full cursor-pointer py-6 text-2xl whitespace-normal"
           type="submit"
+          disabled={isLoading}
         >
-          Confirm
+          {isLoading ? (
+            <LoaderCircle className="h-8! w-8! animate-spin" />
+          ) : (
+            'Confirm'
+          )}
         </Button>
         <Button
           className="text-muted-foreground cursor-pointer text-lg"
           variant="link"
+          type="button"
           onClick={() => {
             signOut()
           }}
