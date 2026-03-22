@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { Pool } from 'pg'
+import pg from 'pg'
+const { Pool } = pg
 import { PrismaPg } from '@prisma/adapter-pg'
 
 declare global {

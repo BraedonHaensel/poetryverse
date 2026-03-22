@@ -1,11 +1,13 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
+import axios from 'axios'
 import { Star } from 'lucide-react'
-import { api, displayApiError } from '@/lib/api'
+import { useEffect, useState } from 'react'
+
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { api, displayApiError } from '@/lib/api'
 
 interface PoemData {
   id: string
@@ -50,6 +52,7 @@ export default function PoemOfTheDay() {
   const [poem, setPoemData] = useState<PoemData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fullPoemOpen, setFullPoemOpen] = useState(false)
+  const [isLiked, setIsLiked] = useState(false)
 
   // Fetch poem data on component mount
   useEffect(() => {
@@ -64,7 +67,9 @@ export default function PoemOfTheDay() {
           setPoemData(response.data)
         }
       } catch (error) {
-        displayApiError(error as any, 'Failed to load poem of the day')
+        if (axios.isAxiosError(error)) {
+          displayApiError(error, 'Failed to load poem of the day')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -101,7 +106,7 @@ export default function PoemOfTheDay() {
         <div className="space-y-2 pb-2 border-b">
           <div>
             <div className="mb-1 inline-block rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
-              TODAY'S FEATURED POEM
+              TODAY&#39;S FEATURED POEM
             </div>
             <CardTitle className="text-xl font-bold md:text-2xl">
               {poem.title}
@@ -141,13 +146,20 @@ export default function PoemOfTheDay() {
 
         {/* Poem metadata and rating */}
         <div className="flex items-center justify-between border-t pt-2">
-          <p className="text-xs text-muted-foreground">{poem.linecount} lines</p>
           {poem.rating !== undefined && (
-            <div className="flex items-center gap-1">
-              <Star className="size-3 text-muted-foreground" />
-              <span className="text-sm font-semibold">{poem.rating}</span>
-            </div>
+            <button
+              onClick={() => setIsLiked(!isLiked)}
+              className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <Star
+                size={28}
+                className="text-black"
+                fill={isLiked ? '#fbbf24' : 'none'}
+              />
+              <span className="text-lg font-semibold">{poem.rating}</span>
+            </button>
           )}
+          <p className="text-xs text-muted-foreground">{poem.linecount} lines</p>
         </div>
       </CardContent>
 
@@ -172,10 +184,19 @@ export default function PoemOfTheDay() {
                 </p>
               ))}
             </div>
-            <div className="mt-4 flex items-center gap-2">
-              <Star className="size-5 text-muted-foreground" />
-              <span className="font-semibold">{poem.rating}</span>
-              <span className="text-sm text-muted-foreground ml-4">
+            <div className="mt-4 flex items-center justify-between">
+              <button
+                onClick={() => setIsLiked(!isLiked)}
+                className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+              >
+                <Star
+                  size={28}
+                  className="text-black"
+                  fill={isLiked ? '#fbbf24' : 'none'}
+                />
+                <span className="text-lg font-semibold">{poem.rating}</span>
+              </button>
+              <span className="text-sm text-muted-foreground">
                 {poem.linecount} lines
               </span>
             </div>

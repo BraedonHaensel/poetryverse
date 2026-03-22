@@ -17,7 +17,9 @@
     "lint:fix": "npm run lint:fix --workspaces --if-present"
   },
   "devDependencies": {
-    "prettier": "3.8.1"
+    "@tailwindcss/postcss": "^4.2.1",
+    "prettier": "3.8.1",
+    "tailwindcss": "^4.2.1"
   },
   "engines": {
     "node": ">=18.0.0"
