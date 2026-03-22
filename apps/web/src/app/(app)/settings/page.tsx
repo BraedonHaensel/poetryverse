@@ -1,7 +1,11 @@
 'use client'
 
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import { ShadowCard } from '@/components/shadow-card'
+import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { AdvancedSettingsForm } from './forms/advanced-settings-form'
@@ -18,6 +22,7 @@ const EMAIL = 'myemail@email.com'
  * User settings page.
  */
 export default function UserSettings() {
+  const router = useRouter()
   return (
     <ShadowCard className="mx-auto h-190 w-full max-w-170 sm:h-auto">
       {/* TODO when mobile layout is suppored, remove card and use h-full */}
@@ -30,6 +35,9 @@ export default function UserSettings() {
         <ProfilePictureForm imageUrl={IMAGE_URL} />
         <UsernameForm username={USERNAME} />
         <EmailForm email={EMAIL} />
+        <Button asChild>
+          <Link href="/admin">Enter Admin Mode</Link>
+        </Button>
         <AdvancedSettingsForm />
         {/* Mobile-only sign out button */}
         <SignOutButton className="mt-auto sm:hidden" text="Sign Out" />
