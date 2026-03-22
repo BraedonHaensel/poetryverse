@@ -326,15 +326,17 @@ export const GetPoemOfDay = async () => {
       createdAt: {
         gte: lastDayTimestamp,
       },
+      poem: {
+        isPublic: true,
+      },
     },
     _count: {
       poemId: true,
     },
-    orderBy: {
-      _count: {
-        poemId: 'desc',
-      },
+    _max: {
+      createdAt: true,
     },
+    orderBy: [{ _count: { poemId: 'desc' } }, { _max: { createdAt: 'desc' } }],
     take: 1,
   })
 
@@ -381,7 +383,7 @@ export const GetPoemOfDay = async () => {
 /**
  * Determine poem of the day from poetryverse database.
  * @param req Express request.
- * @param res Express response object.
+ * @param res Express response.
  * @returns A 200 response with the poem of the day information.
  * @throws {HttpError} 404 if the poem does not exist.
  */
