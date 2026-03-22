@@ -23,7 +23,7 @@ export default async function Login() {
   return (
     <div className="flex flex-1 flex-col gap-8">
       {/* Mobile layout */}
-      <div className="flex w-full flex-1 flex-col items-center gap-4 p-15 md:hidden">
+      <div className="flex w-full flex-1 flex-col items-center gap-4 px-10 py-15 md:hidden">
         <div className="flex w-full flex-1 flex-col items-center justify-end gap-8">
           <Image
             src="/feather-logo.svg"
