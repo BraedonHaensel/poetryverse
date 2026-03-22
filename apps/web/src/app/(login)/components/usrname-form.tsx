@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import axios from 'axios'
 import { LoaderCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
@@ -18,7 +19,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { displayApiError } from '@/lib/api'
 import { UsernameSchema } from '@/schemas/user-settings-schemas'
-import axios from 'axios'
 
 /**
  * Set username form.
@@ -64,7 +64,7 @@ export default function UsernameForm() {
             <FormItem>
               <FormControl>
                 <Input
-                  className="h-20 border-4 text-2xl!"
+                  className="h-18 border-4 text-xl!"
                   placeholder="Enter a username..."
                   {...field}
                 />
@@ -78,7 +78,7 @@ export default function UsernameForm() {
           You can change this later in your settings.
         </p>
         <Button
-          className="h-auto w-full cursor-pointer py-6 text-2xl whitespace-normal"
+          className="h-auto w-full cursor-pointer py-4 text-2xl whitespace-normal"
           type="submit"
           disabled={isLoading}
         >
@@ -89,7 +89,7 @@ export default function UsernameForm() {
           )}
         </Button>
         <Button
-          className="text-muted-foreground cursor-pointer text-lg"
+          className="text-muted-foreground cursor-pointer"
           variant="link"
           type="button"
           onClick={() => {

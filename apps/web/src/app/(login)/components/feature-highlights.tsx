@@ -56,9 +56,9 @@ export function FeaturesCarousel({ className = '' }: Props) {
       >
         {features.map((feature, i) => (
           <div key={i} className="flex w-full shrink-0 flex-col items-center">
-            <feature.icon size={90} className="mb-6" />
-            <span className="mb-4 text-2xl font-bold">{feature.title}</span>
-            <span className="text-lg">{feature.description}</span>
+            <feature.icon size={70} className="mb-6" />
+            <span className="mb-4 text-xl font-bold">{feature.title}</span>
+            <span>{feature.description}</span>
           </div>
         ))}
       </div>

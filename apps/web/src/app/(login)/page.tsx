@@ -31,13 +31,13 @@ export default async function Login() {
             width={80}
             height={80}
           />
-          <h1 className="text-center text-5xl">Welcome to PoetryVerse</h1>
+          <h1 className="text-center text-4xl">Welcome to PoetryVerse</h1>
           {isSettingUsername ? (
             <p className="mt-4 pb-4 text-center text-3xl">
               Create Your Username
             </p>
           ) : (
-            <p className="text-center text-2xl">
+            <p className="text-center text-xl">
               Sign in with your Google account or browse poetry as a guest.
             </p>
           )}
@@ -51,7 +51,7 @@ export default async function Login() {
                 <span>or</span>
                 <Separator className="flex-1 bg-black" />
               </div>
-              <GuestLoginButton className="w-full pb-8" />
+              <GuestLoginButton className="w-full" />
             </div>
           )}
         </div>
