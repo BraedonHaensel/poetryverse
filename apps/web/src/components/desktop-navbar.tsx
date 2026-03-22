@@ -1,6 +1,7 @@
 'use client'
 
-import { Feather, Settings } from 'lucide-react'
+import { Settings } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -32,7 +33,12 @@ export default function DesktopNavbar({ className = '' }: Props) {
         {/* Main navbar items on the left side */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3" aria-label="Home">
-            <Feather size={22} strokeWidth={2} className="text-black" />
+            <Image
+              src="/feather-logo.svg"
+              alt="PoetryVerse logo"
+              width={30}
+              height={30}
+            />
           </Link>
 
           <nav className="flex items-center gap-8 text-[20px]">
