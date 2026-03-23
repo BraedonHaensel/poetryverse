@@ -1,7 +1,10 @@
 'use client'
 
+import Link from 'next/link'
+
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import { ShadowCard } from '@/components/shadow-card'
+import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { AdvancedSettingsForm } from './forms/advanced-settings-form'
@@ -21,7 +24,7 @@ export default function UserSettings() {
   return (
     <div className="flex h-full min-h-fit p-10">
       <ShadowCard className="m-auto h-190 w-full max-w-170 sm:h-auto">
-        {/* TODO when mobile layout is suppored, remove card and use h-full */}
+        {/* TODO when mobile layout is suppored, remove card */}
         <CardHeader>
           <CardTitle className="mx-auto text-2xl font-bold">
             User Settings
@@ -31,6 +34,9 @@ export default function UserSettings() {
           <ProfilePictureForm imageUrl={IMAGE_URL} />
           <UsernameForm username={USERNAME} />
           <EmailForm email={EMAIL} />
+          <Button asChild>
+            <Link href="/admin">Enter Admin Mode</Link>
+          </Button>
           <AdvancedSettingsForm />
           {/* Mobile-only sign out button */}
           <SignOutButton className="mt-auto sm:hidden" />
