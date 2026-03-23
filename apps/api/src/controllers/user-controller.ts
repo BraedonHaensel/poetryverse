@@ -30,7 +30,7 @@ export const getUserById = async (
 
   const user = await getAndValidateUser((req as AuthRequest).auth.userId, id)
 
-  return res.status(200).send(user)
+  return res.status(200).json({ data: user })
 }
 
 const getAndValidateUser = async (
@@ -54,17 +54,22 @@ const getAndValidateUser = async (
     },
   })
 
-  const isFollowingUser = await prisma.user.findUnique({
-    where: { id: targetUserId },
-    select: { followers: { where: { followerId: currentUserId } } },
-  })
-
   if (!user) {
     throw notFound('Invalid user ID.')
   }
 
+  const follow = await prisma.follow.findUnique({
+    where: {
+      followerId_followingId: {
+        followerId: currentUserId,
+        followingId: targetUserId,
+      },
+    },
+    select: { followerId: true },
+  })
+
   return {
     ...user,
-    isFollowingUser: !!isFollowingUser?.followers.length,
+    isFollowingUser: !!follow,
   }
 }

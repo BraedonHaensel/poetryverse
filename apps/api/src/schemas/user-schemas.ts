@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const getUserSchema = z.object({
   params: z.object({
-    id: z.string().nonempty('User ID is required.'),
+    id: z.cuid('User ID must be a valid CUID.'),
   }),
 })
 
