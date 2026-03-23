@@ -126,11 +126,11 @@ export const getUserFollowers = async (
   _next: NextFunction
 ) => {
   const requesterUserId = req.auth.userId
-  const { id: userId } = req.params as getUserFollowersRequest
+  const { id: targetUserId } = req.params as getUserFollowersRequest
 
-  await validateUserExists(userId)
+  await validateUserExists(targetUserId)
 
-  const followers = await getFollowersForUser(userId, requesterUserId)
+  const followers = await getFollowersForUser(targetUserId, requesterUserId)
 
   return res.status(200).json({ data: followers })
 }
@@ -148,11 +148,14 @@ export const getUserFollowing = async (
   _next: NextFunction
 ) => {
   const requesterUserId = req.auth.userId
-  const { id: userId } = req.params as getUserFollowingRequest
+  const { id: targetUserId } = req.params as getUserFollowingRequest
 
-  await validateUserExists(userId)
+  await validateUserExists(targetUserId)
 
-  const followingUsers = await getFollowingForUser(userId, requesterUserId)
+  const followingUsers = await getFollowingForUser(
+    targetUserId,
+    requesterUserId
+  )
 
   return res.status(200).json({ data: followingUsers })
 }
@@ -315,13 +318,13 @@ const validateUserExists = async (userId: string) => {
 
 /**
  * Fetches and validates target user data and requester follow relationship.
- * @param currentUserId Authenticated requester user ID.
+ * @param requesterUserId Authenticated requester user ID.
  * @param targetUserId Target user ID.
  * @returns Target user data with `isFollowingUser`.
  * @throws {HttpError} 404 if the target user does not exist.
  */
 const getAndValidateUser = async (
-  currentUserId: string,
+  requesterUserId: string,
   targetUserId: string
 ): Promise<UserWithFollowState> => {
   const user = await prisma.user.findUnique({
@@ -336,7 +339,7 @@ const getAndValidateUser = async (
   const follow = await prisma.follow.findUnique({
     where: {
       followerId_followingId: {
-        followerId: currentUserId,
+        followerId: requesterUserId,
         followingId: targetUserId,
       },
     },
