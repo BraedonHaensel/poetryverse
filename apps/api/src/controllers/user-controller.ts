@@ -42,6 +42,14 @@ export const getUsers = async (
   return res.status(200).json(users)
 }
 
+/**
+ * Retrieves a user profile by target user ID and includes whether requester follows them.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing the user profile payload.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
 export const getUserById = async (
   req: AuthRequest,
   res: Response,
@@ -58,6 +66,14 @@ export const getUserById = async (
   return res.status(200).json({ data: user })
 }
 
+/**
+ * Retrieves the authenticated user's profile details.
+ * @param req Authenticated Express request.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing the authenticated user's profile.
+ * @throws {HttpError} 404 if the authenticated user no longer exists.
+ */
 export const getMyUserInfo = async (
   req: AuthRequest,
   res: Response,
@@ -88,6 +104,13 @@ export const getMyUserInfo = async (
   return res.status(200).json({ data: user })
 }
 
+/**
+ * Retrieves followers for a target user and annotates each result with requester follow state.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing users who follow the target user.
+ */
 export const getUserFollowers = async (
   req: AuthRequest,
   res: Response,
@@ -101,6 +124,13 @@ export const getUserFollowers = async (
   return res.status(200).json({ data: followers })
 }
 
+/**
+ * Retrieves users followed by a target user and annotates each with requester follow state.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing users followed by the target user.
+ */
 export const getUserFollowing = async (
   req: AuthRequest,
   res: Response,
@@ -114,6 +144,13 @@ export const getUserFollowing = async (
   return res.status(200).json({ data: followingUsers })
 }
 
+/**
+ * Retrieves followers for the authenticated user and annotates follow state.
+ * @param req Authenticated Express request.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing users who follow the authenticated user.
+ */
 export const getMyFollowers = async (
   req: AuthRequest,
   res: Response,
@@ -126,6 +163,13 @@ export const getMyFollowers = async (
   return res.status(200).json({ data: followers })
 }
 
+/**
+ * Retrieves users followed by the authenticated user and annotates follow state.
+ * @param req Authenticated Express request.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing users followed by the authenticated user.
+ */
 export const getMyFollowing = async (
   req: AuthRequest,
   res: Response,
@@ -138,6 +182,12 @@ export const getMyFollowing = async (
   return res.status(200).json({ data: followingUsers })
 }
 
+/**
+ * Fetches follower users for a target user and appends requester follow state in batch.
+ * @param userId Target user ID.
+ * @param requesterUserId Authenticated requester user ID.
+ * @returns List of follower users with `isFollowingUser` flag.
+ */
 const getFollowersForUser = async (userId: string, requesterUserId: string) => {
   logger.info(`Fetching followers userId=${userId}`)
   const followers = await prisma.follow.findMany({
@@ -156,6 +206,12 @@ const getFollowersForUser = async (userId: string, requesterUserId: string) => {
   )
 }
 
+/**
+ * Fetches users followed by a target user and appends requester follow state in batch.
+ * @param targetUserId Target user ID whose following list is requested.
+ * @param requesterUserId Authenticated requester user ID.
+ * @returns List of followed users with `isFollowingUser` flag.
+ */
 const getFollowingForUser = async (
   targetUserId: string,
   requesterUserId: string
@@ -188,6 +244,12 @@ const getFollowingForUser = async (
   )
 }
 
+/**
+ * Adds whether the requester follows each user using one batched follow query.
+ * @param users Users to annotate.
+ * @param requesterUserId Authenticated requester user ID.
+ * @returns User list enriched with `isFollowingUser`.
+ */
 const addRequesterFollowState = async (
   users: {
     id: string
@@ -227,6 +289,13 @@ const addRequesterFollowState = async (
   }))
 }
 
+/**
+ * Fetches and validates target user data and requester follow relationship.
+ * @param currentUserId Authenticated requester user ID.
+ * @param targetUserId Target user ID.
+ * @returns Target user data with `isFollowingUser`.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
 const getAndValidateUser = async (
   currentUserId: string,
   targetUserId: string
