@@ -8,7 +8,7 @@ import { getAuthSession } from '@/lib/nextauth'
 import { FeaturesCarousel, FeaturesList } from './components/feature-highlights'
 import GoogleLoginButton from './components/google-login-button'
 import GuestLoginButton from './components/guest-login-button'
-import UsernameForm from './components/usrname-form'
+import UsernameForm from './components/username-form'
 
 export default async function Login() {
   // Redirect to the Home page if the user is already signed in
