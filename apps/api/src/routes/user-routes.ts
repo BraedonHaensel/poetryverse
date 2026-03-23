@@ -1,6 +1,10 @@
 import { Router } from 'express'
 
-import { getUserById, getUsers } from '../controllers/user-controller'
+import {
+  getMyUserInfo,
+  getUserById,
+  getUsers,
+} from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
@@ -10,6 +14,9 @@ const router = Router()
 
 /** GET /api/users */
 router.get('/', requireAuth, asyncHandler(getUsers))
+
+/** GET /api/users/me */
+router.get('/me', requireAuth, asyncHandler(getMyUserInfo))
 
 /** Get /api/users/{id} */
 router.get(

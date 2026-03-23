@@ -2,7 +2,7 @@ import { prisma } from '@seng513/database'
 import type { NextFunction, Request, Response } from 'express'
 
 import { notFound } from '../lib/http-errors'
-import { AuthRequest } from '../middleware/auth'
+import type { AuthRequest } from '../middleware/auth'
 import { getUserRequest } from '../schemas/user-schemas'
 
 /**
@@ -22,13 +22,39 @@ export const getUsers = async (
 }
 
 export const getUserById = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   _next: NextFunction
 ) => {
   const { id } = req.params as getUserRequest
 
-  const user = await getAndValidateUser((req as AuthRequest).auth.userId, id)
+  const user = await getAndValidateUser(req.auth.userId, id)
+
+  return res.status(200).json({ data: user })
+}
+
+export const getMyUserInfo = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const userId = req.auth.userId
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      _count: {
+        select: {
+          authoredPoems: true,
+          followers: true,
+          following: true,
+        },
+      },
+    },
+  })
+
+  if (!user) {
+    throw notFound('Invalid user ID.')
+  }
 
   return res.status(200).json({ data: user })
 }
