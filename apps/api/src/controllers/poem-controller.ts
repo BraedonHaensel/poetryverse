@@ -271,7 +271,7 @@ export const unlikePoem = async (req: Request, res: Response) => {
   })
 }
 
-/** Validates the typeId against poem types in the database  */
+/** Validates the typeId against poem types in the database. */
 const validateAndReturnPoemType = async (typeId: string) => {
   const poemType = await prisma.poemType.findUnique({
     where: { id: typeId },
@@ -301,7 +301,7 @@ const validateAndReturnPoemTags = async (tagIds: string[]) => {
   return existingTags
 }
 
-/** validates poemId against poems in the database */
+/** Validates poemId against poems in the database. */
 const validateAndReturnPoem = async (poemId: string) => {
   const poem = await prisma.poem.findUnique({
     where: { id: poemId },
