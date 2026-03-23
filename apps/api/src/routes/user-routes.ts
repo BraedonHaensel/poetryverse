@@ -43,7 +43,7 @@ router.get(
 
 /** GET /api/users/following/{id} */
 router.get(
-  '/:id/following/',
+  '/:id/following',
   requireAuth,
   validate(getUserFollowingSchema),
   asyncHandler(getUserFollowing)

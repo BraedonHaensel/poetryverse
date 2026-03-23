@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@seng513/database'
 import type { NextFunction, Request, Response } from 'express'
 
@@ -22,6 +23,14 @@ const SELECT_USER_STATEMENT = {
       following: true,
     },
   },
+} satisfies Prisma.UserSelect
+
+type SelectedUser = Prisma.UserGetPayload<{
+  select: typeof SELECT_USER_STATEMENT
+}>
+
+type UserWithFollowState = SelectedUser & {
+  isFollowingUser: boolean
 }
 
 /**
@@ -119,6 +128,8 @@ export const getUserFollowers = async (
   const requesterUserId = req.auth.userId
   const { id: userId } = req.params as getUserFollowersRequest
 
+  await validateUserExists(userId)
+
   const followers = await getFollowersForUser(userId, requesterUserId)
 
   return res.status(200).json({ data: followers })
@@ -138,6 +149,8 @@ export const getUserFollowing = async (
 ) => {
   const requesterUserId = req.auth.userId
   const { id: userId } = req.params as getUserFollowingRequest
+
+  await validateUserExists(userId)
 
   const followingUsers = await getFollowingForUser(userId, requesterUserId)
 
@@ -188,7 +201,10 @@ export const getMyFollowing = async (
  * @param requesterUserId Authenticated requester user ID.
  * @returns List of follower users with `isFollowingUser` flag.
  */
-const getFollowersForUser = async (userId: string, requesterUserId: string) => {
+const getFollowersForUser = async (
+  userId: string,
+  requesterUserId: string
+): Promise<UserWithFollowState[]> => {
   logger.info(`Fetching followers userId=${userId}`)
   const followers = await prisma.follow.findMany({
     where: { followingId: userId },
@@ -215,7 +231,7 @@ const getFollowersForUser = async (userId: string, requesterUserId: string) => {
 const getFollowingForUser = async (
   targetUserId: string,
   requesterUserId: string
-) => {
+): Promise<UserWithFollowState[]> => {
   logger.info(`Fetching following users userId=${targetUserId}`)
   const followingUsers = await prisma.follow.findMany({
     where: { followerId: targetUserId },
@@ -251,18 +267,9 @@ const getFollowingForUser = async (
  * @returns User list enriched with `isFollowingUser`.
  */
 const addRequesterFollowState = async (
-  users: {
-    id: string
-    username: string | null
-    image: string | null
-    _count: {
-      authoredPoems: number
-      followers: number
-      following: number
-    }
-  }[],
+  users: SelectedUser[],
   requesterUserId: string
-) => {
+): Promise<UserWithFollowState[]> => {
   if (users.length === 0) {
     return []
   }
@@ -290,6 +297,23 @@ const addRequesterFollowState = async (
 }
 
 /**
+ * Validates that a target user exists.
+ * @param userId Target user ID.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
+const validateUserExists = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  })
+
+  if (!user) {
+    logger.warn(`Target user not found userId=${userId}`)
+    throw notFound('Invalid user ID.')
+  }
+}
+
+/**
  * Fetches and validates target user data and requester follow relationship.
  * @param currentUserId Authenticated requester user ID.
  * @param targetUserId Target user ID.
@@ -299,7 +323,7 @@ const addRequesterFollowState = async (
 const getAndValidateUser = async (
   currentUserId: string,
   targetUserId: string
-) => {
+): Promise<UserWithFollowState> => {
   const user = await prisma.user.findUnique({
     where: { id: targetUserId },
     select: SELECT_USER_STATEMENT,
