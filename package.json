@@ -14,7 +14,8 @@
     "build:web": "npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
     "lint": "npm run lint --workspaces --if-present",
-    "lint:fix": "npm run lint:fix --workspaces --if-present"
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "ngrok": "ngrok http 3000"
   },
   "devDependencies": {
     "dotenv": "^17.3.1",
