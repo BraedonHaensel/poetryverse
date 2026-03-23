@@ -1,3 +1,4 @@
+import { ReasonType } from '@prisma/client'
 import { z } from 'zod'
 
 // Validation limits.
@@ -59,6 +60,13 @@ export const PoemInterpretRequestSchema = z.object({
   }),
 })
 
+/** Validates structured AI interpretation responses. */
+export const PoemInterpretResponseSchema = z.object({
+  interpretation: z
+    .string()
+    .describe('Interpretation provided from interpret call'),
+})
+
 /** Validates `PUT /api/poems/like` request bodies. */
 export const LikePoemRequestSchema = z.object({
   body: z.object({
@@ -69,11 +77,18 @@ export const LikePoemRequestSchema = z.object({
 /** Validates `DELETE /api/poems/like` request bodies. */
 export const UnlikePoemRequestSchema = LikePoemRequestSchema
 
+/** Validates `POST /api/poems/report` request bodies. */
+export const ReportPoemRequestSchema = z.object({
+  body: z.object({
+    poemId: z.string().nonempty('Poem is required.'),
+    reasonType: z.enum(ReasonType),
+    reason: z.string().nonempty('Report reason is required.'),
+  }),
+})
+
 /** Validates structured AI interpretation responses. */
-export const PoemInterpretResponseSchema = z.object({
-  interpretation: z
-    .string()
-    .describe('Interpretation provided from interpret call'),
+export const ReportPoemResponseSchema = z.object({
+  reportId: z.string().describe('Id of the created poem report.'),
 })
 
 /** Type returned by `interpretSchema`. */
@@ -97,3 +112,6 @@ export type LikePoemRequest = z.infer<typeof LikePoemRequestSchema>['body']
 
 /** Request body type for `UnlikePoemRequestSchema`. */
 export type UnlikePoemRequest = z.infer<typeof UnlikePoemRequestSchema>['body']
+
+/** Reuqest body type for `ReportPoemSchema`. */
+export type ReportPoemRequest = z.infer<typeof ReportPoemRequestSchema>['body']

@@ -14,6 +14,7 @@ import {
   PoemAIResponseSchema,
   PoemInterpretRequest,
   PoemInterpretResponseSchema,
+  ReportPoemRequest,
   UnlikePoemRequest,
 } from '../schemas/poem-schemas'
 
@@ -262,6 +263,50 @@ export const unlikePoem = async (req: Request, res: Response) => {
     `Unliked poem for userId=${authReq.auth.userId} poemId=${poemId} likesCount=${likesCount}`
   )
 
+  return res.status(200).json({
+    data: {
+      poemId,
+      liked: false,
+      likesCount,
+    },
+  })
+}
+
+/**
+ * Reports a poem for the authenticated user.
+ * @param req Express request with a validated poem ID, report reason, and report reason type.
+ * @param res Express response object.
+ * @returns A 200 response confirming the unliked state and current like count.
+ * @throws {HttpError} 404 if the poem does not exist.
+ */
+export const reportPoem = async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest
+  const { poemId, reasonType, reason } = req.body as ReportPoemRequest
+
+  logger.info(
+    `Reporting poem for userId=${authReq.auth.userId} poemId=${poemId} reasonType=${reasonType}`
+  )
+
+  await validateAndReturnPoem(poemId)
+
+  //  TODO: udpate this
+
+  // await prisma.poemLike.deleteMany({
+  //   where: {
+  //     poemId,
+  //     userId: authReq.auth.userId,
+  //   },
+  // })
+
+  // const likesCount = await prisma.poemLike.count({
+  //   where: { poemId },
+  // })
+
+  logger.info(
+    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reportId=${reportId}`
+  )
+
+    // TODO: update response
   return res.status(200).json({
     data: {
       poemId,
