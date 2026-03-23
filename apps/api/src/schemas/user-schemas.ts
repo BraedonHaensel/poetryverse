@@ -6,4 +6,16 @@ export const getUserSchema = z.object({
   }),
 })
 
+/** Same schema as getUserSchema */
+export const getUserFollowingSchema = getUserSchema
+
+/** Same schema as getUserSchema */
+export const getUserFollowersSchema = getUserSchema
+
 export type getUserRequest = z.infer<typeof getUserSchema>['params']
+export type getUserFollowingRequest = z.infer<
+  typeof getUserFollowingSchema
+>['params']
+export type getUserFollowersRequest = z.infer<
+  typeof getUserFollowersSchema
+>['params']
