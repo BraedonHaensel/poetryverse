@@ -3,6 +3,8 @@
 import { CircleCheckBig, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
+import AdminUserManagement from '@/app/admin/admin-user/page'
+import GeneralUserManagement from '@/app/admin/general-user/page'
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -93,8 +95,8 @@ export default function AdminPage() {
 
       <main className="flex-1 px-9 py-10">
         {activeTab === 'analytics' && <AnalyticsView />}
-        {activeTab === 'general' && <div>General User Management</div>}
-        {activeTab === 'admin' && <div>Admin User Management</div>}
+        {activeTab === 'general' && <GeneralUserManagement />}
+        {activeTab === 'admin' && <AdminUserManagement />}
       </main>
     </div>
   )
@@ -150,7 +152,7 @@ function AnalyticsView() {
           </CardTitle>
         </CardHeader>
 
-        <ShadowCard className="rounded-[20px] bg-admin-panel p-3">
+        <ShadowCard className="bg-admin-panel rounded-[20px] p-3">
           <CardContent className="max-h-[470px] overflow-y-auto p-0">
             <DataTable
               columns={columns}
@@ -186,9 +188,7 @@ function StatCard({ title, value }: { title: string; value: string }) {
   return (
     <div className="flex min-h-[px] flex-col items-center justify-center rounded-[20px] bg-white px-6 py-8 text-center shadow-md">
       <div className="mb-5 text-xl font-semibold text-black">{title}</div>
-      <div className="text-6xl leading-none font-bold text-black">
-        {value}
-      </div>
+      <div className="text-6xl leading-none font-bold text-black">{value}</div>
     </div>
   )
 }
