@@ -110,49 +110,53 @@ export default function CreatePoemWithAI() {
         onClose={() => setIsRegenConfirmOpen(false)}
         onAction={generate}
       />
-      <ShadowCard
-        className={`m-auto ${!isGenerated ? 'w-full max-w-150' : ''}`}
-      >
-        <CardHeader>
-          <div className="flex items-center justify-center gap-3">
-            <CardTitle className="text-2xl font-bold">Create With AI</CardTitle>
-            <Image src="/robot-icon.svg" alt="" width={40} height={40} />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className={`grid grid-cols-1 gap-x-5 ${isGenerated ? 'md:grid-cols-2' : ''}`}
-            >
-              {/* Left column fields */}
-              <div className="space-y-3">
-                <PoemTypeField control={control} />
-                <PoemPromptField control={control} />
-
-                {/* Generate/regenerate button */}
-                <LargeButton type="button" onClick={handleGenerateClick}>
-                  {isGenerated ? 'Regenerate' : 'Generate'}
-                </LargeButton>
-
-                {isGenerated && <PoemTitleField control={control} />}
-              </div>
-
-              {/* Right column fields */}
-              {isGenerated && (
+      <div className="flex h-full min-h-fit p-10">
+        <ShadowCard
+          className={`m-auto ${!isGenerated ? 'w-full max-w-150' : ''}`}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-center gap-3">
+              <CardTitle className="text-2xl font-bold">
+                Create With AI
+              </CardTitle>
+              <Image src="/robot-icon.svg" alt="" width={40} height={40} />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className={`grid grid-cols-1 gap-x-5 ${isGenerated ? 'md:grid-cols-2' : ''}`}
+              >
+                {/* Left column fields */}
                 <div className="space-y-3">
-                  <PoemContentsField control={control} showAIDescription />
-                  <PoemTagsField control={control} />
-                  <PoemVisibilityField control={control} />
+                  <PoemTypeField control={control} />
+                  <PoemPromptField control={control} />
 
-                  {/* Publish button */}
-                  <LargeButton type="submit">Publish</LargeButton>
+                  {/* Generate/regenerate button */}
+                  <LargeButton type="button" onClick={handleGenerateClick}>
+                    {isGenerated ? 'Regenerate' : 'Generate'}
+                  </LargeButton>
+
+                  {isGenerated && <PoemTitleField control={control} />}
                 </div>
-              )}
-            </form>
-          </Form>
-        </CardContent>
-      </ShadowCard>
+
+                {/* Right column fields */}
+                {isGenerated && (
+                  <div className="space-y-3">
+                    <PoemContentsField control={control} showAIDescription />
+                    <PoemTagsField control={control} />
+                    <PoemVisibilityField control={control} />
+
+                    {/* Publish button */}
+                    <LargeButton type="submit">Publish</LargeButton>
+                  </div>
+                )}
+              </form>
+            </Form>
+          </CardContent>
+        </ShadowCard>
+      </div>
     </>
   )
 }
