@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, UseFormReturn } from 'react-hook-form'
 
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
@@ -87,6 +87,13 @@ export default function CreatePoemWithAI() {
   const [isGenerating, setIsGenerating] = useState(false)
   // Whether the regenerate poem confirmation is open
   const [isRegenConfirmOpen, setIsRegenConfirmOpen] = useState(false)
+
+  useEffect((): (() => void) => {
+    // Prevent the body scrollbar from appearing, as the page has its own scrollbar
+    document.body.style.overflow = 'hidden'
+    // Restore the body scrollbar upon leaving the page
+    return () => (document.body.style.overflow = '')
+  }, [])
 
   // Create poem with AI form
   const form = useForm<CreateWithAISchema>({

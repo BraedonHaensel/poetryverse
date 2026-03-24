@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
+import { useEffect } from 'react'
 import { useForm, UseFormReturn } from 'react-hook-form'
 
 import { LargeButton } from '@/components/large-button'
@@ -61,6 +62,13 @@ function CreatePoemFromScratchForm({
  * Create poem from scratch page.
  */
 export default function CreatePoemFromScratch() {
+  useEffect((): (() => void) => {
+    // Prevent the body scrollbar from appearing, as the page has its own scrollbar
+    document.body.style.overflow = 'hidden'
+    // Restore the body scrollbar upon leaving the page
+    return () => (document.body.style.overflow = '')
+  }, [])
+
   // Create poem from scratch form
   const form = useForm<CreateFromScratchSchema>({
     resolver: zodResolver(CreateFromScratchSchema),
