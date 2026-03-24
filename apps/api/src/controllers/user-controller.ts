@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client'
-import { prisma } from '@seng513/database'
 import type { NextFunction, Request, Response } from 'express'
 
+import { prisma } from '../lib/db'
 import { notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import type { AuthRequest } from '../middleware/auth'
