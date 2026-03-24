@@ -1,4 +1,5 @@
-import { redirect } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import { toast } from 'sonner'
 
 import { ConfirmationDialog } from './confirmation-dialog'
 
@@ -20,8 +21,13 @@ export default function SignInRequiredDialog({ isOpen, onClose }: Props) {
       description="Continue to the Google Sign In page?"
       continueButtonText="Sign In"
       onClose={onClose}
-      // On continue, redirect to the login page
-      onAction={() => redirect('/')}
+      onAction={() =>
+        // Sign in with a Google account using NextAuth.js
+        signIn('google').catch((error) => {
+          console.log(error)
+          toast.error(error)
+        })
+      }
     />
   )
 }
