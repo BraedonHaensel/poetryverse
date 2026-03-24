@@ -4,10 +4,12 @@ import { Settings } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import { cn } from '@/lib/utils'
 
+import SignInButton from './auth-buttons/sign-in-button'
 import CreateDropdown from './create-nav-dropdown'
 
 const links = [
@@ -26,6 +28,8 @@ type Props = {
  */
 export default function DesktopNavbar({ className = '' }: Props) {
   const pathname = usePathname()
+  const session = useSession()
+  const isGuest = session.status === 'unauthenticated'
 
   return (
     <header className={cn('border-b-2 border-black/30 bg-white', className)}>
@@ -89,7 +93,7 @@ export default function DesktopNavbar({ className = '' }: Props) {
               <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
             )}
           </Link>
-          <SignOutButton />
+          {isGuest ? <SignInButton /> : <SignOutButton />}
         </div>
       </div>
     </header>
