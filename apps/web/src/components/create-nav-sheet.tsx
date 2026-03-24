@@ -1,6 +1,5 @@
 'use client'
 
-import { LucideProps } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -9,34 +8,18 @@ import { Sheet } from 'react-modal-sheet'
 import { Separator } from './ui/separator'
 
 type Props = {
-  Icon: React.FC<LucideProps>
-  isActive: boolean
+  children: React.ReactNode
 }
 
 /**
  * Bottom slider for the Create link in the mobile navigation bar.
- * @param Icon The navigation bar icon to render.
- * @param isActive Whether the Create page is open.
  */
-export default function CreateSheet({ Icon, isActive }: Props) {
+export default function CreateSheet({ children }: Props) {
   const [isOpen, setOpen] = useState(false)
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className={`relative cursor-pointer pb-1 font-medium text-black ${
-          isActive ? 'font-semibold' : 'opacity-90'
-        }`}
-      >
-        <Icon
-          className="h-12 w-12 min-[380px]:h-13 min-[380px]:w-13"
-          strokeWidth={isActive ? 2.8 : 2}
-        />
-        {isActive && (
-          <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
-        )}
-      </button>
+      <div onClick={() => setOpen(true)}>{children}</div>
 
       <Sheet detent="content" isOpen={isOpen} onClose={() => setOpen(false)}>
         <Sheet.Container onClick={() => setOpen(false)}>

@@ -21,7 +21,7 @@ const links = [
   { label: 'My Profile', href: '/profile' },
 ]
 
-type LinkComponentProps = {
+type MainNavLinkProps = {
   href: string
   label: string
   isOnPage: boolean
@@ -36,7 +36,7 @@ function MainNavLink({
   label,
   isOnPage,
   disabled = false,
-}: LinkComponentProps) {
+}: MainNavLinkProps) {
   const baseClassName = cn(
     'relative pb-1 font-medium text-black cursor-pointer',
     isOnPage ? 'font-semibold' : 'opacity-90'
@@ -100,19 +100,23 @@ export default function DesktopNavbar({ className = '' }: Props) {
             <nav className="flex items-center gap-8 text-[20px]">
               {links.map((link) => {
                 // Whether the user is currently on the link's page
-                const isActive = pathname.startsWith(link.href)
+                const isOnPage = pathname.startsWith(link.href)
 
                 // Whether the user needs to sign in first to access this page
                 const signInRequired =
                   isGuest && !GUEST_ACCESSIBLE_PAGES.includes(link.href)
 
                 // Create the navigation bar link component
-                const NavLink = () => (
+                const NavLink = ({
+                  disabled = false,
+                }: {
+                  disabled?: boolean
+                }) => (
                   <MainNavLink
                     href={link.href}
                     label={link.label}
-                    isOnPage={isActive}
-                    disabled={signInRequired}
+                    isOnPage={isOnPage}
+                    disabled={disabled || signInRequired}
                   />
                 )
 
@@ -132,7 +136,7 @@ export default function DesktopNavbar({ className = '' }: Props) {
                   // Clicking the link opens the dropdown for selecting the poem creation mode
                   return (
                     <CreateDropdown key={link.href}>
-                      <NavLink />
+                      <NavLink disabled={true} />
                     </CreateDropdown>
                   )
                 }
