@@ -302,16 +302,57 @@ export const reportPoem = async (req: Request, res: Response) => {
   //   where: { poemId },
   // })
 
+  // const createdReport = await prisma.report.create({
+  //   data: {
+  //     reporterUserId: authReq.auth.userId,
+  //     poemId,
+  //     reasonType,
+  //     reason,
+  //   }
+  // })
+
+  // Create the report and update the reports array in the poem
+  const updatedPoem = await prisma.poem.update({
+    // data: mapCreatePoemRequestToPrismaInput({
+    //   authorId: authReq.auth.userId,
+    //   data: poemData,
+    //   tagIds: existingTags.map((tag) => tag.id),
+    // }),
+    // include: poemIncludeStatement,
+
+    where: {
+      id: poemId,
+    },
+    data: {
+      reports: {
+        create: {
+            reporterUserId: authReq.auth.userId,
+            reasonType,
+            reason,
+        },
+      }
+    },
+    include: {
+      reports: true,
+    }
+  })
+
+  const poemReports = await prisma.poem.findUnique({
+    where: { id: poemId },
+    select: {
+      reports: true
+    }
+  })
+
   logger.info(
-    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reportId=${reportId}`
+    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reports=${poemReports}`
   )
 
     // TODO: update response
   return res.status(200).json({
     data: {
       poemId,
-      liked: false,
-      likesCount,
+      poemReports,
     },
   })
 }
