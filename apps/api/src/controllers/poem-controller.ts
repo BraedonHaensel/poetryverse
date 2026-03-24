@@ -278,6 +278,7 @@ export const unlikePoem = async (req: Request, res: Response) => {
  * @param res Express response object.
  * @returns A 200 response confirming the report has been created.
  * @throws {HttpError} 404 if the poem does not exist.
+ * @throws {HttpError} 400 if this user has already reported this poem.
  */
 export const reportPoem = async (req: Request, res: Response) => {
   const authReq = req as AuthRequest
