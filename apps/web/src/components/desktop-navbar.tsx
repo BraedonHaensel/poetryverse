@@ -1,35 +1,50 @@
 'use client'
 
-import { Feather, Settings } from 'lucide-react'
+import { Settings } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
+import { cn } from '@/lib/utils'
 
 import CreateDropdown from './create-nav-dropdown'
 
 const links = [
-  { label: 'Home', href: '/' },
+  { label: 'Home', href: '/home' },
   { label: 'Poem of the Day', href: '/poem-of-the-day' },
   { label: 'Create', href: '/create' },
   { label: 'My Profile', href: '/profile' },
 ]
 
-export default function DesktopNavbar() {
+type Props = {
+  className?: string
+}
+
+/**
+ * Top navigation bar for desktop layouts.
+ */
+export default function DesktopNavbar({ className = '' }: Props) {
   const pathname = usePathname()
 
   return (
-    <header className="w-full border-b border-black/10 bg-white">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className={cn('border-b-2 border-black/30 bg-white', className)}>
+      <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
+        {/* Main navbar items on the left side */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3" aria-label="Home">
-            <Feather size={22} strokeWidth={2} className="text-black" />
+            <Image
+              src="/feather-logo.svg"
+              alt="PoetryVerse logo"
+              width={30}
+              height={30}
+            />
           </Link>
 
           <nav className="flex items-center gap-8 text-[20px]">
             {links.map((link) => {
               if (link.label === 'Create') {
-                // Poem creation method method dropdown
+                // Navbar item that displays a dropdown for selecting the poem creation mode
                 return (
                   <CreateDropdown
                     key={link.href}
@@ -38,8 +53,9 @@ export default function DesktopNavbar() {
                 )
               }
 
-              const isActive = pathname === link.href
+              const isActive = pathname.startsWith(link.href)
               return (
+                // Return a link for each navbar item
                 <Link
                   key={link.href}
                   href={link.href}
@@ -48,8 +64,9 @@ export default function DesktopNavbar() {
                   }`}
                 >
                   {link.label}
+                  {/* Underline the navbar item for the current page */}
                   {isActive && (
-                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
+                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
                   )}
                 </Link>
               )
@@ -57,6 +74,7 @@ export default function DesktopNavbar() {
           </nav>
         </div>
 
+        {/* Extra navbar items on the right side */}
         <div className="flex items-center gap-8">
           <Link
             href={'/settings'}
@@ -71,7 +89,7 @@ export default function DesktopNavbar() {
               <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
             )}
           </Link>
-          <SignOutButton text="Sign Out" />
+          <SignOutButton />
         </div>
       </div>
     </header>
