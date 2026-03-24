@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 
@@ -11,6 +11,7 @@ const adapter = new PrismaPg(pool)
 const logLevels = ['query' as const]
 
 export let prisma: PrismaClient
+export { Prisma }
 
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient({ adapter })

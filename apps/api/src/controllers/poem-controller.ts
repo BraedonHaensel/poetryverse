@@ -1,5 +1,4 @@
-import { prisma } from '@seng513/database'
-import { Prisma } from '@prisma/client'
+import { prisma, Prisma } from '@seng513/database'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
@@ -290,13 +289,6 @@ export const reportPoem = async (req: Request, res: Response) => {
 
   await validateAndReturnPoem(poemId)
 
-  // data: mapCreatePoemRequestToPrismaInput({
-  //   authorId: authReq.auth.userId,
-  //   data: poemData,
-  //   tagIds: existingTags.map((tag) => tag.id),
-  // }),
-  // include: poemIncludeStatement,
-
   try {
     // Create the report and update the reports array in the poem
     await prisma.poem.update({
@@ -316,30 +308,32 @@ export const reportPoem = async (req: Request, res: Response) => {
         reports: true,
       },
     })
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === 'P2002') {
         throw new HttpError(400, 'You have already reported this poem.')
       }
     }
+    throw err
   }
 
-  const poemReports = await prisma.poem.findUnique({
-    where: { id: poemId },
-    select: {
-      reports: true,
+  const createdReport = await prisma.report.findUnique({
+    where: { 
+      reporterUserId_poemId: {
+        reporterUserId: authReq.auth.userId, 
+        poemId
+      }
     },
   })
 
   logger.info(
-    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reports=${poemReports?.reports}`
+    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reportId=${createdReport?.id}`
   )
 
-  // TODO: update response
   return res.status(200).json({
     data: {
       poemId,
-      poemReports,
+      createdReport,
     },
   })
 }
