@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { getAuthSession } from '@/lib/nextauth'
 
 import { FeaturesCarousel, FeaturesList } from './components/feature-highlights'
-import GoogleLoginButton from './components/google-login-button'
+import GoogleSignInButton from './components/google-sign-in-button'
 import GuestLoginButton from './components/guest-login-button'
 import UsernameForm from './components/username-form'
 
@@ -45,7 +45,7 @@ export default async function Login() {
           {!isSettingUsername && (
             // Login buttons
             <div className="flex w-full flex-col">
-              <GoogleLoginButton className="w-full" />
+              <GoogleSignInButton className="w-full" />
               <div className="my-2 flex w-full items-center gap-4">
                 <Separator className="flex-1 bg-black" />
                 <span>or</span>
@@ -119,7 +119,7 @@ export default async function Login() {
 
               {/* Login buttons */}
               <div className="flex w-full flex-col">
-                <GoogleLoginButton className="w-full" />
+                <GoogleSignInButton className="w-full" />
                 <div className="my-2 flex w-full items-center gap-4">
                   <Separator className="flex-1 bg-black" />
                   <span>or</span>

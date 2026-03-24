@@ -14,12 +14,12 @@ type Props = {
 }
 
 /**
- * Button for logging in with a Google account using NextAuth.js.
+ * Button with the Google icon for signing in with a Google account using NextAuth.js.
  */
-export default function GoogleLoginButton({ className = '' }: Props) {
+export default function GoogleSignInButton({ className = '' }: Props) {
   const [isLoading, setLoading] = useState(false)
 
-  // Launch the Google login page using NextAuth.js
+  // Sign in with a Google account using NextAuth.js
   const handleLogin = async () => {
     setLoading(true)
     signIn('google').catch((error) => {
@@ -36,7 +36,7 @@ export default function GoogleLoginButton({ className = '' }: Props) {
       onClick={handleLogin}
     >
       {isLoading ? (
-        <LoaderCircle className="animate-spin" />
+        <LoaderCircle className="h-6! w-6! animate-spin" />
       ) : (
         <>
           <FaGoogle />
