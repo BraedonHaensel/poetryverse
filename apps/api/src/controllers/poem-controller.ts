@@ -1,4 +1,5 @@
 import { prisma } from '@seng513/database'
+import { Prisma } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
@@ -276,7 +277,7 @@ export const unlikePoem = async (req: Request, res: Response) => {
  * Reports a poem for the authenticated user.
  * @param req Express request with a validated poem ID, report reason, and report reason type.
  * @param res Express response object.
- * @returns A 200 response confirming the unliked state and current like count.
+ * @returns A 200 response confirming the report has been created.
  * @throws {HttpError} 404 if the poem does not exist.
  */
 export const reportPoem = async (req: Request, res: Response) => {
@@ -289,66 +290,52 @@ export const reportPoem = async (req: Request, res: Response) => {
 
   await validateAndReturnPoem(poemId)
 
-  //  TODO: udpate this
+  // data: mapCreatePoemRequestToPrismaInput({
+  //   authorId: authReq.auth.userId,
+  //   data: poemData,
+  //   tagIds: existingTags.map((tag) => tag.id),
+  // }),
+  // include: poemIncludeStatement,
 
-  // await prisma.poemLike.deleteMany({
-  //   where: {
-  //     poemId,
-  //     userId: authReq.auth.userId,
-  //   },
-  // })
-
-  // const likesCount = await prisma.poemLike.count({
-  //   where: { poemId },
-  // })
-
-  // const createdReport = await prisma.report.create({
-  //   data: {
-  //     reporterUserId: authReq.auth.userId,
-  //     poemId,
-  //     reasonType,
-  //     reason,
-  //   }
-  // })
-
-  // Create the report and update the reports array in the poem
-  const updatedPoem = await prisma.poem.update({
-    // data: mapCreatePoemRequestToPrismaInput({
-    //   authorId: authReq.auth.userId,
-    //   data: poemData,
-    //   tagIds: existingTags.map((tag) => tag.id),
-    // }),
-    // include: poemIncludeStatement,
-
-    where: {
-      id: poemId,
-    },
-    data: {
-      reports: {
-        create: {
+  try {
+    // Create the report and update the reports array in the poem
+    await prisma.poem.update({
+      where: {
+        id: poemId,
+      },
+      data: {
+        reports: {
+          create: {
             reporterUserId: authReq.auth.userId,
             reasonType,
             reason,
+          },
         },
+      },
+      include: {
+        reports: true,
+      },
+    })
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === 'P2002') {
+        throw new HttpError(400, 'You have already reported this poem.')
       }
-    },
-    include: {
-      reports: true,
     }
-  })
+  }
 
   const poemReports = await prisma.poem.findUnique({
     where: { id: poemId },
     select: {
-      reports: true
-    }
+      reports: true,
+    },
   })
 
   logger.info(
-    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reports=${poemReports}`
+    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reports=${poemReports?.reports}`
   )
 
-    // TODO: update response
+  // TODO: update response
   return res.status(200).json({
     data: {
       poemId,
