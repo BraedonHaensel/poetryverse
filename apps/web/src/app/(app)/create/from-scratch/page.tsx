@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
-import { useForm } from 'react-hook-form'
+import { useForm, UseFormReturn } from 'react-hook-form'
 
 import { LargeButton } from '@/components/large-button'
 import MobilePageHeader from '@/components/mobile-page-header'
@@ -18,10 +18,49 @@ import { PoemTitleField } from '../fields/poem-title-field'
 import { PoemTypeField } from '../fields/poem-type-field'
 import { PoemVisibilityField } from '../fields/poem-visibility-field'
 
+type CreatePoemFromScratchFormProps = {
+  form: UseFormReturn<CreateFromScratchSchema>
+  onSubmit: (data: CreateFromScratchSchema) => void
+}
+
 /**
  * Create poem from scratch form.
  */
-function CreatePoemFromScratchForm() {
+function CreatePoemFromScratchForm({
+  form,
+  onSubmit,
+}: CreatePoemFromScratchFormProps) {
+  const control = form.control
+
+  return (
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-2"
+    >
+      {/* Left column fields on desktop */}
+      <div className="space-y-2 md:space-y-3">
+        <PoemTypeField control={control} />
+        <PoemContentsField control={control} />
+      </div>
+
+      {/* Right column fields on desktop */}
+      <div className="space-y-2 md:space-y-3">
+        <PoemTitleField control={control} />
+        <PoemTagsField control={control} />
+        <PoemVisibilityField control={control} />
+        <PoemAIAssistanceField control={control} />
+
+        {/* Publish button */}
+        <LargeButton type="submit">Publish</LargeButton>
+      </div>
+    </form>
+  )
+}
+
+/**
+ * Create poem from scratch page.
+ */
+export default function CreatePoemFromScratch() {
   // Create poem from scratch form
   const form = useForm<CreateFromScratchSchema>({
     resolver: zodResolver(CreateFromScratchSchema),
@@ -40,49 +79,17 @@ function CreatePoemFromScratchForm() {
     console.log(`TODO Submit form: ${JSON.stringify(data)}`)
   }
 
-  const control = form.control
-
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-1 gap-x-5 gap-y-2 md:grid-cols-2"
-      >
-        {/* Left column fields */}
-        <div className="space-y-2 md:space-y-3">
-          <PoemTypeField control={control} />
-          <PoemContentsField control={control} />
-        </div>
-
-        {/* Right column fields */}
-        <div className="space-y-2 md:space-y-3">
-          <PoemTitleField control={control} />
-          <PoemTagsField control={control} />
-          <PoemVisibilityField control={control} />
-          <PoemAIAssistanceField control={control} />
-
-          {/* Publish button */}
-          <LargeButton type="submit">Publish</LargeButton>
-        </div>
-      </form>
-    </Form>
-  )
-}
-
-/**
- * Create poem from scratch page.
- */
-export default function CreatePoemFromScratch() {
-  return (
-    <>
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col md:hidden">
         <MobilePageHeader
           title="Create From Scratch"
           image="/stylus-icon.svg"
+          className="max-[340]:text-[22px]"
         />
         <div className="flex flex-1 flex-col gap-2 p-4">
-          <CreatePoemFromScratchForm />
+          <CreatePoemFromScratchForm form={form} onSubmit={onSubmit} />
         </div>
       </div>
 
@@ -98,10 +105,10 @@ export default function CreatePoemFromScratch() {
             </div>
           </CardHeader>
           <CardContent>
-            <CreatePoemFromScratchForm />
+            <CreatePoemFromScratchForm form={form} onSubmit={onSubmit} />
           </CardContent>
         </ShadowCard>
       </div>
-    </>
+    </Form>
   )
 }
