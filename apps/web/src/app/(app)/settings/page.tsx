@@ -47,7 +47,7 @@ export default async function UserSettings() {
     <>
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col md:hidden">
-        <MobilePageHeader title="User Settings" />
+        <MobilePageHeader title="User Settings" showSignInButton={isGuest} />
         <div className="flex flex-1 flex-col gap-2 p-4">
           {isGuest ? (
             <ShadowCard className="p-2 md:m-auto">
