@@ -136,7 +136,7 @@ export default function PoemOfTheDay() {
             {poem.lines.length > LINES_TO_SHOW && (
               <button
                 onClick={() => setFullPoemOpen(true)}
-                className="text-sm text-gray-400 hover:text-gray-500 transition-colors"
+                className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
               >
                 ... Read more
               </button>

@@ -14,12 +14,13 @@
     "build:web": "npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
     "lint": "npm run lint --workspaces --if-present",
-    "lint:fix": "npm run lint:fix --workspaces --if-present"
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "ngrok": "ngrok http 3000"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.1",
+    "dotenv": "^17.3.1",
     "prettier": "3.8.1",
-    "tailwindcss": "^4.2.1"
+    "prisma": "^7.5.0"
   },
   "engines": {
     "node": ">=18.0.0"
