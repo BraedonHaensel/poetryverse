@@ -1,8 +1,7 @@
-'use client'
-
 import Link from 'next/link'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
+import MobilePageHeader from '@/components/mobile-page-header'
 import { ShadowCard } from '@/components/shadow-card'
 import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,30 +17,52 @@ const USERNAME = 'sampleUsername123'
 const EMAIL = 'myemail@email.com'
 
 /**
+ * User settings forms used by both mobile and desktop.
+ */
+function UserSettingsForms() {
+  return (
+    <>
+      <ProfilePictureForm imageUrl={IMAGE_URL} />
+      <UsernameForm username={USERNAME} />
+      <EmailForm email={EMAIL} />
+      {/* TODO only render when signed in as an admin user */}
+      <Button asChild>
+        <Link href="/admin">Enter Admin Mode</Link>
+      </Button>
+      <AdvancedSettingsForm />
+    </>
+  )
+}
+
+/**
  * User settings page.
  */
 export default function UserSettings() {
   return (
-    <div className="flex h-full min-h-fit p-10">
-      <ShadowCard className="m-auto h-190 w-full max-w-170 md:h-auto">
-        {/* TODO when mobile layout is suppored, remove card */}
-        <CardHeader>
-          <CardTitle className="mx-auto text-2xl font-bold">
-            User Settings
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex h-full flex-col gap-5">
-          <ProfilePictureForm imageUrl={IMAGE_URL} />
-          <UsernameForm username={USERNAME} />
-          <EmailForm email={EMAIL} />
-          <Button asChild>
-            <Link href="/admin">Enter Admin Mode</Link>
-          </Button>
-          <AdvancedSettingsForm />
+    <>
+      {/* Mobile layout */}
+      <div className="flex flex-1 flex-col md:hidden">
+        <MobilePageHeader title="User Settings" />
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <UserSettingsForms />
           {/* Mobile-only sign out button */}
-          <SignOutButton className="mt-auto md:hidden" />
-        </CardContent>
-      </ShadowCard>
-    </div>
+          <SignOutButton className="mt-auto" />
+        </div>
+      </div>
+
+      {/* Desktop layout */}
+      <div className="m-auto hidden w-full p-10 md:block">
+        <ShadowCard className="m-auto max-w-170">
+          <CardHeader>
+            <CardTitle className="mx-auto text-2xl font-bold">
+              User Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex h-full flex-col gap-5">
+            <UserSettingsForms />
+          </CardContent>
+        </ShadowCard>
+      </div>
+    </>
   )
 }
