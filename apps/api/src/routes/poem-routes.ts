@@ -63,7 +63,7 @@ router.delete(
 )
 
 /** POST /api/poems/report */
-router.delete(
+router.post(
   '/report',
   requireAuth,
   validate(ReportPoemRequestSchema),
