@@ -23,7 +23,7 @@ const EMAIL = 'myemail@email.com'
 export default function UserSettings() {
   return (
     <div className="flex h-full min-h-fit p-10">
-      <ShadowCard className="m-auto h-190 w-full max-w-170 sm:h-auto">
+      <ShadowCard className="m-auto h-190 w-full max-w-170 md:h-auto">
         {/* TODO when mobile layout is suppored, remove card */}
         <CardHeader>
           <CardTitle className="mx-auto text-2xl font-bold">
@@ -39,7 +39,7 @@ export default function UserSettings() {
           </Button>
           <AdvancedSettingsForm />
           {/* Mobile-only sign out button */}
-          <SignOutButton className="mt-auto sm:hidden" />
+          <SignOutButton className="mt-auto md:hidden" />
         </CardContent>
       </ShadowCard>
     </div>
