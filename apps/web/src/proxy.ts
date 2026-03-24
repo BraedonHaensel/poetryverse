@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { getAuthSession } from './lib/nextauth'
-
-// Pages that can be accessed while in guest mode
-const GUEST_ACCESSIBLE_PAGES = ['/home', '/poem-of-the-day', '/settings']
+import { GUEST_ACCESSIBLE_PAGES } from './lib/utils'
 
 export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname

@@ -13,6 +13,7 @@ type Props = {
   isOpen: boolean
   title: string
   description: string
+  continueButtonText?: string
   onClose: () => void
   onAction: () => void
   variant?: 'default' | 'delete'
@@ -30,6 +31,7 @@ export function ConfirmationDialog({
   isOpen,
   title,
   description,
+  continueButtonText = 'Continue',
   onClose,
   onAction,
   variant = 'default',
@@ -50,7 +52,7 @@ export function ConfirmationDialog({
             onClick={onAction}
             variant={variant === 'delete' ? 'destructive' : 'default'}
           >
-            {variant === 'delete' ? 'Delete' : 'Continue'}
+            {variant === 'delete' ? 'Delete' : continueButtonText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

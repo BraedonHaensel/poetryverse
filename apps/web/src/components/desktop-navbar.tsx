@@ -5,12 +5,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
-import { cn } from '@/lib/utils'
+import { cn, GUEST_ACCESSIBLE_PAGES } from '@/lib/utils'
 
 import SignInButton from './auth-buttons/sign-in-button'
 import CreateDropdown from './create-nav-dropdown'
+import SignInRequiredDialog from './sign-in-required-dialog'
 
 const links = [
   { label: 'Home', href: '/home' },
@@ -18,6 +20,45 @@ const links = [
   { label: 'Create', href: '/create' },
   { label: 'My Profile', href: '/profile' },
 ]
+
+type LinkComponentProps = {
+  href: string
+  label: string
+  isOnPage: boolean
+  disabled?: boolean
+}
+
+/**
+ * Navigation bar links for the main pages.
+ */
+function MainNavLink({
+  href,
+  label,
+  isOnPage,
+  disabled = false,
+}: LinkComponentProps) {
+  const baseClassName = cn(
+    'relative pb-1 font-medium text-black cursor-pointer',
+    isOnPage ? 'font-semibold' : 'opacity-90'
+  )
+  const content = (
+    <>
+      {label}
+      {/* Underline the navbar item for the current page */}
+      {isOnPage && (
+        <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
+      )}
+    </>
+  )
+
+  return disabled ? (
+    <div className={baseClassName}>{content}</div>
+  ) : (
+    <Link href={href} className={baseClassName}>
+      {content}
+    </Link>
+  )
+}
 
 type Props = {
   className?: string
@@ -27,75 +68,100 @@ type Props = {
  * Top navigation bar for desktop layouts.
  */
 export default function DesktopNavbar({ className = '' }: Props) {
+  const [isSignInRequiredOpen, setSignInRequiredOpen] = useState(false)
+
   const pathname = usePathname()
   const session = useSession()
   const isGuest = session.status === 'unauthenticated'
 
   return (
-    <header className={cn('border-b-2 border-black/30 bg-white', className)}>
-      <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
-        {/* Main navbar items on the left side */}
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-3" aria-label="Home">
-            <Image
-              src="/feather-logo.svg"
-              alt="PoetryVerse logo"
-              width={30}
-              height={30}
-            />
-          </Link>
+    <>
+      <SignInRequiredDialog
+        isOpen={isSignInRequiredOpen}
+        onClose={() => setSignInRequiredOpen(false)}
+      />
+      <header className={cn('border-b-2 border-black/30 bg-white', className)}>
+        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
+          {/* Main navbar items on the left side */}
+          <div className="flex items-center gap-8">
+            <Link
+              href="/"
+              className="flex items-center gap-3"
+              aria-label="Home"
+            >
+              <Image
+                src="/feather-logo.svg"
+                alt="PoetryVerse logo"
+                width={30}
+                height={30}
+              />
+            </Link>
 
-          <nav className="flex items-center gap-8 text-[20px]">
-            {links.map((link) => {
-              if (link.label === 'Create') {
-                // Navbar item that displays a dropdown for selecting the poem creation mode
-                return (
-                  <CreateDropdown
-                    key={link.href}
-                    isActive={pathname.startsWith('/create/')}
+            <nav className="flex items-center gap-8 text-[20px]">
+              {links.map((link) => {
+                // Whether the user is currently on the link's page
+                const isActive = pathname.startsWith(link.href)
+
+                // Whether the user needs to sign in first to access this page
+                const signInRequired =
+                  isGuest && !GUEST_ACCESSIBLE_PAGES.includes(link.href)
+
+                // Create the navigation bar link component
+                const NavLink = () => (
+                  <MainNavLink
+                    href={link.href}
+                    label={link.label}
+                    isOnPage={isActive}
+                    disabled={signInRequired}
                   />
                 )
-              }
 
-              const isActive = pathname.startsWith(link.href)
-              return (
-                // Return a link for each navbar item
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative pb-1 font-medium text-black ${
-                    isActive ? 'font-semibold' : 'opacity-90'
-                  }`}
-                >
-                  {link.label}
-                  {/* Underline the navbar item for the current page */}
-                  {isActive && (
-                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
-        </div>
+                if (signInRequired) {
+                  // Clicking the link opens the sign in required dialog
+                  return (
+                    <div
+                      key={link.href}
+                      onClick={() => setSignInRequiredOpen(true)}
+                    >
+                      <NavLink />
+                    </div>
+                  )
+                }
 
-        {/* Extra navbar items on the right side */}
-        <div className="flex items-center gap-8">
-          <Link
-            href={'/settings'}
-            className="relative rounded-full py-1 hover:bg-black/5 active:bg-black/10"
-          >
-            <Settings
-              size={32}
-              strokeWidth={pathname === '/settings' ? 2.8 : 2}
-              className="text-black"
-            />
-            {pathname === '/settings' && (
-              <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
-            )}
-          </Link>
-          {isGuest ? <SignInButton /> : <SignOutButton />}
+                if (link.label === 'Create') {
+                  // Clicking the link opens the dropdown for selecting the poem creation mode
+                  return (
+                    <CreateDropdown key={link.href}>
+                      <NavLink />
+                    </CreateDropdown>
+                  )
+                }
+
+                // Return the default navigation bar link
+                return <NavLink key={link.href} />
+              })}
+            </nav>
+          </div>
+
+          {/* Extra navbar items on the right side */}
+          <div className="flex items-center gap-8">
+            <Link
+              href={'/settings'}
+              className="relative rounded-full py-1 hover:bg-black/5 active:bg-black/10"
+            >
+              <Settings
+                size={32}
+                strokeWidth={pathname === '/settings' ? 2.8 : 2}
+                className="text-black"
+              />
+              {pathname === '/settings' && (
+                <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
+              )}
+            </Link>
+            {isGuest ? <SignInButton /> : <SignOutButton />}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   )
 }
