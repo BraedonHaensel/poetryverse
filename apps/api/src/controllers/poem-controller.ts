@@ -1,4 +1,4 @@
-import { prisma, Prisma } from '@seng513/database'
+import { Prisma,prisma } from '@seng513/database'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
