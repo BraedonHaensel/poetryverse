@@ -1,4 +1,4 @@
-const poemId = {
+export const poemIds = {
   id1: 'cmn5hpjpr000304kzeqt67a4g',
   id2: 'cmn5hp5i8000104kz2sqhbrlb',
   id3: 'cmn5hpdln000204kzfbg941te',
@@ -6,7 +6,7 @@ const poemId = {
 
 export const poemData = [
   {
-    id: poemId.id1,
+    id: poemIds.id1,
     authorId: 'cmn2apa7m0000wbrmgb2s775x',
     title: 'A Poem About Cars',
     typeId: 'haiku',
@@ -18,7 +18,7 @@ export const poemData = [
     updatedAt: new Date('2026-03-25T03:09:16.151Z'),
   },
   {
-    id: poemId.id2,
+    id: poemIds.id2,
     authorId: 'cmn5grryw0000m68o3m0jttjo',
     title: 'Dogs and Cats',
     typeId: 'couplet',
@@ -30,7 +30,7 @@ export const poemData = [
     updatedAt: new Date('2026-03-25T03:09:16.151Z'),
   },
   {
-    id: poemId.id3,
+    id: poemIds.id3,
     authorId: 'cmn5gss8a0002m68oamdbn850',
     title: 'Running On Grass',
     typeId: 'sonnet',

@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 const { PrismaPg } = require('@prisma/adapter-pg')
 const { Pool } = require('pg')
-const { userData } = require('./seeding-data/users')
+const { userData } = require('./seeding-data/user')
 const { poemData } = require('./seeding-data/poem')
 const { poemLikeData } = require('./seeding-data/poemLike')
 
