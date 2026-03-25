@@ -1,7 +1,8 @@
-import { Prisma,prisma } from '@seng513/database'
+import { Prisma } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
+import { prisma } from '../lib/db'
 import { badRequest, HttpError, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
