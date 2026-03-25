@@ -14,32 +14,19 @@ import {
 } from './ui/dropdown-menu'
 
 type Props = {
-  isActive: boolean
+  children: React.ReactNode
 }
 
 /**
- * Dropdown for the Create link in the navigation bar.
- * @param isActive Whether the Create page is open.
+ * Dropdown for the Create link in the desktop navigation bar.
  */
-export default function CreateDropdown({ isActive }: Props) {
+export default function CreateDropdown({ children }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* Create navbar button */}
-        <Link
-          href={'#'}
-          className={`relative pb-1 font-medium text-black ${
-            isActive ? 'font-semibold' : 'opacity-90'
-          }`}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          Create
-          {isActive && (
-            <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />
-          )}
-        </Link>
+        <div onClick={() => setIsOpen(!isOpen)}>{children}</div>
       </DropdownMenuTrigger>
 
       <DropdownMenuPortal>
