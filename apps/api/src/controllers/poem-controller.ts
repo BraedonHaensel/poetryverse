@@ -315,12 +315,14 @@ const validateAndReturnPoem = async (poemId: string) => {
   return poem
 }
 
-/** retrieves daily poem from database by validating greatest like count over the past 24 hours*/
-export const GetPoemOfDay = async () => {
+/** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
+async function getPoemOfDay() {
+  //Retrieve the timestamp of the previous 24 hours.
   const DAY_MS = 24 * 60 * 60 * 1000
   const now = new Date()
   const lastDayTimestamp = new Date(now.getTime() - DAY_MS)
 
+  //Retrieve the poemId from public poems with the greatest number of likes in the past 24 hours.
   const topLikedPoem = await prisma.poemLike.groupBy({
     by: ['poemId'],
     where: {
@@ -341,6 +343,7 @@ export const GetPoemOfDay = async () => {
     take: 1,
   })
 
+  //Fetch the poem using the poemId with the greatest number of likes in the past 24 hours. Ensure the author, number of likes, and tags are included.
   if (topLikedPoem.length > 0) {
     const poem = await prisma.poem.findFirst({
       where: {
@@ -360,6 +363,7 @@ export const GetPoemOfDay = async () => {
     }
   }
 
+  // If each poem does not have a like. Then fetch a random poem from the poems database
   const count = await prisma.poem.count({
     where: { isPublic: true },
   })
@@ -388,9 +392,9 @@ export const GetPoemOfDay = async () => {
  * @returns A 200 response with the poem of the day information.
  * @throws {HttpError} 404 if the poem does not exist.
  */
-export const GetDailyPoem = async (req: Request, res: Response) => {
+export const getDailyPoem = async (req: Request, res: Response) => {
   logger.info('Fetch new poem of the day.')
-  const poem = await GetPoemOfDay()
+  const poem = await getPoemOfDay()
   if (!poem) {
     logger.warn('Poem of the day failed to retrieve')
     throw new HttpError(
