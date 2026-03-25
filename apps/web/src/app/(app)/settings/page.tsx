@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import { ShadowCard } from '@/components/shadow-card'
@@ -22,26 +21,28 @@ const EMAIL = 'myemail@email.com'
  * User settings page.
  */
 export default function UserSettings() {
-  const router = useRouter()
+  // const router = useRouter()
   return (
-    <ShadowCard className="mx-auto h-190 w-full max-w-170 sm:h-auto">
-      {/* TODO when mobile layout is suppored, remove card and use h-full */}
-      <CardHeader>
-        <CardTitle className="mx-auto text-2xl font-bold">
-          User Settings
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex h-full flex-col gap-5">
-        <ProfilePictureForm imageUrl={IMAGE_URL} />
-        <UsernameForm username={USERNAME} />
-        <EmailForm email={EMAIL} />
-        <Button asChild>
-          <Link href="/admin">Enter Admin Mode</Link>
-        </Button>
-        <AdvancedSettingsForm />
-        {/* Mobile-only sign out button */}
-        <SignOutButton className="mt-auto sm:hidden" text="Sign Out" />
-      </CardContent>
-    </ShadowCard>
+    <div className="flex h-full min-h-fit p-10">
+      <ShadowCard className="m-auto h-190 w-full max-w-170 md:h-auto">
+        {/* TODO when mobile layout is suppored, remove card */}
+        <CardHeader>
+          <CardTitle className="mx-auto text-2xl font-bold">
+            User Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex h-full flex-col gap-5">
+          <ProfilePictureForm imageUrl={IMAGE_URL} />
+          <UsernameForm username={USERNAME} />
+          <EmailForm email={EMAIL} />
+          <Button asChild>
+            <Link href="/admin">Enter Admin Mode</Link>
+          </Button>
+          <AdvancedSettingsForm />
+          {/* Mobile-only sign out button */}
+          <SignOutButton className="mt-auto md:hidden" />
+        </CardContent>
+      </ShadowCard>
+    </div>
   )
 }

@@ -98,6 +98,7 @@ export const ReportPoemResponseSchema = z.object({
 
 /** Type returned by `interpretSchema`. */
 export type PoemInterpretResponse = z.infer<typeof PoemInterpretResponseSchema>
+
 /** Type returned by `PoemAIResponseSchema`. */
 export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
 
