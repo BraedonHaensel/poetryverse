@@ -1,5 +1,10 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
-import { DefaultSession, getServerSession, NextAuthOptions } from 'next-auth'
+import {
+  DefaultSession,
+  getServerSession,
+  NextAuthOptions,
+  Session,
+} from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
 import { prisma } from './db'
@@ -20,6 +25,7 @@ declare module 'next-auth/jwt' {
   }
 }
 
+// Default NextAuth.js options
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
@@ -63,6 +69,11 @@ export const authOptions: NextAuthOptions = {
   ],
 }
 
-export const getAuthSession = () => {
+/**
+ * Gets the user's auth session.
+ * @returns A promise that resolves to the user's auth session, or `null` if no
+ * auth session exists.
+ */
+export const getAuthSession = (): Promise<Session | null> => {
   return getServerSession(authOptions)
 }

@@ -42,40 +42,42 @@ export default function CreatePoemFromScratch() {
   const control = form.control
 
   return (
-    <ShadowCard>
-      <CardHeader>
-        <div className="flex items-center justify-center gap-3">
-          <CardTitle className="text-2xl font-bold">
-            Create From Scratch
-          </CardTitle>
-          <Image src="/stylus-icon.svg" alt="" width={40} height={40} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="grid grid-cols-1 gap-x-5 md:grid-cols-2"
-          >
-            {/* Left column fields */}
-            <div className="space-y-3">
-              <PoemTypeField control={control} />
-              <PoemContentsField control={control} />
-            </div>
+    <div className="flex h-full min-h-fit p-10">
+      <ShadowCard className="m-auto">
+        <CardHeader>
+          <div className="flex items-center justify-center gap-3">
+            <CardTitle className="text-2xl font-bold">
+              Create From Scratch
+            </CardTitle>
+            <Image src="/stylus-icon.svg" alt="" width={40} height={40} />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="grid grid-cols-1 gap-x-5 md:grid-cols-2"
+            >
+              {/* Left column fields */}
+              <div className="space-y-3">
+                <PoemTypeField control={control} />
+                <PoemContentsField control={control} />
+              </div>
 
-            {/* Right column fields */}
-            <div className="space-y-3">
-              <PoemTitleField control={control} />
-              <PoemTagsField control={control} />
-              <PoemVisibilityField control={control} />
-              <PoemAIAssistanceField control={control} />
+              {/* Right column fields */}
+              <div className="space-y-3">
+                <PoemTitleField control={control} />
+                <PoemTagsField control={control} />
+                <PoemVisibilityField control={control} />
+                <PoemAIAssistanceField control={control} />
 
-              {/* Publish button */}
-              <LargeButton type="submit">Publish</LargeButton>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </ShadowCard>
+                {/* Publish button */}
+                <LargeButton type="submit">Publish</LargeButton>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </ShadowCard>
+    </div>
   )
 }
