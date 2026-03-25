@@ -9,7 +9,6 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const logLevels = ['query' as const]
 
 export let prisma: PrismaClient
-export { Prisma }
 
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient({ adapter })
