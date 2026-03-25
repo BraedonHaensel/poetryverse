@@ -317,8 +317,9 @@ const validateAndReturnPoem = async (poemId: string) => {
 
 /** retrieves daily poem from database by validating greatest like count over the past 24 hours*/
 export const GetPoemOfDay = async () => {
+  const DAY_MS = 24 * 60 * 60 * 1000
   const now = new Date()
-  const lastDayTimestamp = new Date(now.getTime() - 24 * 3600 * 1000)
+  const lastDayTimestamp = new Date(now.getTime() - DAY_MS)
 
   const topLikedPoem = await prisma.poemLike.groupBy({
     by: ['poemId'],
