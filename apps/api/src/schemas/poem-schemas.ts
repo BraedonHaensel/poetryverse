@@ -10,6 +10,8 @@ const MIN_TAGS = 1
 const MAX_TAGS = 5
 const PROMPT_MIN = 20
 const PROMPT_MAX = 1000
+const REPORT_REASON_MIN = 3
+const REPORT_REASON_MAX = 200
 
 /** Validates `POST /api/poems` request bodies. */
 export const CreatePoemRequestSchema = z.object({
@@ -82,7 +84,10 @@ export const ReportPoemRequestSchema = z.object({
   body: z.object({
     poemId: z.string().nonempty('Poem is required.'),
     reasonType: z.enum(ReasonType),
-    reason: z.string().nonempty('Report reason is required.'),
+    reason: z
+      .string()
+      .min(REPORT_REASON_MIN, `Report reason must be at least ${REPORT_REASON_MIN} characters.`)
+      .max(REPORT_REASON_MAX, `Report reason must be at most ${REPORT_REASON_MAX} characters.`),
   }),
 })
 
