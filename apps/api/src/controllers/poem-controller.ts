@@ -294,7 +294,7 @@ export const reportPoem = async (req: AuthRequest, res: Response) => {
     })
 
     logger.info(
-      `Reported poem for userId=${req.auth.userId} poemId=${poemId} reportId=${createdReport?.id}`
+      `Reported poem for userId=${req.auth.userId} poemId=${poemId} reportId=${createdReport.id}`
     )
 
     return res.status(201).json({
