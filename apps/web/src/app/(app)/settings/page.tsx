@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
+// import { useRouter } from 'next/navigation'
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import { ShadowCard } from '@/components/shadow-card'
 import { Button } from '@/components/ui/button'
@@ -22,7 +22,7 @@ const EMAIL = 'myemail@email.com'
  * User settings page.
  */
 export default function UserSettings() {
-  const router = useRouter()
+  // const router = useRouter()
   return (
     <ShadowCard className="mx-auto h-190 w-full max-w-170 sm:h-auto">
       {/* TODO when mobile layout is suppored, remove card and use h-full */}
