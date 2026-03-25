@@ -2,11 +2,10 @@
 
 import Link from 'next/link'
 
-// import { useRouter } from 'next/navigation'
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
-import { ShadowCard } from '@/components/shadow-card'
 import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ShadowCard } from '@/components/shadow-card'
 
 import { AdvancedSettingsForm } from './forms/advanced-settings-form'
 import { EmailForm } from './forms/email-form'
