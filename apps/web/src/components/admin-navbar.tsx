@@ -2,13 +2,10 @@
 
 import { Feather } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 
 export default function AdminNavbar() {
-  const router = useRouter()
-
   return (
     <header className="w-full border-b border-black/10 bg-white">
       <div className="mx-auto flex h-16 items-center justify-between px-8">
