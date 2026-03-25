@@ -41,10 +41,8 @@ const poemIncludeStatement = {
  * @returns A 201 response containing the created poem.
  * @throws {HttpError} 400 if the poem type or any tag ID is invalid.
  */
-export const createPoem = async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest
-
-  logger.info(`Creating poem for userId=${authReq.auth.userId}`)
+export const createPoem = async (req: AuthRequest, res: Response) => {
+  logger.info(`Creating poem for userId=${req.auth.userId}`)
 
   const poemData = req.body as CreatePoemRequest
 
@@ -59,7 +57,7 @@ export const createPoem = async (req: Request, res: Response) => {
   // Create the poem.
   const createdPoem = await prisma.poem.create({
     data: mapCreatePoemRequestToPrismaInput({
-      authorId: authReq.auth.userId,
+      authorId: req.auth.userId,
       data: poemData,
       tagIds: existingTags.map((tag) => tag.id),
     }),
@@ -67,7 +65,7 @@ export const createPoem = async (req: Request, res: Response) => {
   })
 
   logger.info(
-    `Created poem id=${createdPoem.id} userId=${authReq.auth.userId} typeId=${createdPoem.typeId} tagCount=${createdPoem.poemTags.length}`
+    `Created poem id=${createdPoem.id} userId=${req.auth.userId} typeId=${createdPoem.typeId} tagCount=${createdPoem.poemTags.length}`
   )
 
   // Return the created poem
@@ -82,11 +80,10 @@ export const createPoem = async (req: Request, res: Response) => {
  * @throws {HttpError} 429 if the Gemini API is rate limited.
  * @throws {HttpError} 500 if the generation fails.
  */
-export const generateAIPoem = async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest
+export const generateAIPoem = async (req: AuthRequest, res: Response) => {
   const { typeId, prompt } = req.body as PoemAIRequest
   logger.info(
-    `Generating AI poem for userId=${authReq.auth.userId} typeId=${typeId} promptLength=${prompt.length}`
+    `Generating AI poem for userId=${req.auth.userId} typeId=${typeId} promptLength=${prompt.length}`
   )
 
   const type = await validateAndReturnPoemType(typeId)
@@ -99,7 +96,7 @@ export const generateAIPoem = async (req: Request, res: Response) => {
       PoemAIResponseSchema
     )
     logger.info(
-      `Generated AI poem for userId=${authReq.auth.userId} typeId=${typeId} durationMs=${Date.now() - startedAt}`
+      `Generated AI poem for userId=${req.auth.userId} typeId=${typeId} durationMs=${Date.now() - startedAt}`
     )
 
     return res.status(200).json({ data: responseJSON })
@@ -108,7 +105,7 @@ export const generateAIPoem = async (req: Request, res: Response) => {
 
     if (status === 429) {
       logger.warn(
-        `AI poem generation rate limited for userId=${authReq.auth.userId} typeId=${typeId}`
+        `AI poem generation rate limited for userId=${req.auth.userId} typeId=${typeId}`
       )
       throw new HttpError(
         429,
@@ -137,14 +134,13 @@ export const generateAIPoem = async (req: Request, res: Response) => {
  * @throws {HttpError} 500 if interpretation fails.
  */
 export const interpretPoem = async (
-  req: Request,
+  req: AuthRequest,
   res: Response
 ): Promise<Response> => {
-  const authReq = req as AuthRequest
   try {
     const { prompt, poemId } = req.body as PoemInterpretRequest
     logger.info(
-      `Generating interpretation for userId=${authReq.auth.userId} poemId=${poemId} promptLength=${prompt.length}`
+      `Generating interpretation for userId=${req.auth.userId} poemId=${poemId} promptLength=${prompt.length}`
     )
 
     const poem = await validateAndReturnPoem(poemId)
@@ -158,7 +154,7 @@ export const interpretPoem = async (
       PoemInterpretResponseSchema
     )
     logger.info(
-      `Generated interpretation for userId=${authReq.auth.userId} poemId=${poemId} durationMs=${Date.now() - startedAt}`
+      `Generated interpretation for userId=${req.auth.userId} poemId=${poemId} durationMs=${Date.now() - startedAt}`
     )
 
     return res.status(200).json({ data: responseJSON })
@@ -167,7 +163,7 @@ export const interpretPoem = async (
 
     if (status === 429) {
       logger.warn(
-        `Poem interpretation rate limited for userId=${authReq.auth.userId}`
+        `Poem interpretation rate limited for userId=${req.auth.userId}`
       )
       throw new HttpError(
         429,
@@ -193,11 +189,10 @@ export const interpretPoem = async (
  * @returns A 200 response confirming the liked state and current like count.
  * @throws {HttpError} 404 if the poem does not exist.
  */
-export const likePoem = async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest
+export const likePoem = async (req: AuthRequest, res: Response) => {
   const { poemId } = req.body as LikePoemRequest
 
-  logger.info(`Liking poem for userId=${authReq.auth.userId} poemId=${poemId}`)
+  logger.info(`Liking poem for userId=${req.auth.userId} poemId=${poemId}`)
 
   await validateAndReturnPoem(poemId)
 
@@ -205,13 +200,13 @@ export const likePoem = async (req: Request, res: Response) => {
     where: {
       poemId_userId: {
         poemId,
-        userId: authReq.auth.userId,
+        userId: req.auth.userId,
       },
     },
     update: {},
     create: {
       poemId,
-      userId: authReq.auth.userId,
+      userId: req.auth.userId,
     },
   })
 
@@ -220,7 +215,7 @@ export const likePoem = async (req: Request, res: Response) => {
   })
 
   logger.info(
-    `Liked poem for userId=${authReq.auth.userId} poemId=${poemId} likesCount=${likesCount}`
+    `Liked poem for userId=${req.auth.userId} poemId=${poemId} likesCount=${likesCount}`
   )
 
   return res.status(200).json({
@@ -239,12 +234,11 @@ export const likePoem = async (req: Request, res: Response) => {
  * @returns A 200 response confirming the unliked state and current like count.
  * @throws {HttpError} 404 if the poem does not exist.
  */
-export const unlikePoem = async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest
+export const unlikePoem = async (req: AuthRequest, res: Response) => {
   const { poemId } = req.body as UnlikePoemRequest
 
   logger.info(
-    `Unliking poem for userId=${authReq.auth.userId} poemId=${poemId}`
+    `Unliking poem for userId=${req.auth.userId} poemId=${poemId}`
   )
 
   await validateAndReturnPoem(poemId)
@@ -252,7 +246,7 @@ export const unlikePoem = async (req: Request, res: Response) => {
   await prisma.poemLike.deleteMany({
     where: {
       poemId,
-      userId: authReq.auth.userId,
+      userId: req.auth.userId,
     },
   })
 
@@ -261,7 +255,7 @@ export const unlikePoem = async (req: Request, res: Response) => {
   })
 
   logger.info(
-    `Unliked poem for userId=${authReq.auth.userId} poemId=${poemId} likesCount=${likesCount}`
+    `Unliked poem for userId=${req.auth.userId} poemId=${poemId} likesCount=${likesCount}`
   )
 
   return res.status(200).json({
@@ -281,12 +275,11 @@ export const unlikePoem = async (req: Request, res: Response) => {
  * @throws {HttpError} 404 if the poem does not exist.
  * @throws {HttpError} 400 if this user has already reported this poem.
  */
-export const reportPoem = async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest
+export const reportPoem = async (req: AuthRequest, res: Response) => {
   const { poemId, reasonType, reason } = req.body as ReportPoemRequest
 
   logger.info(
-    `Reporting poem for userId=${authReq.auth.userId} poemId=${poemId} reasonType=${reasonType}`
+    `Reporting poem for userId=${req.auth.userId} poemId=${poemId} reasonType=${reasonType}`
   )
 
   await validateAndReturnPoem(poemId)
@@ -300,7 +293,7 @@ export const reportPoem = async (req: Request, res: Response) => {
       data: {
         reports: {
           create: {
-            reporterUserId: authReq.auth.userId,
+            reporterUserId: req.auth.userId,
             reasonType,
             reason,
           },
@@ -322,14 +315,14 @@ export const reportPoem = async (req: Request, res: Response) => {
   const createdReport = await prisma.report.findUnique({
     where: { 
       reporterUserId_poemId: {
-        reporterUserId: authReq.auth.userId, 
+        reporterUserId: req.auth.userId, 
         poemId
       }
     },
   })
 
   logger.info(
-    `Reported poem for userId=${authReq.auth.userId} poemId=${poemId} reportId=${createdReport?.id}`
+    `Reported poem for userId=${req.auth.userId} poemId=${poemId} reportId=${createdReport?.id}`
   )
 
   return res.status(200).json({
