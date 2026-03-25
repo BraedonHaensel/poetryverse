@@ -21,6 +21,7 @@ const EMAIL = 'myemail@email.com'
  * User settings page.
  */
 export default function UserSettings() {
+  // const router = useRouter()
   return (
     <div className="flex h-full min-h-fit p-10">
       <ShadowCard className="m-auto h-190 w-full max-w-170 md:h-auto">
