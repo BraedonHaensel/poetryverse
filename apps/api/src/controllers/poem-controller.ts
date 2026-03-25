@@ -237,9 +237,7 @@ export const likePoem = async (req: AuthRequest, res: Response) => {
 export const unlikePoem = async (req: AuthRequest, res: Response) => {
   const { poemId } = req.body as UnlikePoemRequest
 
-  logger.info(
-    `Unliking poem for userId=${req.auth.userId} poemId=${poemId}`
-  )
+  logger.info(`Unliking poem for userId=${req.auth.userId} poemId=${poemId}`)
 
   await validateAndReturnPoem(poemId)
 
@@ -285,22 +283,24 @@ export const reportPoem = async (req: AuthRequest, res: Response) => {
   await validateAndReturnPoem(poemId)
 
   try {
-    // Create the report and update the reports array in the poem
-    await prisma.poem.update({
-      where: {
-        id: poemId,
-      },
+    // Create the report
+    const createdReport = await prisma.report.create({
       data: {
-        reports: {
-          create: {
-            reporterUserId: req.auth.userId,
-            reasonType,
-            reason,
-          },
-        },
+        poemId,
+        reporterUserId: req.auth.userId,
+        reasonType,
+        reason,
       },
-      include: {
-        reports: true,
+    })
+
+    logger.info(
+      `Reported poem for userId=${req.auth.userId} poemId=${poemId} reportId=${createdReport?.id}`
+    )
+
+    return res.status(201).json({
+      data: {
+        poemId,
+        createdReport,
       },
     })
   } catch (err: unknown) {
@@ -311,26 +311,6 @@ export const reportPoem = async (req: AuthRequest, res: Response) => {
     }
     throw err
   }
-
-  const createdReport = await prisma.report.findUnique({
-    where: { 
-      reporterUserId_poemId: {
-        reporterUserId: req.auth.userId, 
-        poemId
-      }
-    },
-  })
-
-  logger.info(
-    `Reported poem for userId=${req.auth.userId} poemId=${poemId} reportId=${createdReport?.id}`
-  )
-
-  return res.status(200).json({
-    data: {
-      poemId,
-      createdReport,
-    },
-  })
 }
 
 /** Validates the typeId against poem types in the database. */
