@@ -10,19 +10,9 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
-const poemTypes = [
-  { id: 'haiku', name: 'Haiku' },
-  { id: 'couplet', name: 'Couplet' },
-  { id: 'sonnet', name: 'Sonnet' },
-]
-
-const tags = [
-  { id: 'nature', name: 'Nature' },
-  { id: 'romance', name: 'Romance' },
-  { id: 'comedy', name: 'Comedy' },
-  { id: 'parody', name: 'Parody' },
-]
-
+/**
+ * Seeds the database tables with sample data
+ */
 async function main() {
   const poemTypeResult = await prisma.poemType.createMany({
     data: poemTypes,
@@ -51,18 +41,35 @@ async function main() {
 
   const reportResult = await prisma.report.createMany({
     data: reportData,
-    skipDuplicates: true
+    skipDuplicates: true,
   })
 
-  console.log(
-    `Seed complete. Added:
+  if (
+    [
+      poemTypeResult,
+      tagResult,
+      userResult,
+      poemResult,
+      poemLikeResult,
+      reportResult,
+    ].every((result) => result.count === 0)
+  ) {
+    // DB already contains all the seed data
+    console.log(
+      'Seed complete. No changes were made as the database is already up to date!'
+    )
+  } else {
+    // Dispaly the number of additions to each table
+    console.log(
+      `Seed complete. Added:
     - ${poemTypeResult.count} poem types 
     - ${tagResult.count} tags
     - ${userResult.count} users
     - ${poemResult.count} poems
     - ${poemLikeResult.count} poemLikes
     - ${reportResult.count} reports`
-  )
+    )
+  }
 }
 
 main()
