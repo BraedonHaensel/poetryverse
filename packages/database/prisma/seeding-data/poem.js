@@ -1,3 +1,4 @@
+import { poemTypeIds } from './poemType.js'
 import { userIds } from './user.js'
 
 export const poemIds = {
@@ -11,7 +12,7 @@ export const poemData = [
     id: poemIds.id1,
     authorId: userIds.user1,
     title: 'A Poem About Cars',
-    typeId: 'haiku',
+    typeId: poemTypeIds.haiku,
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoodScore: 0.26,
@@ -23,7 +24,7 @@ export const poemData = [
     id: poemIds.id2,
     authorId: userIds.user2,
     title: 'Dogs and Cats',
-    typeId: 'couplet',
+    typeId: poemTypeIds.couplet,
     isPublic: false,
     isAIAssisted: true,
     aiLikelihoodScore: 0.95,
@@ -35,7 +36,7 @@ export const poemData = [
     id: poemIds.id3,
     authorId: userIds.user3,
     title: 'Running On Grass',
-    typeId: 'haiku',
+    typeId: poemTypeIds.haiku,
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoodScore: 0.16,

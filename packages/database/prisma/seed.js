@@ -1,12 +1,12 @@
-const { PrismaClient } = require('@prisma/client')
-const { PrismaPg } = require('@prisma/adapter-pg')
-const { Pool } = require('pg')
-const { userData } = require('./seeding-data/user')
-const { poemData } = require('./seeding-data/poem')
-const { poemLikeData } = require('./seeding-data/poemLike')
-const { reportData } = require('./seeding-data/report')
-const { poemTypeData } = require('./seeding-data/poemType')
-const { poemTagData } = require('./seeding-data/poemTag')
+import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
+import { userData } from './seeding-data/user.js'
+import { poemData } from './seeding-data/poem.js'
+import { poemLikeData } from './seeding-data/poemLike.js'
+import { reportData } from './seeding-data/report.js'
+import { poemTypeData } from './seeding-data/poemType.js'
+import { poemTagData } from './seeding-data/poemTag.js'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
