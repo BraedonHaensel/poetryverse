@@ -1,3 +1,4 @@
+import { RoleEnum } from '@prisma/client'
 import { Router } from 'express'
 
 import {
@@ -10,7 +11,7 @@ import {
   getUsers,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
-import { requireAuth } from '../middleware/auth'
+import { requireAuth, requireRole } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
   getUserFollowersSchema,
@@ -21,8 +22,12 @@ import {
 const router = Router()
 
 /** GET /api/users */
-// TODO: Make this admin only
-router.get('/', requireAuth, asyncHandler(getUsers))
+router.get(
+  '/',
+  requireAuth,
+  requireRole(RoleEnum.ADMIN),
+  asyncHandler(getUsers)
+)
 
 /** GET /api/users/me */
 router.get('/me', requireAuth, asyncHandler(getMyUserInfo))
