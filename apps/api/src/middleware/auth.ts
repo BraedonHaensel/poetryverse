@@ -60,7 +60,6 @@ export const requireAuth = async (
 export const requireRole = (role: RoleEnum) => {
   return async (req: Request, _res: Response, next: NextFunction) => {
     const userId = (req as AuthRequest).auth.userId
-    logger.info(`requesting userId: ${userId}`)
 
     if (!userId) {
       throw unauthorized()
