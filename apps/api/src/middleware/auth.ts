@@ -8,6 +8,21 @@ import { HttpError, unauthorized } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 
 export type AuthRequest = Request & { auth: { userId: string } }
+export type OptionalAuthRequest = Request & { auth?: { userId: string } }
+
+const getTokenUserId = async (req: Request) => {
+  const token = await getToken({
+    req: req,
+    secret: config.NEXT_AUTH_SECRET, // must match NextAuth secret
+    secureCookie: config.nodeEnv === 'production',
+  })
+
+  if (!token || typeof token.id !== 'string') {
+    return null
+  }
+
+  return token.id
+}
 
 const getRoleLevel = (role: RoleEnum) => {
   switch (role) {
@@ -35,21 +50,42 @@ export const requireAuth = async (
   next: NextFunction
 ) => {
   try {
-    const token = await getToken({
-      req: req,
-      secret: config.NEXT_AUTH_SECRET, // must match NextAuth secret
-      secureCookie: config.nodeEnv === 'production',
-    })
+    const userId = await getTokenUserId(req)
 
-    if (!token || typeof token.id !== 'string') {
+    if (!userId) {
       return next(unauthorized())
     }
 
-    ;(req as AuthRequest).auth = { userId: token.id }
+    ;(req as AuthRequest).auth = { userId }
     return next()
   } catch {
     return next(unauthorized())
   }
+}
+
+/**
+ * Attaches `auth.userId` when a valid token is present, but allows guests through.
+ * @param req Incoming Express request.
+ * @param _res Express response object (unused).
+ * @param next Express next callback.
+ * @returns Always continues to next middleware.
+ */
+export const optionalAuth = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = await getTokenUserId(req)
+
+    if (userId) {
+      ;(req as OptionalAuthRequest).auth = { userId }
+    }
+  } catch {
+    // Ignore token parsing issues for guest-accessible routes.
+  }
+
+  return next()
 }
 
 /**

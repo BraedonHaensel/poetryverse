@@ -4,7 +4,7 @@ import type { NextFunction, Request, Response } from 'express'
 import { prisma } from '../lib/db'
 import { notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
-import type { AuthRequest } from '../middleware/auth'
+import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   getUserFollowersRequest,
   getUserFollowingRequest,
@@ -60,16 +60,18 @@ export const getUsers = async (
  * @throws {HttpError} 404 if the target user does not exist.
  */
 export const getUserById = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   _next: NextFunction
 ) => {
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
   const { id: targetUserId } = req.params as getUserRequest
   logger.info(
-    `Fetching user by id targetUserId=${targetUserId} viewerUserId=${req.auth.userId}`
+    `Fetching user by id targetUserId=${targetUserId} viewerUserId=${requesterUserId ?? 'guest'}`
   )
 
-  const user = await getAndValidateUser(req.auth.userId, targetUserId)
+  const user = await getAndValidateUser(targetUserId, requesterUserId)
 
   logger.info(`Fetched user by id targetUserId=${targetUserId}`)
   return res.status(200).json({ data: user })
@@ -121,11 +123,11 @@ export const getMyUserInfo = async (
  * @returns A 200 response containing users who follow the target user.
  */
 export const getUserFollowers = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   _next: NextFunction
 ) => {
-  const requesterUserId = req.auth.userId
+  const requesterUserId = (req as OptionalAuthRequest).auth?.userId
   const { id: targetUserId } = req.params as getUserFollowersRequest
 
   await validateUserExists(targetUserId)
@@ -143,11 +145,11 @@ export const getUserFollowers = async (
  * @returns A 200 response containing users followed by the target user.
  */
 export const getUserFollowing = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   _next: NextFunction
 ) => {
-  const requesterUserId = req.auth.userId
+  const requesterUserId = (req as OptionalAuthRequest).auth?.userId
   const { id: targetUserId } = req.params as getUserFollowingRequest
 
   await validateUserExists(targetUserId)
@@ -206,7 +208,7 @@ export const getMyFollowing = async (
  */
 const getFollowersForUser = async (
   userId: string,
-  requesterUserId: string
+  requesterUserId?: string
 ): Promise<UserWithFollowState[]> => {
   logger.info(`Fetching followers userId=${userId}`)
   const followers = await prisma.follow.findMany({
@@ -233,7 +235,7 @@ const getFollowersForUser = async (
  */
 const getFollowingForUser = async (
   targetUserId: string,
-  requesterUserId: string
+  requesterUserId?: string
 ): Promise<UserWithFollowState[]> => {
   logger.info(`Fetching following users userId=${targetUserId}`)
   const followingUsers = await prisma.follow.findMany({
@@ -250,7 +252,7 @@ const getFollowingForUser = async (
   )
 
   // If the target user is the requesting user, they are already following every user.
-  if (targetUserId === requesterUserId) {
+  if (requesterUserId && targetUserId === requesterUserId) {
     return followingUsers.map(({ following }) => ({
       ...following,
       isFollowingUser: true,
@@ -271,10 +273,17 @@ const getFollowingForUser = async (
  */
 const addRequesterFollowState = async (
   users: SelectedUser[],
-  requesterUserId: string
+  requesterUserId?: string
 ): Promise<UserWithFollowState[]> => {
   if (users.length === 0) {
     return []
+  }
+
+  if (!requesterUserId) {
+    return users.map((user) => ({
+      ...user,
+      isFollowingUser: false,
+    }))
   }
 
   const followedUsers = await prisma.follow.findMany({
@@ -324,8 +333,8 @@ const validateUserExists = async (userId: string) => {
  * @throws {HttpError} 404 if the target user does not exist.
  */
 const getAndValidateUser = async (
-  requesterUserId: string,
-  targetUserId: string
+  targetUserId: string,
+  requesterUserId?: string
 ): Promise<UserWithFollowState> => {
   const user = await prisma.user.findUnique({
     where: { id: targetUserId },
@@ -336,15 +345,17 @@ const getAndValidateUser = async (
     throw notFound('Invalid user ID.')
   }
 
-  const follow = await prisma.follow.findUnique({
-    where: {
-      followerId_followingId: {
-        followerId: requesterUserId,
-        followingId: targetUserId,
-      },
-    },
-    select: { followerId: true },
-  })
+  const follow = requesterUserId
+    ? await prisma.follow.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId: requesterUserId,
+            followingId: targetUserId,
+          },
+        },
+        select: { followerId: true },
+      })
+    : null
 
   return {
     ...user,
