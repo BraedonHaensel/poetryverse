@@ -5,6 +5,8 @@ const { userData } = require('./seeding-data/user')
 const { poemData } = require('./seeding-data/poem')
 const { poemLikeData } = require('./seeding-data/poemLike')
 const { reportData } = require('./seeding-data/report')
+const { poemTypeData } = require('./seeding-data/poemType')
+const { poemTagData } = require('./seeding-data/poemTag')
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
@@ -15,12 +17,12 @@ const prisma = new PrismaClient({ adapter })
  */
 async function main() {
   const poemTypeResult = await prisma.poemType.createMany({
-    data: poemTypes,
+    data: poemTypeData,
     skipDuplicates: true,
   })
 
   const tagResult = await prisma.tag.createMany({
-    data: tags,
+    data: poemTagData,
     skipDuplicates: true,
   })
 
@@ -63,10 +65,10 @@ async function main() {
     console.log(
       `Seed complete. Added:
     - ${poemTypeResult.count} poem types 
-    - ${tagResult.count} tags
+    - ${tagResult.count} poem tags
     - ${userResult.count} users
     - ${poemResult.count} poems
-    - ${poemLikeResult.count} poemLikes
+    - ${poemLikeResult.count} poem likes
     - ${reportResult.count} reports`
     )
   }
