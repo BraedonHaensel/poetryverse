@@ -1,7 +1,9 @@
+import { RoleEnum } from '@prisma/client'
 import type { NextFunction, Request, Response } from 'express'
 import { getToken } from 'next-auth/jwt'
 
 import config from '../lib/config'
+import { prisma } from '../lib/db'
 import { unauthorized } from '../lib/http-errors'
 
 export type AuthRequest = Request & { auth: { userId: string } }
@@ -35,3 +37,18 @@ export const requireAuth = async (
     return next(unauthorized())
   }
 }
+
+export const requireRole =
+  (req: AuthRequest, _res: Response, next: NextFunction) =>
+  async (role: RoleEnum) => {
+    const requestingUser = await prisma.user.findUnique({
+      where: { id: req.auth.userId },
+      select: { role: true },
+    })
+
+    if (requestingUser?.role === role) {
+      next()
+    }
+
+    throw unauthorized()
+  }
