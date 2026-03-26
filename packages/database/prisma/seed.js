@@ -6,7 +6,8 @@ import { poemData } from './seeding-data/poem.js'
 import { poemLikeData } from './seeding-data/poemLike.js'
 import { reportData } from './seeding-data/report.js'
 import { poemTypeData } from './seeding-data/poemType.js'
-import { poemTagData } from './seeding-data/poemTag.js'
+import { tagData } from './seeding-data/tag.js'
+import { poemTagData } from './poemTag.js'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
@@ -22,7 +23,7 @@ async function main() {
   })
 
   const tagResult = await prisma.tag.createMany({
-    data: poemTagData,
+    data: tagData,
     skipDuplicates: true,
   })
 
@@ -41,6 +42,11 @@ async function main() {
     skipDuplicates: true,
   })
 
+  const poemTagResult = await prisma.poemTag.createMany({
+    data: poemTagData,
+    skipDuplicates: true,
+  })
+
   const reportResult = await prisma.report.createMany({
     data: reportData,
     skipDuplicates: true,
@@ -53,6 +59,7 @@ async function main() {
       userResult,
       poemResult,
       poemLikeResult,
+      poemTagResult,
       reportResult,
     ].every((result) => result.count === 0)
   ) {
@@ -69,6 +76,7 @@ async function main() {
     - ${userResult.count} users
     - ${poemResult.count} poems
     - ${poemLikeResult.count} poem likes
+    - ${poemTagResult.count} poem tag relationships
     - ${reportResult.count} reports`
     )
   }
