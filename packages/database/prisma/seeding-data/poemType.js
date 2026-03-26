@@ -1,5 +1,16 @@
 export const poemTypeData = [
-  { id: 'haiku', name: 'Haiku' },
+  { id: 'acrostic', name: 'Acrostic' },
+  { id: 'ballad', name: 'Ballad' },
+  { id: 'blank-verse', name: 'Blank Verse' },
   { id: 'couplet', name: 'Couplet' },
+  { id: 'elegy', name: 'Elegy' },
+  { id: 'free-verse', name: 'Free Verse' },
+  { id: 'haiku', name: 'Haiku' },
+  { id: 'limerick', name: 'Limerick' },
+  { id: 'lyric', name: 'Lyric' },
+  { id: 'palindrome', name: 'Palindrome' },
+  { id: 'prose', name: 'Prose' },
+  { id: 'quatrain', name: 'Quatrain' },
   { id: 'sonnet', name: 'Sonnet' },
+  { id: 'tercet', name: 'Tercet' },
 ]
