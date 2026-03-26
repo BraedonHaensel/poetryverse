@@ -107,7 +107,7 @@ cp apps/api/.env.production.example apps/api/.env.production
 cp apps/web/.env.production.example apps/web/.env.production
 ```
 
-Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` .
+Then, run this command from root: `docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up` .
 
 - This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`.
 - `docker-compose.prod.yml` sets the Compose project name to `poetryverse-prod`, which keeps production Docker resources isolated from development resources.
@@ -115,14 +115,14 @@ Then, run this command from root: `docker compose -f docker-compose.yml -f docke
 If you need to seed data in production, run this manually (from repo root):
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm migrate npm run db:seed --workspace=packages/database
+docker compose  --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml run --rm migrate npm run db:seed --workspace=packages/database
 ```
 
 ### Stopping the Containers:
 
 To stop development containers, run `docker compose down`.
 
-To stop production containers, run `docker compose -f docker-compose.yml -f docker-compose.prod.yml down`.
+To stop production containers, run `docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml down`.
 
 If you would like to remove the database volume for a given environment as well, add `-v` to the matching `down` command.
 
