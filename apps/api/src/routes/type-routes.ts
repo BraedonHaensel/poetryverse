@@ -5,7 +5,7 @@ import { asyncHandler } from '../lib/async-handler'
 
 const router = Router()
 
-/** Get /api/types */
+/** GET /api/types */
 router.get('/', asyncHandler(getPoemTypes))
 
 export default router
