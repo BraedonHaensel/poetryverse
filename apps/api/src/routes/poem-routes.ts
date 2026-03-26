@@ -5,6 +5,7 @@ import {
   generateAIPoem,
   interpretPoem,
   likePoem,
+  reportPoem,
   unlikePoem,
 } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
@@ -15,6 +16,7 @@ import {
   LikePoemRequestSchema,
   PoemAIRequestSchema,
   PoemInterpretRequestSchema,
+  ReportPoemRequestSchema,
   UnlikePoemRequestSchema,
 } from '../schemas/poem-schemas'
 
@@ -58,6 +60,14 @@ router.delete(
   requireAuth,
   validate(UnlikePoemRequestSchema),
   asyncHandler(unlikePoem)
+)
+
+/** POST /api/poems/report */
+router.post(
+  '/report',
+  requireAuth,
+  validate(ReportPoemRequestSchema),
+  asyncHandler(reportPoem)
 )
 
 export default router
