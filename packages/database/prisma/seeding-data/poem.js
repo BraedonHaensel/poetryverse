@@ -5,6 +5,8 @@ export const poemIds = {
   id1: 'cmn5hpjpr000304kzeqt67a4g',
   id2: 'cmn5hp5i8000104kz2sqhbrlb',
   id3: 'cmn5hpdln000204kzfbg941te',
+  id5: 'cmn5hpzz1000504kzh3jk9a2l',
+  id6: 'cmn5hq2m4000604kzj8mn2b5p',
 }
 
 export const poemData = [
@@ -43,5 +45,29 @@ export const poemData = [
     body: "I like running fast. Especially while on grass. Unless it's wet grass.",
     createdAt: new Date('2026-03-19T05:12:13.151Z'),
     updatedAt: new Date('2026-03-19T05:12:13.151Z'),
+  },
+  {
+    id: poemIds.id5,
+    authorId: userIds.user1,
+    title: 'Moonlight Reflection',
+    typeId: poemTypeIds.couplet,
+    isPublic: true,
+    isAIAssisted: false,
+    aiLikelihoodScore: 0.31,
+    body: 'Silver moonlight dances on the still water. Reflecting dreams of the night.',
+    createdAt: new Date('2026-03-15T08:45:22.151Z'),
+    updatedAt: new Date('2026-03-15T08:45:22.151Z'),
+  },
+  {
+    id: poemIds.id6,
+    authorId: userIds.user2,
+    title: 'Winter Snow',
+    typeId: poemTypeIds.haiku,
+    isPublic: true,
+    isAIAssisted: false,
+    aiLikelihoodScore: 0.22,
+    body: 'Snowflakes fall gently. Blanketing the frozen ground. Nature sleeps in white.',
+    createdAt: new Date('2026-03-10T14:20:45.151Z'),
+    updatedAt: new Date('2026-03-10T14:20:45.151Z'),
   },
 ]
