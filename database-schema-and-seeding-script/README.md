@@ -163,3 +163,57 @@ SELECT * FROM "<table>";
   ```bash
   \pset x on
   ```
+
+## Schema and seeding instructions with a local PostgreSQL database
+
+_Prerequisite_: Install PostgreSQL and set up a local database:
+
+- https://www.postgresql.org/download/
+
+_Important Note_: Ensure the `DATABASE_URL` environment variable in [packages/database/.env](../packages/database/.env) is uncommented and points to your local PostgreSQL database.
+
+### [Local] Step 4.2.1: Install dependencies and generate the Prisma client
+
+Install the app's dependencies:
+
+```bash
+npm install
+```
+
+Generate the Prisma client:
+
+```bash
+npm run db:generate --workspace=packages/database
+```
+
+### [Local] Step 4.2.2: Apply schema/migrations to the local database
+
+There are several ways to apply the schema/migrations to your _local_ database.
+
+The easiest is with the following command, which just applies the Prisma schema directly to your database (recommended for basic local setup):
+
+```bash
+npm run db:push --workspace=packages/database
+```
+
+Alternatively, the schema can be applied by running the Prisma migrations (recommended for CI/staging/production):
+
+```bash
+npm run db:deploy --workspace=packages/database
+```
+
+### [Local] Step 5.2: Seed the local database
+
+Once the Prisma schema is applied, you can run the Prisma seeding script:
+
+```bash
+npm run db:seed --workspace=packages/database
+```
+
+### [Local] Step 6.2: Viewing the database contents
+
+Connect to the _local_ PostgreSQL database using your corresponding _username_ and _db_name_:
+
+```bash
+psql -U <username> -d <db_name>
+```
