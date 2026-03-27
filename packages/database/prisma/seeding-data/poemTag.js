@@ -11,6 +11,9 @@ export const poemTagData = [
   { poemId: poemIds.id3, tagId: tagIds.life },
 
   { poemId: poemIds.id5, tagId: tagIds.life },
+  { poemId: poemIds.id5, tagId: tagIds.night},
 
-  { poemId: poemIds.id6, tagId: tagIds.life },
+  { poemId: poemIds.id6, tagId: tagIds.winter },
+  { poemId: poemIds.id6, tagId: tagIds.nature },
+  { poemId: poemIds.id6, tagId: tagIds.camping },
 ]

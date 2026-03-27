@@ -49,6 +49,7 @@ export const tagData = [
   { id: tagIds.happy, name: 'Happy' },
   { id: tagIds.life, name: 'Life' },
   { id: tagIds.nature, name: 'Nature' },
+  { id: tagIds.night, name: 'Night' },
   { id: tagIds.nostalgic, name: 'Nostalgic' },
   { id: tagIds.ocean, name: 'Ocean' },
   { id: tagIds.parody, name: 'Parody' },
