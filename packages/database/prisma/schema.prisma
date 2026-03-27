@@ -8,11 +8,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
-
-
-
-
 // Entities Postgresql needs for NextAuth
 
 // OAuth provider accounts linked to users (tokens, provider IDs, and ownership).

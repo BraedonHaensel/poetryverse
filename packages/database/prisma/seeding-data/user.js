@@ -4,6 +4,7 @@ export const userIds = {
   user1: 'cmn2apa7m0000wbrmgb2s775x',
   user2: 'cmn5grryw0000m68o3m0jttjo',
   user3: 'cmn5gss8a0002m68oamdbn850',
+  user4: 'cmn5gss8a0002m68ogmdht670',
 }
 
 export const userData = [
@@ -19,8 +20,8 @@ export const userData = [
   },
   {
     id: userIds.user2,
-    name: 'JohnDoe',
-    email: 'johndow@gmail.com',
+    name: 'John Doe',
+    email: 'johndoe@gmail.com',
     emailVerified: null,
     image:
       'https://lh3.googleusercontent.com/a/ACg8ocJmj5fJySqfIkcNZwinUwEKlbmBmIz1sCIPgQX8OhMzF91fWw=s96-c',
@@ -35,6 +36,16 @@ export const userData = [
     image:
       'https://lh3.googleusercontent.com/a/ACg8ocIbRiKXH6j9ql_MAcuogBdPHAvTm08JA6eZAqb6YhNhElA4Xg=s96-c',
     username: 'poetryman123',
+    role: RoleEnum.USER,
+  },
+  {
+    id: userIds.user4,
+    name: 'Jane Doe',
+    email: 'janedoe@gmail.com',
+    emailVerified: null,
+    image:
+      'https://lh3.googleusercontent.com/a/ACg8ocJW7X4MmU8DnSQEiceCoue-Zm8xMcQBC16ntr7HFmHBHv4r7spC=s400-c',
+    username: 'janedoe321',
     role: RoleEnum.USER,
   },
 ]
