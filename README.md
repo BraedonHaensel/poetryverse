@@ -17,7 +17,7 @@ PoetryVerse is a mobile-first platform for creating, sharing, and discovering po
 
 ## Database Schema and Seeding Script
 
-Please see [README.md](database-schema-and-seeding-script/README.md) for instructions on how to run our database schema and seeding script.
+Please see [database-schema-and-seeding-script/README.md](database-schema-and-seeding-script/README.md) for instructions on how to run our database schema and seeding script.
 
 ## Monorepo Organization
 
