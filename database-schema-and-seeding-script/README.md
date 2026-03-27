@@ -39,9 +39,9 @@ Switch to the commit tagged with ‘schema-milestone’ using the following comm
 git switch --detach schema-milestone
 ```
 
-## Step 2: Create each of the .env files
+## Step 2: Create the .env files
 
-Create each of the `.env` and `.env.production` files by copying each of their respective `.env.example` and `.env.production.example` files, with the following commands:
+Create the `.env` and `.env.production` files by copying their respective `.env.example` and `.env.production.example` files, with the following commands:
 
 ```bash
 cp .env.example .env
@@ -60,7 +60,7 @@ cp packages/database/.env.example packages/database/.env
 
 <u>Note to TA: Please populate the `.env` files with the `.env` file examples we have submitted.</u>
 
-Otherwise, if the `.env` file examples were not provided, you would populate each of the `.env` files created in the previous step by following their commented instructions. You will need to contact a PoetryVerse team member to obtain some of the secret environment variable values.
+Otherwise, if the `.env` file examples were not provided, you would populate the `.env` files created in the previous step by following their commented instructions. You will need to contact a PoetryVerse team member to obtain some of the secret environment variable values.
 
 ## Schema and seeding instructions with the Docker PostgreSQL instance
 
@@ -110,7 +110,7 @@ docker compose --env-file .env.production -f docker-compose.yml -f docker-compos
 
 _Note_: Running the seed command populates seed data by starting a temporary container based on the "migrate" service and overrides the service’s default command with the Prisma seeding command.
 
-### [Compose] Step 6.1: Viewing the database contents
+### [Compose] Step 6.1: View the database contents
 
 Connect to the containerized _development_ PostgreSQL database:
 
@@ -210,10 +210,44 @@ Once the Prisma schema is applied, you can run the Prisma seeding script:
 npm run db:seed --workspace=packages/database
 ```
 
-### [Local] Step 6.2: Viewing the database contents
+### [Local] Step 6.2: View the database contents
 
 Connect to the _local_ PostgreSQL database using your corresponding _username_ and _db_name_:
 
 ```bash
 psql -U <username> -d <db_name>
 ```
+
+View a table’s schema:
+
+```bash
+\d "<table>"
+```
+
+- For example:
+
+  ```bash
+  \d "Poem"
+  ```
+
+- _Tip_: If necessary, use `q` to exit the viewer
+
+View the seeded rows for a table:
+
+```bash
+SELECT * FROM "<table>";
+```
+
+- For example:
+
+  ```bash
+  SELECT * FROM "Poem";
+  ```
+
+- _Tip_: If necessary, use `q` to exit the viewer
+
+- _Tip_: For a cleaner view of the table rows without line wrapping, use:
+
+  ```bash
+  \pset x on
+  ```
