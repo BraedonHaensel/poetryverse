@@ -51,12 +51,10 @@ export const getPoems = async (
   // TODO: do i need to check if this id exists?
 
 
-  // Check for authorId
   if (query?.authorId) {
-    
-  // if authorId == this user id, return all poems
+    // if authorId == this user id, return all poems for this user
 
-  // if authorId != this user id, return author's public poems
+    // if authorId != this user id, return the author's public poems
 
     return res.status(200).json(query)
 

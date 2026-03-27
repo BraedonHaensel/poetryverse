@@ -24,7 +24,11 @@ import {
 
 const router = Router()
 
-/** GET /api/poems/:authorId */
+/** GET /api/poems
+ * 
+ * Query params:
+ * - authorId (optional): string - filter returned poems by authorId
+ */
 router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPoems))
 
 /** POST /api/poems */
