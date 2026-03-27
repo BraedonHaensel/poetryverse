@@ -5,6 +5,7 @@ export const poemIds = {
   id1: 'cmn5hpjpr000304kzeqt67a4g',
   id2: 'cmn5hp5i8000104kz2sqhbrlb',
   id3: 'cmn5hpdln000204kzfbg941te',
+  id4: 'cmn5hptkb800064kzfbg872re',
 }
 
 export const poemData = [
@@ -43,5 +44,17 @@ export const poemData = [
     body: "I like running fast. Especially while on grass. Unless it's wet grass.",
     createdAt: new Date('2026-03-19T05:12:13.151Z'),
     updatedAt: new Date('2026-03-19T05:12:13.151Z'),
+  },
+  {
+    id: poemIds.id4,
+    authorId: userIds.user3,
+    title: 'The Pink Octopus',
+    typeId: poemTypeIds.haiku,
+    isPublic: true,
+    isAIAssisted: false,
+    aiLikelihoodScore: 0.75,
+    body: 'The octopus is pink and deep. But she has promises to keep. After cake and lots of sleep.',
+    createdAt: new Date('2026-03-26T05:11:13.151Z'),
+    updatedAt: new Date('2026-03-26T05:11:13.151Z'),
   },
 ]
