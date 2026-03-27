@@ -1,6 +1,25 @@
-# PoetryVerse Monorepo
+# PoetryVerse
 
-## Repo Organization
+SENG 513 - Web-Based Systems - Winter 2026 - PG 2
+
+PoetryVerse is a mobile-first platform for creating, sharing, and discovering poetry!
+
+## Group Members
+
+| Person          | Lecture | Lab | UCID     |
+| --------------- | ------- | --- | -------- |
+| Carson May      | L01     | B05 | 30139961 |
+| Sukriti Badhwar | L01     | B05 | 30164075 |
+| Feranmi Falade  | L01     | B05 | 30145480 |
+| Chantae Ho      | L01     | B08 | 30141743 |
+| Rohan Kapila    | L01     | B08 | 30145862 |
+| Braedon Haensel | L01     | B02 | 30144363 |
+
+## Database Schema and Seeding Script
+
+Please see [database-schema-and-seeding-script/README.md](database-schema-and-seeding-script/README.md) for instructions on how to run our database schema and seeding script.
+
+## Monorepo Organization
 
 - `apps/web`: Next.js frontend (`http://localhost:3000`)
 - `apps/api`: Express API (`http://localhost:3001`)
