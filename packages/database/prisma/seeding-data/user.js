@@ -20,8 +20,8 @@ export const userData = [
   },
   {
     id: userIds.user2,
-    name: 'JohnDoe',
-    email: 'johndow@gmail.com',
+    name: 'John Doe',
+    email: 'johndoe@gmail.com',
     emailVerified: null,
     image:
       'https://lh3.googleusercontent.com/a/ACg8ocJmj5fJySqfIkcNZwinUwEKlbmBmIz1sCIPgQX8OhMzF91fWw=s96-c',
@@ -40,7 +40,7 @@ export const userData = [
   },
   {
     id: userIds.user4,
-    name: 'JaneDoe',
+    name: 'Jane Doe',
     email: 'janedoe@gmail.com',
     emailVerified: null,
     image:
