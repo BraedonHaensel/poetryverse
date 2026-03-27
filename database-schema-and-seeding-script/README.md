@@ -11,6 +11,16 @@
 | Rohan Kapila    | L01     | B08 | 30145862 |
 | Braedon Haensel | L01     | B02 | 30144363 |
 
+## Schema File
+
+The Prisma database schema is located at [packages/database/prisma/schema.prisma](../packages/database/prisma/schema.prisma).
+
+## Seeding Script
+
+The seed script is located at [packages/database/prisma/seed.js](../packages/database/prisma/seed.js).
+
+Seed data is stored in [packages/database/prisma/seeding-data/](../packages/database/prisma/seeding-data/).
+
 ## Prerequisites
 
 Install Git from https://git-scm.com/install/.
