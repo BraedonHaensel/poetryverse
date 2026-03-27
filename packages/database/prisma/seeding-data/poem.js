@@ -6,6 +6,7 @@ export const poemIds = {
   id2: 'cmn5hp5i8000104kz2sqhbrlb',
   id3: 'cmn5hpdln000204kzfbg941te',
   id4: 'cmn5hptkb800064kzfbg872re',
+  id7: 'cmn9eogcp0001356s0875b3rp',
 }
 
 export const poemData = [
@@ -56,5 +57,17 @@ export const poemData = [
     body: 'The octopus is pink and sweet. She has many fishes to eat. Crabs are her favourite treat.',
     createdAt: new Date('2026-03-26T05:11:13.151Z'),
     updatedAt: new Date('2026-03-26T05:11:13.151Z'),
+  },
+  {
+    id: poemIds.id7,
+    authorId: userIds.user2,
+    title: 'The Sea',
+    typeId: poemTypeIds.freeVerse,
+    isPublic: true,
+    isAIAssisted: false,
+    aiLikelihoodScore: 0.45,
+    body: 'How strong is the sea. We wonder we.',
+    createdAt: new Date('2026-03-27T05:08:27.151Z'),
+    updatedAt: new Date('2026-03-27T05:08:27.151Z'),
   },
 ]
