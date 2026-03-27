@@ -55,7 +55,7 @@ export const poemData = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoodScore: 0.75,
-    body: 'The octopus is pink and deep. But she has promises to keep. After cake and lots of sleep.',
+    body: 'The octopus is pink and sweet. She has many fishes to eat. Crabs are her favourite treat.',
     createdAt: new Date('2026-03-26T05:11:13.151Z'),
     updatedAt: new Date('2026-03-26T05:11:13.151Z'),
   },
