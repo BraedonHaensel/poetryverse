@@ -1,36 +1,29 @@
-const { PrismaClient } = require('@prisma/client')
-const { PrismaPg } = require('@prisma/adapter-pg')
-const { Pool } = require('pg')
-const { userData } = require('./seeding-data/user')
-const { poemData } = require('./seeding-data/poem')
-const { poemLikeData } = require('./seeding-data/poemLike')
-const { reportData } = require('./seeding-data/report')
+import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
+import { userData } from './seeding-data/user.js'
+import { poemData } from './seeding-data/poem.js'
+import { poemLikeData } from './seeding-data/poemLike.js'
+import { reportData } from './seeding-data/report.js'
+import { poemTypeData } from './seeding-data/poemType.js'
+import { tagData } from './seeding-data/tag.js'
+import { poemTagData } from './poemTag.js'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
-const poemTypes = [
-  { id: 'haiku', name: 'Haiku' },
-  { id: 'couplet', name: 'Couplet' },
-  { id: 'sonnet', name: 'Sonnet' },
-]
-
-const tags = [
-  { id: 'nature', name: 'Nature' },
-  { id: 'romance', name: 'Romance' },
-  { id: 'comedy', name: 'Comedy' },
-  { id: 'parody', name: 'Parody' },
-]
-
+/**
+ * Seeds the database tables with sample data
+ */
 async function main() {
   const poemTypeResult = await prisma.poemType.createMany({
-    data: poemTypes,
+    data: poemTypeData,
     skipDuplicates: true,
   })
 
   const tagResult = await prisma.tag.createMany({
-    data: tags,
+    data: tagData,
     skipDuplicates: true,
   })
 
@@ -49,20 +42,44 @@ async function main() {
     skipDuplicates: true,
   })
 
-  const reportResult = await prisma.report.createMany({
-    data: reportData,
-    skipDuplicates: true
+  const poemTagResult = await prisma.poemTag.createMany({
+    data: poemTagData,
+    skipDuplicates: true,
   })
 
-  console.log(
-    `Seed complete. Added:
+  const reportResult = await prisma.report.createMany({
+    data: reportData,
+    skipDuplicates: true,
+  })
+
+  if (
+    [
+      poemTypeResult,
+      tagResult,
+      userResult,
+      poemResult,
+      poemLikeResult,
+      poemTagResult,
+      reportResult,
+    ].every((result) => result.count === 0)
+  ) {
+    // DB already contains all the seed data
+    console.log(
+      'Seed complete. No changes were made as the database is already up to date!'
+    )
+  } else {
+    // Dispaly the number of additions to each table
+    console.log(
+      `Seed complete. Added:
     - ${poemTypeResult.count} poem types 
-    - ${tagResult.count} tags
+    - ${tagResult.count} poem tags
     - ${userResult.count} users
     - ${poemResult.count} poems
-    - ${poemLikeResult.count} poemLikes
+    - ${poemLikeResult.count} poem likes
+    - ${poemTagResult.count} poem tag relationships
     - ${reportResult.count} reports`
-  )
+    )
+  }
 }
 
 main()
