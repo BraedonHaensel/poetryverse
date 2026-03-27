@@ -47,7 +47,7 @@ export const poemData = [
   },
   {
     id: poemIds.id4,
-    authorId: userIds.user3,
+    authorId: userIds.user4,
     title: 'The Pink Octopus',
     typeId: poemTypeIds.haiku,
     isPublic: true,
