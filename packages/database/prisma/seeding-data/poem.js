@@ -54,7 +54,7 @@ export const poemData = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoodScore: 0.31,
-    body: 'Silver moonlight dances on the still water. Reflecting dreams of the night.',
+    body: 'Soft moonlight shines upon the sleeping earth. In its gentle glow, lost souls find their worth.',
     createdAt: new Date('2026-03-15T08:45:22.151Z'),
     updatedAt: new Date('2026-03-15T08:45:22.151Z'),
   },
@@ -66,6 +66,7 @@ export const poemData = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoodScore: 0.22,
+    // Source: https://www.facebook.com/groups/2446080102259824/posts/2493742574160243/
     body: 'Snowflakes fall gently. Blanketing the frozen ground. Nature sleeps in white.',
     createdAt: new Date('2026-03-10T14:20:45.151Z'),
     updatedAt: new Date('2026-03-10T14:20:45.151Z'),
