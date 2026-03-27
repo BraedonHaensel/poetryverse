@@ -35,6 +35,31 @@ const poemIncludeStatement = {
 }
 
 /**
+ * Retrieves poems with from the database and returns them as JSON.
+ * @param _req Incoming Express request.
+ * @param res Express response used to return poems.
+ * @returns A 200 response containing the list of poems.
+ */
+export const getPoems = async (
+  _req: Request,
+  res: Response,
+) => {
+  // Check for authorId
+  // if authorId == this user id, return all poems
+
+  // if authorId != this user id, return author's public poems
+
+  // Else if not authorId provided
+  // Return all existing poems with public visibility
+
+
+  // logger.info('Fetching all users')
+  // const users = await prisma.user.findMany()
+  // logger.info(`Fetched all users count=${users.length}`)
+  // return res.status(200).json(users)
+}
+
+/**
  * Creates a poem for the authenticated user.
  * @param req Express request with a validated create-poem body.
  * @param res Express response object.

@@ -13,6 +13,13 @@ const PROMPT_MAX = 1000
 const REPORT_REASON_MIN = 3
 const REPORT_REASON_MAX = 200
 
+/** Validates `GET /api/poems` request bodies. */
+export const GetPoemsRequestSchema = z.object({
+  body: z.object({
+    authorId: z.string().optional()
+  })
+})
+
 /** Validates `POST /api/poems` request bodies. */
 export const CreatePoemRequestSchema = z.object({
   body: z.object({

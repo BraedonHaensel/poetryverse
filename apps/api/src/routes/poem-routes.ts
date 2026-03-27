@@ -1,6 +1,7 @@
 import { Router } from 'express'
 
 import {
+  getPoems,
   createPoem,
   generateAIPoem,
   interpretPoem,
@@ -21,6 +22,9 @@ import {
 } from '../schemas/poem-schemas'
 
 const router = Router()
+
+/** GET /api/poems */
+router.get('/', requireAuth, asyncHandler(getPoems))
 
 /** POST /api/poems */
 router.post(
