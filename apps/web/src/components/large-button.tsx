@@ -13,7 +13,10 @@ export function LargeButton({
 }: React.ComponentProps<typeof Button>) {
   return (
     <Button
-      className={cn('h-auto w-full text-lg whitespace-normal', className)}
+      className={cn(
+        'h-auto w-full cursor-pointer text-lg whitespace-normal',
+        className
+      )}
       {...props}
     />
   )
