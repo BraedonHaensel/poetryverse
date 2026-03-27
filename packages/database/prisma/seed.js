@@ -8,6 +8,7 @@ import { reportData } from './seeding-data/report.js'
 import { poemTypeData } from './seeding-data/poemType.js'
 import { tagData } from './seeding-data/tag.js'
 import { poemTagData } from './poemTag.js'
+import { followData } from './seeding-data/follow.js'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
@@ -17,6 +18,7 @@ const prisma = new PrismaClient({ adapter })
  * Seeds the database tables with sample data
  */
 async function main() {
+  // Seed the tables
   const poemTypeResult = await prisma.poemType.createMany({
     data: poemTypeData,
     skipDuplicates: true,
@@ -52,6 +54,12 @@ async function main() {
     skipDuplicates: true,
   })
 
+  const followResult = await prisma.follow.createMany({
+    data: followData,
+    skipDuplicates: true,
+  })
+
+  // Output the seeding result
   if (
     [
       poemTypeResult,
@@ -61,6 +69,7 @@ async function main() {
       poemLikeResult,
       poemTagResult,
       reportResult,
+      followResult,
     ].every((result) => result.count === 0)
   ) {
     // DB already contains all the seed data
@@ -77,7 +86,8 @@ async function main() {
     - ${poemResult.count} poems
     - ${poemLikeResult.count} poem likes
     - ${poemTagResult.count} poem tag relationships
-    - ${reportResult.count} reports`
+    - ${reportResult.count} reports
+    - ${followResult.count} follows`
     )
   }
 }
