@@ -9,6 +9,7 @@ import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import type { AuthRequest } from '../middleware/auth'
 import {
+  GetPoemsRequest,
   CreatePoemRequest,
   LikePoemRequest,
   PoemAIRequest,
@@ -41,22 +42,33 @@ const poemIncludeStatement = {
  * @returns A 200 response containing the list of poems.
  */
 export const getPoems = async (
-  _req: Request,
+  req: AuthRequest,
   res: Response,
 ) => {
+  const query = req.query as GetPoemsRequest
+  logger.info(`getPoemsData ${query?.authorId}`)
+
+  // TODO: do i need to check if this id exists?
+
+
   // Check for authorId
+  if (query?.authorId) {
+    
   // if authorId == this user id, return all poems
 
   // if authorId != this user id, return author's public poems
 
-  // Else if not authorId provided
-  // Return all existing poems with public visibility
+    return res.status(200).json(query)
 
-
-  // logger.info('Fetching all users')
-  // const users = await prisma.user.findMany()
-  // logger.info(`Fetched all users count=${users.length}`)
-  // return res.status(200).json(users)
+  } else {
+    // If authorId not provided, return all public poems
+    logger.info('Fetching all public poems')
+    const poems = await prisma.poem.findMany({
+      where: { isPublic: true }
+    })
+    logger.info(`Fetched all public poems count=${poems.length}`)
+    return res.status(200).json(poems)
+  }
 }
 
 /**

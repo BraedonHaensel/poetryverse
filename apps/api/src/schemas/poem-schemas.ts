@@ -15,9 +15,7 @@ const REPORT_REASON_MAX = 200
 
 /** Validates `GET /api/poems` request bodies. */
 export const GetPoemsRequestSchema = z.object({
-  body: z.object({
-    authorId: z.string().optional()
-  })
+  authorId: z.string().optional(),
 })
 
 /** Validates `POST /api/poems` request bodies. */
@@ -111,6 +109,9 @@ export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
 
 /** Request body type for `PoemAIRequestSchema`. */
 export type PoemAIRequest = z.infer<typeof PoemAIRequestSchema>['body']
+
+/** Request type for `GetPoemsRequestSchema`. */
+export type GetPoemsRequest = z.infer<typeof GetPoemsRequestSchema>
 
 /** Request body type for `CreatePoemRequestSchema`. */
 export type CreatePoemRequest = z.infer<typeof CreatePoemRequestSchema>['body']

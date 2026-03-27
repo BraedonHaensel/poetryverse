@@ -13,6 +13,7 @@ import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
+  GetPoemsRequestSchema,
   CreatePoemRequestSchema,
   LikePoemRequestSchema,
   PoemAIRequestSchema,
@@ -23,8 +24,8 @@ import {
 
 const router = Router()
 
-/** GET /api/poems */
-router.get('/', requireAuth, asyncHandler(getPoems))
+/** GET /api/poems/:authorId */
+router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPoems))
 
 /** POST /api/poems */
 router.post(
