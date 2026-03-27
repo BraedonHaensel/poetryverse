@@ -1,6 +1,6 @@
 # SENG 513 - PoetryVerse Database Schema and Seeding Script - PG 2
 
-## Group members
+## Group Members
 
 | Person          | Lecture | Lab | UCID     |
 | --------------- | ------- | --- | -------- |
