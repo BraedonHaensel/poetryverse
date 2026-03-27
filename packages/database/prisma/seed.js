@@ -7,7 +7,7 @@ import { poemLikeData } from './seeding-data/poemLike.js'
 import { reportData } from './seeding-data/report.js'
 import { poemTypeData } from './seeding-data/poemType.js'
 import { tagData } from './seeding-data/tag.js'
-import { poemTagData } from './poemTag.js'
+import { poemTagData } from './seeding-data/poemTag.js'
 import { followData } from './seeding-data/follow.js'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
