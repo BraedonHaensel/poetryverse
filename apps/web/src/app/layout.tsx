@@ -22,6 +22,12 @@ export const metadata: Metadata = {
     'SENG513 Application - PoetryVerse is a platform for sharing and discovering poetry!',
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
