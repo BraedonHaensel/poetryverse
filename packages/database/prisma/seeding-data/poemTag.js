@@ -1,5 +1,5 @@
-import { poemIds } from './seeding-data/poem.js'
-import { tagIds } from './seeding-data/tag.js'
+import { poemIds } from './poem.js'
+import { tagIds } from './tag.js'
 
 export const poemTagData = [
   { poemId: poemIds.id1, tagId: tagIds.random },
