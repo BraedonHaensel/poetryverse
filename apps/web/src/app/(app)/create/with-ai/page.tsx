@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -14,6 +14,12 @@ import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { api, displayApiError } from '@/lib/api'
+import {
+  getPoemTags,
+  getPoemTypes,
+  PoemTag,
+  PoemType,
+} from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 import {
   CreateFromScratchSchema,
@@ -34,13 +40,25 @@ export default function CreatePoemWithAI() {
   const [isRegenConfirmOpen, setIsRegenConfirmOpen] = useState(false)
 
   const [isPublishing, setIsPublishing] = useState(false)
+  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
+  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
   const router = useRouter()
 
+  // Prevent the body scrollbar from appearing, as the page has its own scrollbar
   useEffect((): (() => void) => {
-    // Prevent the body scrollbar from appearing, as the page has its own scrollbar
     document.body.style.overflow = 'hidden'
     // Restore the body scrollbar upon leaving the page
     return () => (document.body.style.overflow = '')
+  }, [])
+
+  // Get the list of poem tags and types from the API
+  const didFetch = useRef(false)
+  useEffect(() => {
+    if (didFetch.current) return // Prevent double fetch in strict mode
+    didFetch.current = true
+
+    getPoemTypes().then(setPoemTypes)
+    getPoemTags().then(setPoemTags)
   }, [])
 
   // Create poem with AI form
@@ -147,6 +165,8 @@ export default function CreatePoemWithAI() {
               onSubmit={onSubmit}
               isGenerated={isGenerated}
               onGenerateClick={handleGenerateClick}
+              poemTypes={poemTypes}
+              poemTags={poemTags}
             />
           </div>
         </div>
@@ -170,6 +190,8 @@ export default function CreatePoemWithAI() {
                 onSubmit={onSubmit}
                 isGenerated={isGenerated}
                 onGenerateClick={handleGenerateClick}
+                poemTypes={poemTypes}
+                poemTags={poemTags}
               />
             </CardContent>
           </ShadowCard>

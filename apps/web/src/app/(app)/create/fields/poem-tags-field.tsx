@@ -9,18 +9,23 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { PoemTag } from '@/lib/poem-requests'
 import { MAX_TAGS } from '@/schemas/create-poem-schemas'
 
 type HasTagIds = { tagIds: string[] }
 
 type Props<T extends HasTagIds> = {
   control: Control<T>
+  poemTags: PoemTag[]
 }
 
 /**
  * Poem tags field.
  */
-export function PoemTagsField<T extends HasTagIds>({ control }: Props<T>) {
+export function PoemTagsField<T extends HasTagIds>({
+  control,
+  poemTags,
+}: Props<T>) {
   const { trigger } = useFormContext<T>()
 
   return (
@@ -33,6 +38,7 @@ export function PoemTagsField<T extends HasTagIds>({ control }: Props<T>) {
             <FormLabel>Tags</FormLabel>
             <FormControl>
               <PoemTagsSelector
+                poemTags={poemTags}
                 selectedTagIds={field.value as string[]}
                 onChange={async (val) => {
                   // Prevent adding excess tags (+1 so the validation error appears)

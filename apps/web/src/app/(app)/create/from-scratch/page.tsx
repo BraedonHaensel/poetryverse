@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -13,6 +13,12 @@ import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { api, displayApiError } from '@/lib/api'
+import {
+  getPoemTags,
+  getPoemTypes,
+  PoemTag,
+  PoemType,
+} from '@/lib/poem-requests'
 import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 import CreatePoemFromScratchForm from './from-scratch-form'
@@ -22,6 +28,8 @@ import CreatePoemFromScratchForm from './from-scratch-form'
  */
 export default function CreatePoemFromScratch() {
   const [isPublishing, setIsPublishing] = useState(false)
+  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
+  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
   const router = useRouter()
 
   useEffect((): (() => void) => {
@@ -29,6 +37,16 @@ export default function CreatePoemFromScratch() {
     document.body.style.overflow = 'hidden'
     // Restore the body scrollbar upon leaving the page
     return () => (document.body.style.overflow = '')
+  }, [])
+
+  // Get the list of poem tags and types from the API
+  const didFetch = useRef(false)
+  useEffect(() => {
+    if (didFetch.current) return // Prevent double fetch in strict mode
+    didFetch.current = true
+
+    getPoemTypes().then(setPoemTypes)
+    getPoemTags().then(setPoemTags)
   }, [])
 
   // Create poem from scratch form
@@ -77,7 +95,12 @@ export default function CreatePoemFromScratch() {
             className="max-[340]:text-[22px]"
           />
           <div className="flex flex-1 flex-col gap-2 p-4">
-            <CreatePoemFromScratchForm form={form} onSubmit={onSubmit} />
+            <CreatePoemFromScratchForm
+              form={form}
+              onSubmit={onSubmit}
+              poemTypes={poemTypes}
+              poemTags={poemTags}
+            />
           </div>
         </div>
 
@@ -93,7 +116,12 @@ export default function CreatePoemFromScratch() {
               </div>
             </CardHeader>
             <CardContent>
-              <CreatePoemFromScratchForm form={form} onSubmit={onSubmit} />
+              <CreatePoemFromScratchForm
+                form={form}
+                onSubmit={onSubmit}
+                poemTypes={poemTypes}
+                poemTags={poemTags}
+              />
             </CardContent>
           </ShadowCard>
         </div>

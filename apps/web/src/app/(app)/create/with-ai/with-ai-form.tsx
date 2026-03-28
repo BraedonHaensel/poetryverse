@@ -1,6 +1,7 @@
 import { UseFormReturn } from 'react-hook-form'
 
 import { LargeButton } from '@/components/large-button'
+import { PoemTag, PoemType } from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 import { CreateWithAISchema } from '@/schemas/create-poem-schemas'
 
@@ -16,6 +17,8 @@ type Props = {
   onSubmit: (data: CreateWithAISchema) => void
   isGenerated: boolean
   onGenerateClick: () => void
+  poemTypes: PoemType[]
+  poemTags: PoemTag[]
 }
 
 /**
@@ -26,6 +29,8 @@ export default function CreatePoemWithAIForm({
   onSubmit,
   isGenerated,
   onGenerateClick,
+  poemTypes,
+  poemTags,
 }: Props) {
   const control = form.control
 
@@ -39,7 +44,7 @@ export default function CreatePoemWithAIForm({
     >
       {/* Left column fields on desktop */}
       <div className="space-y-2 md:space-y-3">
-        <PoemTypeField control={control} />
+        <PoemTypeField control={control} poemTypes={poemTypes} />
         <PoemPromptField control={control} />
 
         {/* Generate/regenerate button */}
@@ -54,7 +59,7 @@ export default function CreatePoemWithAIForm({
       {isGenerated && (
         <div className="space-y-2 md:space-y-3">
           <PoemContentsField control={control} showAIDescription />
-          <PoemTagsField control={control} />
+          <PoemTagsField control={control} poemTags={poemTags} />
           <PoemVisibilityField control={control} />
 
           {/* Publish button */}

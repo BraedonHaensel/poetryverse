@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react'
 import { Control, Path } from 'react-hook-form'
 
 import { ShadowCard } from '@/components/shadow-card'
@@ -16,43 +15,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { api, displayApiError } from '@/lib/api'
-
-type PoemType = {
-  id: string
-  name: string
-}
+import { PoemType } from '@/lib/poem-requests'
 
 type HasTypeId = { typeId: string }
 
 type Props<T extends HasTypeId> = {
   control: Control<T>
+  poemTypes: PoemType[]
 }
 
 /**
  * Poem type field.
  */
-export function PoemTypeField<T extends HasTypeId>({ control }: Props<T>) {
-  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
-  const didFetch = useRef(false)
-
-  // Get the list of poem types from the API
-  useEffect(() => {
-    if (didFetch.current) return // Prevent double fetch in strict mode
-    didFetch.current = true
-
-    api
-      .get('/api/poem-types')
-      .then((response) => {
-        const data = response.data.data
-        console.log('Poem types:', data)
-        setPoemTypes(data)
-      })
-      .catch((error) => {
-        displayApiError(error, 'Failed to get poem types')
-      })
-  }, [])
-
+export function PoemTypeField<T extends HasTypeId>({
+  control,
+  poemTypes,
+}: Props<T>) {
   return (
     <ShadowCard className="p-3">
       <FormField

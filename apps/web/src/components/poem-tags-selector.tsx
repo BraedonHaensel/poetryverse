@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import {
   Combobox,
@@ -15,14 +15,10 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from '@/components/ui/combobox'
-import { api, displayApiError } from '@/lib/api'
-
-type PoemTag = {
-  id: string
-  name: string
-}
+import { PoemTag } from '@/lib/poem-requests'
 
 type Props = {
+  poemTags: PoemTag[]
   selectedTagIds: string[]
   onChange: (selection: string[]) => void
   isInvalid: boolean
@@ -30,41 +26,26 @@ type Props = {
 
 /**
  * Poem tags multi-select.
+ * @param poemTags The list of all poem tag objects.
  * @param selectedTagIds The list of currently selected tag IDs.
  * @param onChange Callback for handling selection changes.
  * @param isInvalid Whether the validation styles should be displayed.
  */
 export function PoemTagsSelector({
+  poemTags,
   selectedTagIds,
   onChange,
   isInvalid = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
-  const didFetch = useRef(false)
   const anchor = useComboboxAnchor()
 
-  // Get the list of poem tags from the API
-  useEffect(() => {
-    if (didFetch.current) return // Prevent double fetch in strict mode
-    didFetch.current = true
-
-    api
-      .get('/api/poem-tags')
-      .then((response) => {
-        const data = response.data.data
-        console.log('Poem tags:', data)
-        setPoemTags(data)
-      })
-      .catch((error) => {
-        displayApiError(error, 'Failed to get poem tags')
-      })
-  }, [])
-
   // Gets the PoemTag object for a given tag ID
-  const tagIdToObj = (tagId: string) => {
+  const tagIdToObj = (tagId: PoemTag['id']) => {
     const tag = poemTags.find((tag) => tag.id === tagId)
-    return tag !== undefined ? tag : { id: '', name: '' }
+    if (tag !== undefined) return tag
+    console.error('Unknown tag ID:', tagId)
+    return { id: '', name: '' }
   }
 
   return (
