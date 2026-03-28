@@ -46,7 +46,9 @@ export const getUsers = async (
   _next: NextFunction
 ) => {
   logger.info('Fetching all users')
+
   const users = await prisma.user.findMany()
+
   logger.info(`Fetched all users count=${users.length}`)
   return res.status(200).json(users)
 }
@@ -92,6 +94,7 @@ export const getMyUserInfo = async (
 ) => {
   const userId = req.auth.userId
   logger.info(`Fetching current user profile userId=${userId}`)
+
   // Not using SELECT_USER_STATEMENT here, as this endpoint can expose more information about the user.
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -279,6 +282,7 @@ const addRequesterFollowState = async (
     return []
   }
 
+  // User is a guest, so not following any users.
   if (!requesterUserId) {
     return users.map((user) => ({
       ...user,
