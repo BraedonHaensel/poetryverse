@@ -1,3 +1,4 @@
+import { ReasonType } from '@prisma/client'
 import { z } from 'zod'
 
 // Validation limits.
@@ -9,6 +10,8 @@ const MIN_TAGS = 1
 const MAX_TAGS = 5
 const PROMPT_MIN = 20
 const PROMPT_MAX = 1000
+const REPORT_REASON_MIN = 3
+const REPORT_REASON_MAX = 200
 
 /** Validates `POST /api/poems` request bodies. */
 export const CreatePoemRequestSchema = z.object({
@@ -59,6 +62,13 @@ export const PoemInterpretRequestSchema = z.object({
   }),
 })
 
+/** Validates structured AI interpretation responses. */
+export const PoemInterpretResponseSchema = z.object({
+  interpretation: z
+    .string()
+    .describe('Interpretation provided from interpret call'),
+})
+
 /** Validates `PUT /api/poems/like` request bodies. */
 export const LikePoemRequestSchema = z.object({
   body: z.object({
@@ -69,11 +79,21 @@ export const LikePoemRequestSchema = z.object({
 /** Validates `DELETE /api/poems/like` request bodies. */
 export const UnlikePoemRequestSchema = LikePoemRequestSchema
 
+/** Validates `POST /api/poems/report` request bodies. */
+export const ReportPoemRequestSchema = z.object({
+  body: z.object({
+    poemId: z.string().nonempty('Poem is required.'),
+    reasonType: z.enum(ReasonType),
+    reason: z
+      .string()
+      .min(REPORT_REASON_MIN, `Report reason must be at least ${REPORT_REASON_MIN} characters.`)
+      .max(REPORT_REASON_MAX, `Report reason must be at most ${REPORT_REASON_MAX} characters.`),
+  }),
+})
+
 /** Validates structured AI interpretation responses. */
-export const PoemInterpretResponseSchema = z.object({
-  interpretation: z
-    .string()
-    .describe('Interpretation provided from interpret call'),
+export const ReportPoemResponseSchema = z.object({
+  reportId: z.string().describe('Id of the created poem report.'),
 })
 
 /** Type returned by `interpretSchema`. */
@@ -98,3 +118,6 @@ export type LikePoemRequest = z.infer<typeof LikePoemRequestSchema>['body']
 
 /** Request body type for `UnlikePoemRequestSchema`. */
 export type UnlikePoemRequest = z.infer<typeof UnlikePoemRequestSchema>['body']
+
+/** Reuqest body type for `ReportPoemSchema`. */
+export type ReportPoemRequest = z.infer<typeof ReportPoemRequestSchema>['body']

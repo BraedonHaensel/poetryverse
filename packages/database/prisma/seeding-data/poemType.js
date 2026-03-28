@@ -1,0 +1,33 @@
+export const poemTypeIds = {
+  acrostic: 'acrostic',
+  ballad: 'ballad',
+  blankVerse: 'blank-verse',
+  couplet: 'couplet',
+  elegy: 'elegy',
+  freeVerse: 'free-verse',
+  haiku: 'haiku',
+  limerick: 'limerick',
+  lyric: 'lyric',
+  palindrome: 'palindrome',
+  prose: 'prose',
+  quatrain: 'quatrain',
+  sonnet: 'sonnet',
+  tercet: 'tercet',
+}
+
+export const poemTypeData = [
+  { id: poemTypeIds.acrostic, name: 'Acrostic' },
+  { id: poemTypeIds.ballad, name: 'Ballad' },
+  { id: poemTypeIds.blankVerse, name: 'Blank Verse' },
+  { id: poemTypeIds.couplet, name: 'Couplet' },
+  { id: poemTypeIds.elegy, name: 'Elegy' },
+  { id: poemTypeIds.freeVerse, name: 'Free Verse' },
+  { id: poemTypeIds.haiku, name: 'Haiku' },
+  { id: poemTypeIds.limerick, name: 'Limerick' },
+  { id: poemTypeIds.lyric, name: 'Lyric' },
+  { id: poemTypeIds.palindrome, name: 'Palindrome' },
+  { id: poemTypeIds.prose, name: 'Prose' },
+  { id: poemTypeIds.quatrain, name: 'Quatrain' },
+  { id: poemTypeIds.sonnet, name: 'Sonnet' },
+  { id: poemTypeIds.tercet, name: 'Tercet' },
+]
