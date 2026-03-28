@@ -1,9 +1,9 @@
 'use client'
 
-import { LoaderCircle } from 'lucide-react'
 import { SessionProvider, useSession } from 'next-auth/react'
 import React from 'react'
 
+import PageLoadingIndicator from './page-loading-indicator'
 import { TooltipProvider } from './ui/tooltip'
 
 type SessionLoaderProps = {
@@ -16,9 +16,7 @@ type SessionLoaderProps = {
 function SessionLoader({ children }: SessionLoaderProps) {
   const { status } = useSession()
 
-  if (status === 'loading') {
-    return <LoaderCircle className="mx-auto mt-5 h-10 w-10 animate-spin" />
-  }
+  if (status === 'loading') return <PageLoadingIndicator />
 
   // Session loaded, display the page contents
   return <>{children}</>
