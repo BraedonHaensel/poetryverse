@@ -1,6 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
   Combobox,
@@ -14,18 +15,12 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from '@/components/ui/combobox'
+import { api, displayApiError } from '@/lib/api'
 
-// TODO Hardcoded example, clean up when we can get poem tags from the backend.
-const POEM_TAGS = [
-  { id: 'nature', name: 'Nature' },
-  { id: 'romance', name: 'Romance' },
-  { id: 'comedy', name: 'Comedy' },
-  { id: 'parody', name: 'Parody' },
-]
-const POEM_TAG_IDS = POEM_TAGS.map((tag) => tag.id)
-const POEM_TAG_NAMES_BY_ID = Object.fromEntries(
-  POEM_TAGS.map((tag) => [tag.id, tag.name])
-) as Record<string, string>
+type PoemTag = {
+  id: string
+  name: string
+}
 
 type Props = {
   selectedTagIds: string[]
@@ -35,7 +30,7 @@ type Props = {
 
 /**
  * Poem tags multi-select.
- * @param selectedTagIds The list of currently selected tag ids.
+ * @param selectedTagIds The list of currently selected tag IDs.
  * @param onChange Callback for handling selection changes.
  * @param isInvalid Whether the validation styles should be displayed.
  */
@@ -44,15 +39,43 @@ export function PoemTagsSelector({
   onChange,
   isInvalid = false,
 }: Props) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
+  const didFetch = useRef(false)
   const anchor = useComboboxAnchor()
+
+  // Get the list of poem tags from the API
+  useEffect(() => {
+    if (didFetch.current) return // Prevent double fetch in strict mode
+    didFetch.current = true
+
+    api
+      .get('/api/poem-tags')
+      .then((response) => {
+        const data = response.data.data
+        console.log('Poem tags:', data)
+        setPoemTags(data)
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to get poem tags')
+      })
+  }, [])
+
+  // Gets the PoemTag object for a given tag ID
+  const tagIdToObj = (tagId: string) => {
+    const tag = poemTags.find((tag) => tag.id === tagId)
+    return tag !== undefined ? tag : { id: '', name: '' }
+  }
 
   return (
     <Combobox
       multiple
       autoHighlight
-      items={POEM_TAG_IDS}
-      value={selectedTagIds}
-      onValueChange={onChange}
+      items={poemTags}
+      value={selectedTagIds.map(tagIdToObj)}
+      onValueChange={(tags: PoemTag[]) => onChange(tags.map((tag) => tag.id))}
+      open={isOpen}
+      onOpenChange={setIsOpen}
     >
       <ComboboxChips
         ref={anchor}
@@ -64,13 +87,14 @@ export function PoemTagsSelector({
         <ComboboxValue>
           {selectedTagIds.map((tagId) => (
             <ComboboxChip key={tagId} className="bg-gray-300 text-sm">
-              {POEM_TAG_NAMES_BY_ID[tagId] ?? tagId}
+              {tagIdToObj(tagId).name}
             </ComboboxChip>
           ))}
         </ComboboxValue>
         <ComboboxChipsInput
           className="h-6"
           placeholder={selectedTagIds.length === 0 ? 'Add poem tags...' : ''}
+          onFocus={() => setIsOpen(true)}
         />
         {/* Clear button */}
         {selectedTagIds.length > 0 && (
@@ -83,15 +107,15 @@ export function PoemTagsSelector({
       </ComboboxChips>
       {/* Select dropdown */}
       <ComboboxContent anchor={anchor} className="bg-off-white">
-        <ComboboxEmpty>No tags found.</ComboboxEmpty>
+        <ComboboxEmpty>Loading...</ComboboxEmpty>
         <ComboboxList>
-          {(tagId) => (
+          {(tag) => (
             <ComboboxItem
-              key={tagId}
+              key={tag.id}
               className="data-highlighted:bg-gray-200"
-              value={tagId}
+              value={tag}
             >
-              {POEM_TAG_NAMES_BY_ID[tagId] ?? tagId}
+              {tag.name}
             </ComboboxItem>
           )}
         </ComboboxList>

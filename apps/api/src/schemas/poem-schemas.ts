@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 // Validation limits.
 const TITLE_MIN = 3
-const TITLE_MAX = 30
+const TITLE_MAX = 40
 const POEM_MIN = 20
 const POEM_MAX = 1000
 const MIN_TAGS = 1
@@ -86,8 +86,14 @@ export const ReportPoemRequestSchema = z.object({
     reasonType: z.enum(ReasonType),
     reason: z
       .string()
-      .min(REPORT_REASON_MIN, `Report reason must be at least ${REPORT_REASON_MIN} characters.`)
-      .max(REPORT_REASON_MAX, `Report reason must be at most ${REPORT_REASON_MAX} characters.`),
+      .min(
+        REPORT_REASON_MIN,
+        `Report reason must be at least ${REPORT_REASON_MIN} characters.`
+      )
+      .max(
+        REPORT_REASON_MAX,
+        `Report reason must be at most ${REPORT_REASON_MAX} characters.`
+      ),
   }),
 })
 

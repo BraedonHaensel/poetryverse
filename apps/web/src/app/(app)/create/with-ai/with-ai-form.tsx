@@ -19,7 +19,7 @@ type Props = {
 }
 
 /**
- * Create poem from with AI form.
+ * Create poem with AI form.
  */
 export default function CreatePoemWithAIForm({
   form,
