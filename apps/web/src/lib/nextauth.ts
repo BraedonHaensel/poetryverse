@@ -65,6 +65,8 @@ export const authOptions: NextAuthOptions = {
           prompt: 'select_account', // Forces Google account picker every time
         },
       },
+      // Allow linking new Google sign-ins to existing accounts in the database
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
 }
