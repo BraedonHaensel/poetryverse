@@ -6,7 +6,8 @@ export const poemIds = {
   id2: 'cmn5hp5i8000104kz2sqhbrlb',
   id3: 'cmn5hpdln000204kzfbg941te',
   id4: 'cmn5hptkb800064kzfbg872re',
-  id7: 'cmn9eogcp0001356s0875b3rp',
+  id5: 'cmn5hpzz1000504kzh3jk9a2l',
+  id6: 'cmn5hq2m4000604kzj8mn2b5p',
 }
 
 export const poemData = [
@@ -59,15 +60,28 @@ export const poemData = [
     updatedAt: new Date('2026-03-26T05:11:13.151Z'),
   },
   {
-    id: poemIds.id7,
-    authorId: userIds.user2,
-    title: 'The Sea',
-    typeId: poemTypeIds.freeVerse,
+    id: poemIds.id5,
+    authorId: userIds.user1,
+    title: 'Moonlight Reflection',
+    typeId: poemTypeIds.couplet,
     isPublic: true,
     isAIAssisted: false,
-    aiLikelihoodScore: 0.45,
-    body: 'How strong is the sea. We wonder we.',
-    createdAt: new Date('2026-03-27T05:08:27.151Z'),
-    updatedAt: new Date('2026-03-27T05:08:27.151Z'),
+    aiLikelihoodScore: 0.31,
+    body: 'Soft moonlight shines upon the sleeping earth. In its gentle glow, lost souls find their worth.',
+    createdAt: new Date('2026-03-15T08:45:22.151Z'),
+    updatedAt: new Date('2026-03-15T08:45:22.151Z'),
+  },
+  {
+    id: poemIds.id6,
+    authorId: userIds.user2,
+    title: 'Winter Snow',
+    typeId: poemTypeIds.haiku,
+    isPublic: true,
+    isAIAssisted: false,
+    aiLikelihoodScore: 0.22,
+    // Source: https://www.facebook.com/groups/2446080102259824/posts/2493742574160243/
+    body: 'Snowflakes fall gently. Blanketing the frozen ground. Nature sleeps in white.',
+    createdAt: new Date('2026-03-10T14:20:45.151Z'),
+    updatedAt: new Date('2026-03-10T14:20:45.151Z'),
   },
 ]
