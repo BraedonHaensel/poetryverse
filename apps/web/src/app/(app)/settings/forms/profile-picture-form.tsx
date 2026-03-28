@@ -59,7 +59,6 @@ export function ProfilePictureForm({ imageUrl }: Props) {
     const _ = await api.patch('/TODO', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${'TODO'}`,
       },
     })
     setIsOpen(false)

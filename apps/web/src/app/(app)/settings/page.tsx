@@ -1,47 +1,37 @@
-import Link from 'next/link'
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useEffect, useRef, useState } from 'react'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import MobilePageHeader from '@/components/mobile-page-header'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
-import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getAuthSession } from '@/lib/nextauth'
+import { getUserData, UserData } from '@/lib/user-requests'
 import { cn } from '@/lib/utils'
 
-import { AdvancedSettingsForm } from './forms/advanced-settings-form'
-import { EmailForm } from './forms/email-form'
-import { ProfilePictureForm } from './forms/profile-picture-form'
-import { UsernameForm } from './forms/username-form'
-
-// TODO get user data from backend
-const IMAGE_URL = '/sample-profile-image.jpg'
-const USERNAME = 'sampleUsername123'
-const EMAIL = 'myemail@email.com'
-
-/**
- * User settings forms used by both mobile and desktop.
- */
-function UserSettingsForms() {
-  return (
-    <>
-      <ProfilePictureForm imageUrl={IMAGE_URL} />
-      <UsernameForm username={USERNAME} />
-      <EmailForm email={EMAIL} />
-      {/* TODO only render when signed in as an admin user */}
-      <Button asChild>
-        <Link href="/admin">Enter Admin Mode</Link>
-      </Button>
-      <AdvancedSettingsForm />
-    </>
-  )
-}
+import UserSettingsForms from './forms/user-settings-forms'
 
 /**
  * User settings page.
  */
-export default async function UserSettings() {
-  const session = await getAuthSession()
-  const isGuest = !session
+export default function UserSettings() {
+  const [userData, setUserData] = useState<UserData>()
+  const session = useSession()
+  const isGuest = session.status === 'unauthenticated'
+
+  // Get the user's data
+  const didFetch = useRef(false)
+  useEffect(() => {
+    if (didFetch.current) return // Prevent double fetch in strict mode
+    didFetch.current = true
+
+    getUserData().then(setUserData)
+  }, [])
+
+  // Display a loading indicator until the user data has loaded
+  if (userData === undefined) return <PageLoadingIndicator />
 
   return (
     <>
@@ -57,7 +47,7 @@ export default async function UserSettings() {
             </ShadowCard>
           ) : (
             <>
-              <UserSettingsForms />
+              <UserSettingsForms userData={userData} />
               {/* Mobile-only sign out button */}
               <SignOutButton className="mt-auto" />
             </>
@@ -80,7 +70,7 @@ export default async function UserSettings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex h-full flex-col gap-5">
-                <UserSettingsForms />
+                <UserSettingsForms userData={userData} />
               </CardContent>
             </>
           )}
