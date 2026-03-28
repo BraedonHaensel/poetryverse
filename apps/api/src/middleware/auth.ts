@@ -1,10 +1,26 @@
+import { RoleEnum } from '@prisma/client'
 import type { NextFunction, Request, Response } from 'express'
 import { getToken } from 'next-auth/jwt'
 
 import config from '../lib/config'
-import { unauthorized } from '../lib/http-errors'
+import { prisma } from '../lib/db'
+import { HttpError, unauthorized } from '../lib/http-errors'
+import { logger } from '../lib/logger'
 
 export type AuthRequest = Request & { auth: { userId: string } }
+
+const getRoleLevel = (role: RoleEnum) => {
+  switch (role) {
+    case RoleEnum.SUPER_ADMIN:
+      return 3
+    case RoleEnum.ADMIN:
+      return 2
+    case RoleEnum.USER:
+      return 1
+    default:
+      return 0
+  }
+}
 
 /**
  * Verifies the NextAuth token and attaches `auth.userId` to the request.
@@ -33,5 +49,41 @@ export const requireAuth = async (
     return next()
   } catch {
     return next(unauthorized())
+  }
+}
+
+/**
+ * Verifies that the authenticated user has at least the required role.
+ * @param role Minimum role required for access.
+ * @returns Express middleware that allows or rejects the request.
+ */
+export const requireRole = (role: RoleEnum) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    const userId = (req as AuthRequest).auth.userId
+
+    if (!userId) {
+      throw unauthorized()
+    }
+
+    const requestingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    })
+
+    if (!requestingUser) {
+      throw new HttpError(500, 'User information not available.')
+    }
+
+    const requestingUserRoleLevel = getRoleLevel(requestingUser.role)
+    const targetRoleLevel = getRoleLevel(role)
+
+    if (requestingUserRoleLevel >= targetRoleLevel) {
+      return next()
+    }
+
+    logger.error(
+      `User userId=${userId} does not have the required role: ${role}. Sending 401 Unauthorized.`
+    )
+    throw unauthorized()
   }
 }
