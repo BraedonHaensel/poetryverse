@@ -1,11 +1,11 @@
 import { Router } from 'express'
 
-import { getPoemTags } from '../controllers/tag-controller'
+import { getPoemTags } from '../controllers/poem-tag-controller'
 import { asyncHandler } from '../lib/async-handler'
 
 const router = Router()
 
-/** GET /api/tags */
+/** GET /api/poem-tags */
 router.get('/', asyncHandler(getPoemTags))
 
 export default router
