@@ -9,8 +9,8 @@ import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import type { AuthRequest } from '../middleware/auth'
 import {
-  GetPoemsRequest,
   CreatePoemRequest,
+  GetPoemsRequest,
   LikePoemRequest,
   PoemAIRequest,
   PoemAIResponseSchema,
@@ -19,6 +19,7 @@ import {
   ReportPoemRequest,
   UnlikePoemRequest,
 } from '../schemas/poem-schemas'
+import { validateUserExists } from './user-controller'
 
 // Include statement for fetching poems from the database with Prisma.
 const poemIncludeStatement = {
@@ -46,20 +47,34 @@ export const getPoems = async (
   res: Response,
 ) => {
   const query = req.query as GetPoemsRequest
-  logger.info(`getPoemsData ${query?.authorId}`)
+  const authorId = query?.authorId
 
-  // TODO: do i need to check if this id exists?
+  if (authorId) {
+    await validateUserExists(authorId)
 
+    if (authorId === req.auth.userId) {
+      // If this user is requesting their own poems, return all of their poems
+      logger.info('Fetching all poems from this user')
+      const poems = await prisma.poem.findMany({
+        where: { authorId }
+      })
+      logger.info(`Fetched all poems from this user, count=${poems.length}`)
+      return res.status(200).json(poems)
+    } else {
 
-  if (query?.authorId) {
-    // if authorId == this user id, return all poems for this user
-
-    // if authorId != this user id, return the author's public poems
-
-    return res.status(200).json(query)
-
+      // If this user is requesting poems authored by another user, only return that user's public poems
+      logger.info(`Fetching all public poems by ${authorId}`)
+      const poems = await prisma.poem.findMany({
+        where: { 
+          authorId,
+          isPublic: true
+        }
+      })
+      logger.info(`Fetched all public poems by ${authorId}, count=${poems.length}`)
+      return res.status(200).json(poems)
+    }
   } else {
-    // If authorId not provided, return all public poems
+    // If authorId is not provided, return all public poems
     logger.info('Fetching all public poems')
     const poems = await prisma.poem.findMany({
       where: { isPublic: true }

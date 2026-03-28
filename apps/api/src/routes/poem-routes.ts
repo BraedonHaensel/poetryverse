@@ -1,9 +1,9 @@
 import { Router } from 'express'
 
 import {
-  getPoems,
   createPoem,
   generateAIPoem,
+  getPoems,
   interpretPoem,
   likePoem,
   reportPoem,
@@ -13,8 +13,8 @@ import { asyncHandler } from '../lib/async-handler'
 import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
-  GetPoemsRequestSchema,
   CreatePoemRequestSchema,
+  GetPoemsRequestSchema,
   LikePoemRequestSchema,
   PoemAIRequestSchema,
   PoemInterpretRequestSchema,
