@@ -34,7 +34,7 @@ export default function MobilePageHeader({
         className
       )}
     >
-      <div className="flex gap-4">
+      <div className="flex min-w-0 gap-4">
         {showLogo && (
           <Image
             src="/feather-logo.svg"
@@ -43,7 +43,7 @@ export default function MobilePageHeader({
             height={30}
           />
         )}
-        <h1>{title}</h1>
+        <h1 className="truncate">{title}</h1>
       </div>
 
       {showSignInButton ? (
