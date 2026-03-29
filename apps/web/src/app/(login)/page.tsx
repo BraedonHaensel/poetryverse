@@ -92,6 +92,7 @@ export default async function Login() {
               className="object-contain object-left"
               src="/poem-writing-hand.svg"
               alt="Hand writing poem"
+              loading="eager"
               fill
             />
           </div>

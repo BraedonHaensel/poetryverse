@@ -15,24 +15,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-// TODO Hardcoded example, clean up when we can get the poem types from the backend
-const POEM_TYPES = [
-  { id: 'haiku', name: 'Haiku' },
-  { id: 'couplet', name: 'Couplet' },
-  { id: 'sonnet', name: 'Sonnet' },
-]
+import { PoemType } from '@/lib/poem-requests'
 
 type HasTypeId = { typeId: string }
 
 type Props<T extends HasTypeId> = {
   control: Control<T>
+  poemTypes: PoemType[]
 }
 
 /**
  * Poem type field.
  */
-export function PoemTypeField<T extends HasTypeId>({ control }: Props<T>) {
+export function PoemTypeField<T extends HasTypeId>({
+  control,
+  poemTypes,
+}: Props<T>) {
   return (
     <ShadowCard className="p-3">
       <FormField
@@ -42,7 +40,13 @@ export function PoemTypeField<T extends HasTypeId>({ control }: Props<T>) {
           <FormItem>
             <FormLabel>Type</FormLabel>
             <FormControl>
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select
+                value={field.value}
+                onValueChange={(val) => {
+                  if (poemTypes.length === 0) return
+                  field.onChange(val)
+                }}
+              >
                 <SelectTrigger
                   aria-invalid={!!fieldState.error}
                   className={`bg-off-white w-full border-2 hover:cursor-pointer ${
@@ -51,16 +55,26 @@ export function PoemTypeField<T extends HasTypeId>({ control }: Props<T>) {
                 >
                   <SelectValue placeholder="Select a poem type..." />
                 </SelectTrigger>
+
                 <SelectContent className="bg-off-white">
-                  {POEM_TYPES.map((type) => (
+                  {poemTypes.length === 0 ? (
                     <SelectItem
-                      key={type.name}
-                      value={type.id}
+                      value={'none'}
                       className="data-highlighted:bg-gray-200"
                     >
-                      {type.name}
+                      Loading...
                     </SelectItem>
-                  ))}
+                  ) : (
+                    poemTypes.map((type) => (
+                      <SelectItem
+                        key={type.name}
+                        value={type.id}
+                        className="data-highlighted:bg-gray-200"
+                      >
+                        {type.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </FormControl>

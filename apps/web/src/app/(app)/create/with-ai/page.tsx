@@ -2,80 +2,31 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
-import { useForm, UseFormReturn } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
-import { LargeButton } from '@/components/large-button'
 import { LoadingDialog } from '@/components/loading-dialog'
 import MobilePageHeader from '@/components/mobile-page-header'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { api, displayApiError } from '@/lib/api'
+import {
+  getPoemTags,
+  getPoemTypes,
+  PoemTag,
+  PoemType,
+} from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
-import { CreateWithAISchema } from '@/schemas/create-poem-schemas'
+import {
+  CreateFromScratchSchema,
+  CreateWithAISchema,
+} from '@/schemas/create-poem-schemas'
 
-import { PoemContentsField } from '../fields/poem-contents-field'
-import { PoemPromptField } from '../fields/poem-prompt-field'
-import { PoemTagsField } from '../fields/poem-tags-field'
-import { PoemTitleField } from '../fields/poem-title-field'
-import { PoemTypeField } from '../fields/poem-type-field'
-import { PoemVisibilityField } from '../fields/poem-visibility-field'
-
-type CreatePoemWithAIFormProps = {
-  form: UseFormReturn<CreateWithAISchema>
-  onSubmit: (data: CreateWithAISchema) => void
-  isGenerated: boolean
-  onGenerateClick: () => void
-}
-
-/**
- * Create poem from with AI form.
- */
-function CreatePoemWithAIForm({
-  form,
-  onSubmit,
-  isGenerated,
-  onGenerateClick,
-}: CreatePoemWithAIFormProps) {
-  const control = form.control
-
-  return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className={cn(
-        'grid grid-cols-1 gap-x-5',
-        isGenerated && 'md:grid-cols-2'
-      )}
-    >
-      {/* Left column fields on desktop */}
-      <div className="space-y-2 md:space-y-3">
-        <PoemTypeField control={control} />
-        <PoemPromptField control={control} />
-
-        {/* Generate/regenerate button */}
-        <LargeButton type="button" onClick={onGenerateClick}>
-          {isGenerated ? 'Regenerate' : 'Generate'}
-        </LargeButton>
-
-        {isGenerated && <PoemTitleField control={control} />}
-      </div>
-
-      {/* Right column fields on desktop */}
-      {isGenerated && (
-        <div className="space-y-2 md:space-y-3">
-          <PoemContentsField control={control} showAIDescription />
-          <PoemTagsField control={control} />
-          <PoemVisibilityField control={control} />
-
-          {/* Publish button */}
-          <LargeButton type="submit">Publish</LargeButton>
-        </div>
-      )}
-    </form>
-  )
-}
+import CreatePoemWithAIForm from './with-ai-form'
 
 /**
  * Create poem with AI page.
@@ -88,11 +39,26 @@ export default function CreatePoemWithAI() {
   // Whether the regenerate poem confirmation is open
   const [isRegenConfirmOpen, setIsRegenConfirmOpen] = useState(false)
 
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
+  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
+  const router = useRouter()
+
+  // Prevent the body scrollbar from appearing, as the page has its own scrollbar
   useEffect((): (() => void) => {
-    // Prevent the body scrollbar from appearing, as the page has its own scrollbar
     document.body.style.overflow = 'hidden'
     // Restore the body scrollbar upon leaving the page
     return () => (document.body.style.overflow = '')
+  }, [])
+
+  // Get the list of poem tags and types from the API
+  const didFetch = useRef(false)
+  useEffect(() => {
+    if (didFetch.current) return // Prevent double fetch in strict mode
+    didFetch.current = true
+
+    getPoemTypes().then(setPoemTypes)
+    getPoemTags().then(setPoemTags)
   }, [])
 
   // Create poem with AI form
@@ -121,15 +87,7 @@ export default function CreatePoemWithAI() {
     setIsGenerating(true)
     const { typeId, prompt } = form.getValues()
     api
-      .post(
-        '/api/poems/generate',
-        { typeId, prompt },
-        {
-          headers: {
-            Authorization: `Bearer ${'<TODO GET AUTH TOKEN>'}`,
-          },
-        }
-      )
+      .post('/api/poems/generate', { typeId, prompt })
       .then((response) => {
         // Parse the generated poem from the response
         const data = response.data.data
@@ -146,9 +104,33 @@ export default function CreatePoemWithAI() {
       })
   }
 
-  // Handle submitting the completed form
+  // Handle submitting the form (publishing a poem)
   function onSubmit(data: CreateWithAISchema) {
-    console.log(`TODO Submit form: ${JSON.stringify(data)}`)
+    setIsPublishing(true)
+
+    // Discard the prompt field, and indicated it was created with AI
+    const { prompt: _, ...rest } = data
+    const submissionData: CreateFromScratchSchema = {
+      ...rest,
+      createdWithAI: true,
+    }
+
+    console.log('Publishing poem:', submissionData)
+    api
+      .post('/api/poems', submissionData)
+      .then((response) => {
+        // Publish successful
+        const data = response.data.data
+        console.log('Poem published successfully:', data)
+        toast.success('Poem published successfully')
+        router.push('/profile')
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to publish poem')
+      })
+      .finally(() => {
+        setIsPublishing(false)
+      })
   }
 
   // Handle clicking the Generate button.
@@ -165,6 +147,7 @@ export default function CreatePoemWithAI() {
   return (
     <>
       <LoadingDialog isOpen={isGenerating} message="Generating poem..." />
+      <LoadingDialog isOpen={isPublishing} message="Publishing poem..." />
       <ConfirmationDialog
         isOpen={isRegenConfirmOpen}
         title="Are you sure you want to regenerate?"
@@ -182,6 +165,8 @@ export default function CreatePoemWithAI() {
               onSubmit={onSubmit}
               isGenerated={isGenerated}
               onGenerateClick={handleGenerateClick}
+              poemTypes={poemTypes}
+              poemTags={poemTags}
             />
           </div>
         </div>
@@ -205,6 +190,8 @@ export default function CreatePoemWithAI() {
                 onSubmit={onSubmit}
                 isGenerated={isGenerated}
                 onGenerateClick={handleGenerateClick}
+                poemTypes={poemTypes}
+                poemTags={poemTags}
               />
             </CardContent>
           </ShadowCard>

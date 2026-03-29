@@ -52,7 +52,9 @@ function MainNavLink({
   )
 
   return disabled ? (
-    <div className={baseClassName}>{content}</div>
+    <button className={baseClassName} type="button">
+      {content}
+    </button>
   ) : (
     <Link href={href} className={baseClassName}>
       {content}
