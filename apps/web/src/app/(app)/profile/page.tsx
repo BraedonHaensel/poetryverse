@@ -6,13 +6,26 @@ import { useEffect, useRef, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
+import { ShadowCard } from '@/components/shadow-card'
 import { Button } from '@/components/ui/button'
+import { CardContent, CardHeader } from '@/components/ui/card'
 import { getUserData, UserData } from '@/lib/user-requests'
+
+import PoemVisibilityFilters, {
+  PoemVisibilityFilterMode,
+} from './poem-visibility-filters'
+
+type DesktopBaseTab = 'MY_POEMS' | 'CONNECTIONS'
 
 /**
  * Profile page.
  */
 export default function Profile() {
+  const [desktopBaseTab, setDesktopBaseTab] =
+    useState<DesktopBaseTab>('MY_POEMS')
+  const [poemVisibilityFilterMode, setPoemVisibilityFilterMode] =
+    useState<PoemVisibilityFilterMode>('ALL')
+
   const [userData, setUserData] = useState<UserData>()
 
   // Get the user's data
@@ -36,15 +49,43 @@ export default function Profile() {
   return (
     <>
       {/* Mobile layout */}
-      <div className="flex flex-1 flex-col md:hidden">
+      <div className="flex flex-1 flex-col gap-2 divide-y-2 divide-gray-300 md:hidden">
         <MobilePageHeader title={`@${userData.username}`} />
-        <div className="flex flex-1 flex-col gap-2 p-4">Hello, world!</div>
+
+        {/* Profile stats */}
+        <div className="flex items-center divide-x-2 divide-gray-300 border-b border-black/30 pb-2">
+          {profileStats.map((item) => (
+            <div
+              key={item.title}
+              className="flex flex-1 items-center justify-center gap-2 px-2"
+            >
+              <span className="font-medium">{item.title}</span>
+              <span className="font-bold">{item.count}</span>
+            </div>
+          ))}
+        </div>
+
+        <PoemVisibilityFilters
+          className="p-2 pt-0"
+          mode={poemVisibilityFilterMode}
+          setMode={setPoemVisibilityFilterMode}
+        />
+
+        <div className="flex flex-col gap-2 p-2">
+          {/* TODO Replace with real poems */}
+          {Array.from({ length: 10 }).map((_, i) => (
+            <ShadowCard key={i}>
+              <CardHeader>Placeholder Title {i}</CardHeader>
+              <CardContent>Placeholder Content {i}</CardContent>
+            </ShadowCard>
+          ))}
+        </div>
       </div>
 
       {/* Desktop layout */}
       <div className="hidden min-h-0 w-full flex-1 md:flex">
         {/* Left sidebar */}
-        <div className="w-90 overflow-y-auto">
+        <div className="w-75 overflow-y-auto border-r-2 border-black/30 lg:w-90">
           <div className="flex min-h-full flex-col">
             {/* Username */}
             <div className="flex h-16 items-center gap-2 bg-white px-2 text-2xl font-extrabold">
@@ -60,7 +101,7 @@ export default function Profile() {
             </div>
 
             {/* Profile stats */}
-            <div className="flex items-center divide-x-2 divide-gray-400 border-y border-black/30 bg-gray-200 py-4">
+            <div className="flex items-center divide-x-2 divide-black/30 border-y border-black/30 bg-gray-200/65 py-4">
               {profileStats.map((item) => (
                 <div
                   key={item.title}
@@ -73,14 +114,19 @@ export default function Profile() {
             </div>
 
             {/* Nav items */}
-            <nav className="flex flex-col gap-4 p-2">
-              <Button className="cursor-pointer justify-start text-lg font-semibold">
+            <nav className="flex flex-col gap-4 px-2 py-4">
+              <Button
+                className="cursor-pointer justify-start text-lg font-semibold"
+                variant={desktopBaseTab === 'MY_POEMS' ? 'default' : 'ghost'}
+                onClick={() => setDesktopBaseTab('MY_POEMS')}
+              >
                 <BookOpen />
                 My Poems
               </Button>
               <Button
                 className="cursor-pointer justify-start text-lg font-semibold"
-                variant="ghost"
+                variant={desktopBaseTab === 'CONNECTIONS' ? 'default' : 'ghost'}
+                onClick={() => setDesktopBaseTab('CONNECTIONS')}
               >
                 <Users />
                 Connections
@@ -102,9 +148,31 @@ export default function Profile() {
         </div>
 
         {/* Main page contents */}
-        <div className="flex h-full flex-1 overflow-y-auto bg-blue-300">
-          right
-          <div className="m-20 h-300 bg-amber-200">tall</div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="flex min-h-full flex-col px-4 py-4 xl:px-10">
+            {desktopBaseTab === 'MY_POEMS' ? (
+              <div className="flex flex-col gap-4 divide-y-2 divide-gray-300">
+                <PoemVisibilityFilters
+                  className="gap-4 pb-4"
+                  buttonClassName="w-40"
+                  mode={poemVisibilityFilterMode}
+                  setMode={setPoemVisibilityFilterMode}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* TODO Replace with real poems */}
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <ShadowCard key={i}>
+                      <CardHeader>Placeholder Title {i}</CardHeader>
+                      <CardContent>Placeholder Content {i}</CardContent>
+                    </ShadowCard>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>Connections</>
+            )}
+          </div>
         </div>
       </div>
     </>
