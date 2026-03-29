@@ -124,11 +124,10 @@ export default function CreatePoemWithAI() {
         console.log('Poem published successfully:', data)
         toast.success('Poem published successfully')
         router.push('/profile')
+        // Note: Keep isPublishing false to prevent resubmits
       })
       .catch((error) => {
         displayApiError(error, 'Failed to publish poem')
-      })
-      .finally(() => {
         setIsPublishing(false)
       })
   }
