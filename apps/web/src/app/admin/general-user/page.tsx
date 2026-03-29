@@ -54,48 +54,47 @@ export default function GeneralUserManagement() {
   )
 
   const columns: Column<User>[] = [
-    { key: 'id', header: 'ID' },
-    { key: 'name', header: 'Name' },
-    { key: 'username', header: 'Username' },
-    { key: 'email', header: 'Email' },
-    {
-      key: 'action',
-      header: 'Action',
-      render: (user) => (
-        <div className="flex items-center gap-4">
-          <button onClick={() => handleDelete(user.id)}>
-            <Trash2 className="h-5 w-5 text-gray-700 hover:text-red-500" />
-          </button>
-
-          <button onClick={() => handlePromote(user.id)}>
-            <CircleCheckBig className="h-5 w-5 text-gray-700 hover:text-green-500" />
-          </button>
-        </div>
-      ),
-    },
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'username', label: 'Username' },
+    { key: 'email', label: 'Email' },
   ]
 
   return (
-    <ShadowCard>
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">
+    <div>
+      <CardHeader className="px-0 pt-0 pb-5">
+        <CardTitle className="text-2xl font-bold text-black">
           General User Management
         </CardTitle>
       </CardHeader>
 
-      <CardContent>
-        {/* Search Bar */}
-        <div className="mb-4">
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search users by username..."
-          />
-        </div>
+      <ShadowCard className="bg-admin-panel p-3">
+        <CardContent className="p-0">
+          <div className="mb-4">
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search users by username..."
+            />
+          </div>
 
-        {/* Table */}
-        <DataTable columns={columns} data={filteredUsers} />
-      </CardContent>
-    </ShadowCard>
+          <DataTable
+            columns={columns}
+            data={filteredUsers}
+            renderActions={(user) => (
+              <div className="flex items-center gap-4">
+                <button onClick={() => handleDelete(user.id)}>
+                  <Trash2 className="h-5 w-5 text-gray-700 hover:text-red-500" />
+                </button>
+
+                <button onClick={() => handlePromote(user.id)}>
+                  <CircleCheckBig className="h-5 w-5 text-gray-700 hover:text-green-500" />
+                </button>
+              </div>
+            )}
+          />
+        </CardContent>
+      </ShadowCard>
+    </div>
   )
 }
