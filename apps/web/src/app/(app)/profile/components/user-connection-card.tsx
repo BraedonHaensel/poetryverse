@@ -18,8 +18,8 @@ type Props = {
  * Card to display each user connection.
  * @param className Optional additional className values to apply.
  * @param isMyConnectionPage Whether the currently signed in user's page is being viewed.
- * @param userConnectionData Data of the user in the connection
- * @param mode Whether a "Followers" or "Following" tab is being viewed
+ * @param userConnectionData Data of the user in the connection.
+ * @param mode Whether a "Followers" or "Following" connections tab is being viewed.
  */
 export default function UserConnectionCard({
   className = '',

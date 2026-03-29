@@ -18,13 +18,11 @@ import {
   UserData,
 } from '@/lib/user-requests'
 
-import ConnectionsFilters, {
-  ConnectionsFilterMode,
-} from './components/connections-filters'
+import { ConnectionsFilterMode } from './components/connections-filters'
+import ConnectionsTab from './components/connections-tab'
 import PoemVisibilityFilters, {
   PoemVisibilityFilterMode,
 } from './components/poem-visibility-filters'
-import UserConnectionCard from './components/user-connection-card'
 
 type PageTab = 'MY_POEMS' | 'CONNECTIONS'
 
@@ -123,88 +121,52 @@ export default function Profile() {
             </div>
           </>
         ) : (
-          // Connections tab
-          <>
-            <ConnectionsFilters
-              className="p-2 pt-0"
-              mode={connectionsFilterMode}
-              setMode={setConnectionsFilterMode}
-            />
-
-            <div className="-mt-2 flex flex-col gap-3 divide-y-2 divide-gray-300 bg-white px-2 pt-3 min-[420px]:px-4">
-              {connectionsFilterMode === 'FOLLOWERS' ? (
-                followers === undefined ? (
-                  <PageLoadingIndicator className="mt-2" />
-                ) : followers.length === 0 ? (
-                  <p className="text-muted-foreground mt-2 text-center">
-                    You don&apos;t have any followers.
-                  </p>
-                ) : (
-                  followers.map((follower) => (
-                    <UserConnectionCard
-                      key={follower.id}
-                      className="pb-3 max-[420px]:gap-2"
-                      isMyConnectionsPage={true}
-                      userConnectionData={follower}
-                      mode={connectionsFilterMode}
-                    />
-                  ))
-                )
-              ) : following === undefined ? (
-                <PageLoadingIndicator className="mt-2" />
-              ) : following.length === 0 ? (
-                <p className="text-muted-foreground mt-2 text-center">
-                  You don&apos;t have any followers.
-                </p>
-              ) : (
-                following.map((following) => (
-                  <UserConnectionCard
-                    key={following.id}
-                    className="pb-3 max-[420px]:gap-2"
-                    isMyConnectionsPage={true}
-                    userConnectionData={following}
-                    mode={connectionsFilterMode}
-                  />
-                ))
-              )}
-            </div>
-          </>
+          <ConnectionsTab
+            followers={followers}
+            following={following}
+            mode={connectionsFilterMode}
+            setMode={setConnectionsFilterMode}
+          />
         )}
       </div>
 
       {/* Desktop layout */}
       <div className="hidden min-h-0 w-full flex-1 md:flex">
         {/* Left sidebar */}
-        <div className="w-75 overflow-y-auto border-r-2 border-black/30 lg:w-90">
+        <div className="w-80 overflow-y-auto border-r-2 border-black/30 lg:w-90">
           <div className="flex min-h-full flex-col">
-            {/* Username */}
-            <div className="flex h-16 items-center gap-2 bg-white px-2 text-2xl font-extrabold">
-              <Image
-                className="rounded-full border-2 border-black"
-                src={userData.image}
-                loading="eager"
-                alt="Profile picture"
-                width={36}
-                height={36}
-              />
-              <h1 className="truncate">{`@${userData.username}`}</h1>
+            {/* Profile picture and username */}
+            <div className="flex h-18 items-center gap-2 bg-white px-4 text-2xl font-extrabold">
+              <div className="relative aspect-square h-11">
+                <Image
+                  className="rounded-full border-2 border-black object-cover"
+                  src={userData.image}
+                  loading="eager"
+                  alt="Profile picture"
+                  sizes="44px"
+                  fill
+                />
+              </div>
+              <h1 className="break-all">{`@${userData.username}`}</h1>{' '}
             </div>
 
             {/* Profile stats */}
-            <div className="flex items-center divide-x-2 divide-black/30 border-y border-black/30 bg-gray-200/65 py-4">
-              {profileStats.map((item) => (
-                <div
-                  key={item.title}
-                  className="flex flex-1 flex-col items-center px-2"
-                >
-                  <span className="font-bold">{item.count}</span>
-                  <span className="font-medium">{item.title}</span>
-                </div>
-              ))}
+            <div className="border-y border-black/30 bg-gray-200/65 py-4">
+              <div className="flex items-center divide-x-2 divide-black/30 px-4">
+                {profileStats.map((item, i) => (
+                  <div
+                    key={item.title}
+                    className="flex flex-1 flex-col items-center"
+                  >
+                    <span className="font-bold">{item.count}</span>
+                    <span className="font-medium">{item.title}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Nav items */}
-            <nav className="flex flex-col gap-4 px-2 py-4">
+            {/* Page tab selectors */}
+            <nav className="flex flex-col gap-4 px-4 py-4">
               <Button
                 className="cursor-pointer justify-start text-lg font-semibold"
                 variant={pageTab === 'MY_POEMS' ? 'default' : 'ghost'}
@@ -223,7 +185,8 @@ export default function Profile() {
               </Button>
             </nav>
 
-            <div className="mx-2 h-0.5 bg-gray-300" />
+            {/* Divider line */}
+            <div className="mx-4 h-0.5 bg-gray-300" />
 
             <div className="relative mt-auto h-60 w-full">
               <Image
@@ -261,16 +224,12 @@ export default function Profile() {
                   </div>
                 </>
               ) : (
-                // Connections tab
-                <>
-                  <ConnectionsFilters
-                    className="px-2 pb-px"
-                    mode={connectionsFilterMode}
-                    setMode={setConnectionsFilterMode}
-                  />
-
-                  <p>test</p>
-                </>
+                <ConnectionsTab
+                  followers={followers}
+                  following={following}
+                  mode={connectionsFilterMode}
+                  setMode={setConnectionsFilterMode}
+                />
               )}
             </div>
           </div>
