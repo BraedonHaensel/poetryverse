@@ -1,3 +1,4 @@
+import { ArrowLeftFromLine } from 'lucide-react'
 import Image from 'next/image'
 
 import { cn } from '@/lib/utils'
@@ -5,6 +6,8 @@ import { cn } from '@/lib/utils'
 import SignInButton from './auth-buttons/sign-in-button'
 
 type Props = {
+  showBackButton?: boolean
+  onBackButton?: () => void
   showLogo?: boolean
   title: string
   showSignInButton?: boolean
@@ -14,6 +17,8 @@ type Props = {
 
 /**
  * Header displayed at the top of mobile pages.
+ * @param showBackButton Whether to show a back button to exit the page.
+ * @param onBackButton Callback called after clicking the back button.
  * @param showLogo Whether to show the PoetryVerse feather logo.
  * @param title The page title to display in the header.
  * @param showSignInButton Whether to show the sign in button.
@@ -21,6 +26,8 @@ type Props = {
  * @param className Optional additional className values to apply.
  */
 export default function MobilePageHeader({
+  showBackButton = false,
+  onBackButton = () => {},
   showLogo = false,
   title,
   showSignInButton = false,
@@ -34,7 +41,16 @@ export default function MobilePageHeader({
         className
       )}
     >
-      <div className="flex min-w-0 gap-4">
+      {/* Left side */}
+      <div className="flex min-w-0 items-center gap-4">
+        {showBackButton && (
+          <ArrowLeftFromLine
+            className="-mr-2 cursor-pointer hover:opacity-70"
+            size={32}
+            onClick={onBackButton}
+          />
+        )}
+
         {showLogo && (
           <Image
             src="/feather-logo.svg"
@@ -46,6 +62,7 @@ export default function MobilePageHeader({
         <h1 className="truncate">{title}</h1>
       </div>
 
+      {/* Right side */}
       {showSignInButton ? (
         <SignInButton className="w-26" />
       ) : (

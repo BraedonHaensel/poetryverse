@@ -11,18 +11,24 @@ import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import { getUserData, UserData } from '@/lib/user-requests'
 
+import ConnectionsFilters, {
+  ConnectionsFilterMode,
+} from './connections-filters'
 import PoemVisibilityFilters, {
   PoemVisibilityFilterMode,
 } from './poem-visibility-filters'
 
-type DesktopBaseTab = 'MY_POEMS' | 'CONNECTIONS'
+type PageTab = 'MY_POEMS' | 'CONNECTIONS'
 
 /**
  * Profile page.
  */
 export default function Profile() {
-  const [desktopBaseTab, setDesktopBaseTab] =
-    useState<DesktopBaseTab>('MY_POEMS')
+  const [pageTab, setPageTab] = useState<PageTab>('MY_POEMS')
+
+  const [connectionsFilterMode, setConnectionsFilterMode] =
+    useState<ConnectionsFilterMode>('FOLLOWERS')
+
   const [poemVisibilityFilterMode, setPoemVisibilityFilterMode] =
     useState<PoemVisibilityFilterMode>('ALL')
 
@@ -41,45 +47,80 @@ export default function Profile() {
   if (userData === undefined) return <PageLoadingIndicator />
 
   const profileStats = [
-    { title: 'Poems', count: 4 },
-    { title: 'Followers', count: 5 },
-    { title: 'Following', count: 6 },
+    { title: 'Poems', count: 4, onClick: () => setPageTab('MY_POEMS') },
+    {
+      title: 'Followers',
+      count: 5,
+      onClick: () => {
+        setConnectionsFilterMode('FOLLOWERS')
+        setPageTab('CONNECTIONS')
+      },
+    },
+    {
+      title: 'Following',
+      count: 6,
+      onClick: () => {
+        setConnectionsFilterMode('FOLLOWING')
+        setPageTab('CONNECTIONS')
+      },
+    },
   ]
 
   return (
     <>
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-2 divide-y-2 divide-gray-300 md:hidden">
-        <MobilePageHeader title={`@${userData.username}`} />
-
-        {/* Profile stats */}
-        <div className="flex items-center divide-x-2 divide-gray-300 border-b border-black/30 pb-2">
-          {profileStats.map((item) => (
-            <div
-              key={item.title}
-              className="flex flex-1 items-center justify-center gap-2 px-2"
-            >
-              <span className="font-medium">{item.title}</span>
-              <span className="font-bold">{item.count}</span>
-            </div>
-          ))}
-        </div>
-
-        <PoemVisibilityFilters
-          className="p-2 pt-0"
-          mode={poemVisibilityFilterMode}
-          setMode={setPoemVisibilityFilterMode}
+        <MobilePageHeader
+          showBackButton={pageTab === 'CONNECTIONS'}
+          onBackButton={() => setPageTab('MY_POEMS')}
+          title={`@${userData.username}`}
         />
 
-        <div className="flex flex-col gap-2 p-2">
-          {/* TODO Replace with real poems */}
-          {Array.from({ length: 10 }).map((_, i) => (
-            <ShadowCard key={i}>
-              <CardHeader>Placeholder Title {i}</CardHeader>
-              <CardContent>Placeholder Content {i}</CardContent>
-            </ShadowCard>
-          ))}
-        </div>
+        {pageTab === 'MY_POEMS' ? (
+          // My Poems tab
+          <>
+            {/* Profile stats */}
+            <div className="flex items-center divide-x-2 divide-gray-300 border-b border-black/30 pb-2">
+              {profileStats.map((item) => (
+                <div
+                  key={item.title}
+                  className="flex flex-1 cursor-pointer items-center justify-center gap-2 px-2 hover:opacity-70"
+                  onClick={item.onClick}
+                >
+                  <span className="font-medium">{item.title}</span>
+                  <span className="font-bold">{item.count}</span>
+                </div>
+              ))}
+            </div>
+
+            <PoemVisibilityFilters
+              className="p-2 pt-0"
+              mode={poemVisibilityFilterMode}
+              setMode={setPoemVisibilityFilterMode}
+            />
+
+            <div className="flex flex-col gap-2 p-2">
+              {/* TODO Replace with real poems */}
+              {Array.from({ length: 10 }).map((_, i) => (
+                <ShadowCard key={i}>
+                  <CardHeader>Placeholder Title {i}</CardHeader>
+                  <CardContent>Placeholder Content {i}</CardContent>
+                </ShadowCard>
+              ))}
+            </div>
+          </>
+        ) : (
+          // Connections tab
+          <>
+            <ConnectionsFilters
+              className="p-2 pt-0"
+              mode={connectionsFilterMode}
+              setMode={setConnectionsFilterMode}
+            />
+
+            <p>foo</p>
+          </>
+        )}
       </div>
 
       {/* Desktop layout */}
@@ -117,16 +158,16 @@ export default function Profile() {
             <nav className="flex flex-col gap-4 px-2 py-4">
               <Button
                 className="cursor-pointer justify-start text-lg font-semibold"
-                variant={desktopBaseTab === 'MY_POEMS' ? 'default' : 'ghost'}
-                onClick={() => setDesktopBaseTab('MY_POEMS')}
+                variant={pageTab === 'MY_POEMS' ? 'default' : 'ghost'}
+                onClick={() => setPageTab('MY_POEMS')}
               >
                 <BookOpen />
                 My Poems
               </Button>
               <Button
                 className="cursor-pointer justify-start text-lg font-semibold"
-                variant={desktopBaseTab === 'CONNECTIONS' ? 'default' : 'ghost'}
-                onClick={() => setDesktopBaseTab('CONNECTIONS')}
+                variant={pageTab === 'CONNECTIONS' ? 'default' : 'ghost'}
+                onClick={() => setPageTab('CONNECTIONS')}
               >
                 <Users />
                 Connections
@@ -150,28 +191,39 @@ export default function Profile() {
         {/* Main page contents */}
         <div className="flex-1 overflow-y-auto">
           <div className="flex min-h-full flex-col px-4 py-4 xl:px-10">
-            {desktopBaseTab === 'MY_POEMS' ? (
-              <div className="flex flex-col gap-4 divide-y-2 divide-gray-300">
-                <PoemVisibilityFilters
-                  className="gap-4 pb-4"
-                  buttonClassName="w-40"
-                  mode={poemVisibilityFilterMode}
-                  setMode={setPoemVisibilityFilterMode}
-                />
+            <div className="flex flex-col gap-4 divide-y-2 divide-gray-300">
+              {pageTab === 'MY_POEMS' ? (
+                // My Poems tab
+                <>
+                  <PoemVisibilityFilters
+                    className="pb-4"
+                    mode={poemVisibilityFilterMode}
+                    setMode={setPoemVisibilityFilterMode}
+                  />
 
-                <div className="grid grid-cols-2 gap-4">
-                  {/* TODO Replace with real poems */}
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <ShadowCard key={i}>
-                      <CardHeader>Placeholder Title {i}</CardHeader>
-                      <CardContent>Placeholder Content {i}</CardContent>
-                    </ShadowCard>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <>Connections</>
-            )}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* TODO Replace with real poems */}
+                    {Array.from({ length: 10 }).map((_, i) => (
+                      <ShadowCard key={i}>
+                        <CardHeader>Placeholder Title {i}</CardHeader>
+                        <CardContent>Placeholder Content {i}</CardContent>
+                      </ShadowCard>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                // Connections tab
+                <>
+                  <ConnectionsFilters
+                    className="px-2 pb-px"
+                    mode={connectionsFilterMode}
+                    setMode={setConnectionsFilterMode}
+                  />
+
+                  <p>test</p>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

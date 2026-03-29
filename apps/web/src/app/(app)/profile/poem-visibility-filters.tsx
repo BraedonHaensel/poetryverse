@@ -7,7 +7,6 @@ export type PoemVisibilityFilterMode =
 
 type Props = {
   className?: string
-  buttonClassName?: string
   mode: PoemVisibilityFilterMode
   setMode: (mode: PoemVisibilityFilterMode) => void
 }
@@ -17,19 +16,17 @@ type Props = {
  */
 export default function PoemVisibilityFilters({
   className = '',
-  buttonClassName = 'flex-1',
   mode,
   setMode,
 }: Props) {
   return (
-    <div className={cn('flex gap-2', className)}>
+    <div className={cn('flex gap-2 md:gap-4', className)}>
       {POEM_VISIBILITY_FILTER_MODES.map((modeOption) => (
         <Button
           key={modeOption}
-          className={cn(
-            'cursor-pointer border-2 border-black/50 text-lg font-bold',
-            buttonClassName
-          )}
+          className={
+            'flex-1 cursor-pointer border-2 border-black/50 text-lg font-bold md:max-w-50'
+          }
           variant={modeOption === mode ? 'default' : 'outline'}
           onClick={() => setMode(modeOption)}
         >
