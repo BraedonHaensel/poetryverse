@@ -9,14 +9,22 @@ import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader } from '@/components/ui/card'
-import { getUserData, UserData } from '@/lib/user-requests'
+import {
+  FollowerData,
+  FollowingData,
+  getUserData,
+  getUserFollowers,
+  getUserFollowing,
+  UserData,
+} from '@/lib/user-requests'
 
 import ConnectionsFilters, {
   ConnectionsFilterMode,
-} from './connections-filters'
+} from './components/connections-filters'
 import PoemVisibilityFilters, {
   PoemVisibilityFilterMode,
-} from './poem-visibility-filters'
+} from './components/poem-visibility-filters'
+import UserConnectionCard from './components/user-connection-card'
 
 type PageTab = 'MY_POEMS' | 'CONNECTIONS'
 
@@ -33,19 +41,24 @@ export default function Profile() {
     useState<PoemVisibilityFilterMode>('ALL')
 
   const [userData, setUserData] = useState<UserData>()
+  const [followers, setFollowers] = useState<FollowerData[]>()
+  const [following, setFollowing] = useState<FollowingData[]>()
 
-  // Get the user's data
+  // Get the user's data, followers, and following users
   const didFetch = useRef(false)
   useEffect(() => {
     if (didFetch.current) return // Prevent double fetch in strict mode
     didFetch.current = true
 
     getUserData().then(setUserData)
+    getUserFollowers().then(setFollowers)
+    getUserFollowing().then(setFollowing)
   }, [])
 
   // Display a loading indicator until the user data has loaded
   if (userData === undefined) return <PageLoadingIndicator />
 
+  // TODO get from API
   const profileStats = [
     { title: 'Poems', count: 4, onClick: () => setPageTab('MY_POEMS') },
     {
@@ -118,7 +131,43 @@ export default function Profile() {
               setMode={setConnectionsFilterMode}
             />
 
-            <p>foo</p>
+            <div className="-mt-2 flex flex-col gap-3 divide-y-2 divide-gray-300 bg-white px-2 pt-3 min-[420px]:px-4">
+              {connectionsFilterMode === 'FOLLOWERS' ? (
+                followers === undefined ? (
+                  <PageLoadingIndicator className="mt-2" />
+                ) : followers.length === 0 ? (
+                  <p className="text-muted-foreground mt-2 text-center">
+                    You don&apos;t have any followers.
+                  </p>
+                ) : (
+                  followers.map((follower) => (
+                    <UserConnectionCard
+                      key={follower.id}
+                      className="pb-3 max-[420px]:gap-2"
+                      isMyConnectionsPage={true}
+                      userConnectionData={follower}
+                      mode={connectionsFilterMode}
+                    />
+                  ))
+                )
+              ) : following === undefined ? (
+                <PageLoadingIndicator className="mt-2" />
+              ) : following.length === 0 ? (
+                <p className="text-muted-foreground mt-2 text-center">
+                  You don&apos;t have any followers.
+                </p>
+              ) : (
+                following.map((following) => (
+                  <UserConnectionCard
+                    key={following.id}
+                    className="pb-3 max-[420px]:gap-2"
+                    isMyConnectionsPage={true}
+                    userConnectionData={following}
+                    mode={connectionsFilterMode}
+                  />
+                ))
+              )}
+            </div>
           </>
         )}
       </div>
@@ -131,7 +180,7 @@ export default function Profile() {
             {/* Username */}
             <div className="flex h-16 items-center gap-2 bg-white px-2 text-2xl font-extrabold">
               <Image
-                className="rounded-full border-2"
+                className="rounded-full border-2 border-black"
                 src={userData.image}
                 loading="eager"
                 alt="Profile picture"

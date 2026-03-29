@@ -91,7 +91,7 @@ export default function CreatePoemFromScratch() {
           <MobilePageHeader
             title="Create From Scratch"
             image="/stylus-icon.svg"
-            className="max-[340]:text-[22px]"
+            className="max-[340px]:text-[22px]"
           />
           <div className="flex flex-1 flex-col gap-2 p-4">
             <CreatePoemFromScratchForm

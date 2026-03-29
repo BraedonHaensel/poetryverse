@@ -1,3 +1,5 @@
+import { Fragment } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -26,10 +28,9 @@ export default function ConnectionsFilters({
         const isOnMode = mode === modeOption
 
         return (
-          <>
+          <Fragment key={modeOption}>
             {/* Mobile controls */}
             <Button
-              key={modeOption}
               className={cn(
                 'rounded-0 max-w-60 flex-1 cursor-pointer border-2 border-black/50 text-lg md:hidden',
                 i !== 0 && 'rounded-l-none',
@@ -56,7 +57,7 @@ export default function ConnectionsFilters({
                 <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
               )}
             </button>
-          </>
+          </Fragment>
         )
       })}
     </div>

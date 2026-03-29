@@ -6,24 +6,24 @@ import { cn } from '@/lib/utils'
 import SignInButton from './auth-buttons/sign-in-button'
 
 type Props = {
+  className?: string
   showBackButton?: boolean
   onBackButton?: () => void
   showLogo?: boolean
   title: string
   showSignInButton?: boolean
   image?: string
-  className?: string
 }
 
 /**
  * Header displayed at the top of mobile pages.
+ * @param className Optional additional className values to apply.
  * @param showBackButton Whether to show a back button to exit the page.
  * @param onBackButton Callback called after clicking the back button.
  * @param showLogo Whether to show the PoetryVerse feather logo.
  * @param title The page title to display in the header.
  * @param showSignInButton Whether to show the sign in button.
  * @param image An optional image to display on the right side of the header.
- * @param className Optional additional className values to apply.
  */
 export default function MobilePageHeader({
   showBackButton = false,
