@@ -8,6 +8,7 @@ import config from '../lib/config'
 import { prisma } from '../lib/db'
 import { badRequest, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
+import { getImageExtension, getUploadDirectoryPath } from '../lib/utils'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   followUserRequest,
@@ -329,7 +330,9 @@ export const updateMyProfilePicture = async (
     },
   })
 
-  const oldImageFileName = getLocalImageFileName(existingUser.image)
+  const oldImageFileName = existingUser.image
+    ? path.basename(existingUser.image)
+    : ''
   if (oldImageFileName) {
     const oldImageFilePath = path.join(uploadDirectoryPath, oldImageFileName)
 
@@ -348,42 +351,6 @@ export const updateMyProfilePicture = async (
       image: imageUrl,
     },
   })
-}
-
-const getUploadDirectoryPath = () => path.resolve(process.cwd(), 'uploads')
-
-const getLocalImageFileName = (imageUrl: string | null) => {
-  if (!imageUrl) {
-    return null
-  }
-
-  try {
-    const pathname = new URL(imageUrl).pathname
-    if (!pathname.startsWith('/images/')) {
-      return null
-    }
-    return path.basename(pathname)
-  } catch {
-    if (!imageUrl.startsWith('/images/')) {
-      return null
-    }
-    return path.basename(imageUrl)
-  }
-}
-
-const getImageExtension = (mimetype: string) => {
-  switch (mimetype) {
-    case 'image/jpeg':
-      return 'jpg'
-    case 'image/png':
-      return 'png'
-    case 'image/webp':
-      return 'webp'
-    case 'image/gif':
-      return 'gif'
-    default:
-      return 'bin'
-  }
 }
 
 /**

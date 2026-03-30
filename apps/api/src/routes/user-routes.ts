@@ -69,6 +69,7 @@ router.get(
   asyncHandler(getUserById)
 )
 
+/** PUT api/users/me/following/:id */
 router.put(
   '/me/following/:id',
   requireAuth,
@@ -76,6 +77,7 @@ router.put(
   asyncHandler(followUser)
 )
 
+/** DELETE api/users/me/following/:id */
 router.delete(
   '/me/following/:id',
   requireAuth,

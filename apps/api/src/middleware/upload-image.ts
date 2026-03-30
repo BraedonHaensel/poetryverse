@@ -42,9 +42,9 @@ export const uploadProfileImage = (
         )
       }
 
-      return next(badRequest(err.message))
+      throw badRequest(err.message)
     }
 
-    return next(err)
+    throw err
   })
 }
