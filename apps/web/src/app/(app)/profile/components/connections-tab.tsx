@@ -9,37 +9,37 @@ import ConnectionsFilters, {
 import UserConnectionCard from './user-connection-card'
 
 type Props = {
-  isMyConnectionsPage: boolean
+  isMyPage: boolean
   followers: FollowerData[] | undefined
   following: FollowingData[] | undefined
-  mode: ConnectionsFilterMode
-  setMode: (mode: ConnectionsFilterMode) => void
+  filterMode: ConnectionsFilterMode
+  setFilterMode: (mode: ConnectionsFilterMode) => void
   sendFollow: (userId: string) => void
   sendUnfollow: (userId: string) => void
 }
 
 /**
  * Followers and following users connection tab contents.
- * @param isMyConnectionsPage Whether the user is viewing their own page.
+ * @param isMyPage Whether the user is viewing their own page.
  * @param followers Follower users.
  * @param following Following users.
- * @param mode Whether a "Followers" or "Following" connections tab is being viewed.
- * @param setMode Callback to set the connections tab mode.
+ * @param filterMode Whether a "Followers" or "Following" connections tab is being viewed.
+ * @param setFilterMode Callback to set the connections tab mode.
  * @param sendFollow Callback to follow a user.
  * @param sendUnfollow Callback to unfollow a user.
  */
 export default function ConnectionsTab({
-  isMyConnectionsPage,
+  isMyPage,
   followers,
   following,
-  mode,
-  setMode,
+  filterMode,
+  setFilterMode,
   sendFollow,
   sendUnfollow,
 }: Props) {
   /** Renders the list of user cards */
   function renderUsersList() {
-    return mode === 'FOLLOWERS' ? (
+    return filterMode === 'FOLLOWERS' ? (
       followers === undefined ? (
         <PageLoadingIndicator className="py-3" />
       ) : followers.length === 0 ? (
@@ -51,9 +51,9 @@ export default function ConnectionsTab({
           <UserConnectionCard
             key={follower.id}
             className="py-3 max-[420px]:gap-2"
-            isMyConnectionsPage={true}
+            isMyPage={true}
             userConnectionData={follower}
-            mode={mode}
+            filterMode={filterMode}
             sendFollow={sendFollow}
             sendUnfollow={sendUnfollow}
           />
@@ -70,9 +70,9 @@ export default function ConnectionsTab({
         <UserConnectionCard
           key={following.id}
           className="py-3 max-[420px]:gap-2"
-          isMyConnectionsPage={isMyConnectionsPage}
+          isMyPage={isMyPage}
           userConnectionData={following}
-          mode={mode}
+          filterMode={filterMode}
           sendFollow={sendFollow}
           sendUnfollow={sendUnfollow}
         />
@@ -85,8 +85,8 @@ export default function ConnectionsTab({
       {/* Followers vs Following filter modes */}
       <ConnectionsFilters
         className="px-2 pb-2 md:px-0 md:pb-px"
-        mode={mode}
-        setMode={setMode}
+        mode={filterMode}
+        setMode={setFilterMode}
       />
 
       {/* Mobile follower/following users list */}

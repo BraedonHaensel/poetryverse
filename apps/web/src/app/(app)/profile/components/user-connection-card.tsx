@@ -13,9 +13,9 @@ import { ConnectionsFilterMode } from './connections-filters'
 
 type Props = {
   className?: string
-  isMyConnectionsPage: boolean
+  isMyPage: boolean
   userConnectionData: FollowerData | FollowingData
-  mode: ConnectionsFilterMode
+  filterMode: ConnectionsFilterMode
   sendFollow: (userId: string) => void
   sendUnfollow: (userId: string) => void
 }
@@ -23,17 +23,17 @@ type Props = {
 /**
  * Card to display each user connection.
  * @param className Optional additional className values to apply.
- * @param isMyConnectionsPage Whether the user is viewing their own page.
+ * @param isMyPage Whether the user is viewing their own page.
  * @param userConnectionData Data of the user in the connection.
- * @param mode Whether a "Followers" or "Following" connections tab is being viewed.
+ * @param filterMode Whether a "Followers" or "Following" connections tab is being viewed.
  * @param sendFollow Callback to follow a user.
  * @param sendUnfollow Callback to unfollow a user.
  */
 export default function UserConnectionCard({
   className = '',
-  isMyConnectionsPage,
+  isMyPage,
   userConnectionData,
-  mode,
+  filterMode,
   sendFollow,
   sendUnfollow,
 }: Props) {
@@ -44,13 +44,13 @@ export default function UserConnectionCard({
 
   // Determine the type of button to display
   const buttonData = (() => {
-    if (mode === 'FOLLOWERS') {
+    if (filterMode === 'FOLLOWERS') {
       // On the Followers tab
       return userConnectionData.isFollowingUser
         ? { icon: Users, text: 'Following' }
         : {
             icon: UserPlus,
-            text: isMyConnectionsPage ? 'Follow Back' : 'Follow',
+            text: isMyPage ? 'Follow Back' : 'Follow',
             onClick: sendFollow,
           }
     }

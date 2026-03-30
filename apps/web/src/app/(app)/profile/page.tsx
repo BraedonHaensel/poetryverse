@@ -22,7 +22,7 @@ export default async function Profile({ searchParams }: Props) {
   return (
     <ProfilePageContents
       userId={userId ?? sessionUserId}
-      isMe={!userId || userId === sessionUserId}
+      isMyPage={!userId || userId === sessionUserId}
     />
   )
 }
