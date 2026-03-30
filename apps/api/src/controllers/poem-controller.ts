@@ -56,7 +56,8 @@ export const getPoems = async (
       // If this user is requesting their own poems, return all of their poems
       logger.info(`Fetching all poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
-        where: { authorId }
+        where: { authorId },
+        include: poemIncludeStatement,
       })
       logger.info(`Fetched all poems with authorId=${authorId}, count=${poems.length}`)
       return res.status(200).json(poems)
@@ -68,7 +69,8 @@ export const getPoems = async (
         where: { 
           authorId,
           isPublic: true
-        }
+        },
+        include: poemIncludeStatement,
       })
       logger.info(`Fetched all public poems with authorId=${authorId}, count=${poems.length}`)
       return res.status(200).json(poems)
@@ -77,7 +79,8 @@ export const getPoems = async (
     // If authorId is not provided, return all public poems
     logger.info('Fetching all public poems')
     const poems = await prisma.poem.findMany({
-      where: { isPublic: true }
+      where: { isPublic: true },
+      include: poemIncludeStatement,
     })
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
