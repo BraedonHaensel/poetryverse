@@ -52,7 +52,7 @@ export default function ConnectionsFilters({
               onClick={() => setMode(modeOption)}
             >
               {modeOption.charAt(0) + modeOption.slice(1).toLowerCase()}
-              {/* Underline the navbar item for the current page */}
+              {/* Underline the current mode */}
               {isOnMode && (
                 <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black/40" />
               )}

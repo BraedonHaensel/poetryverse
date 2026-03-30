@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
+import PoemFilters, { PoemFilterMode } from '@/components/poem-filters'
 import { ShadowCard } from '@/components/shadow-card'
 import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader } from '@/components/ui/card'
@@ -20,9 +21,6 @@ import {
 
 import { ConnectionsFilterMode } from './components/connections-filters'
 import ConnectionsTab from './components/connections-tab'
-import PoemVisibilityFilters, {
-  PoemVisibilityFilterMode,
-} from './components/poem-visibility-filters'
 
 type PageTab = 'MY_POEMS' | 'CONNECTIONS'
 
@@ -42,8 +40,7 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
   const [connectionsFilterMode, setConnectionsFilterMode] =
     useState<ConnectionsFilterMode>('FOLLOWERS')
 
-  const [poemVisibilityFilterMode, setPoemVisibilityFilterMode] =
-    useState<PoemVisibilityFilterMode>('ALL')
+  const [poemFilterMode, setPoemFilterMode] = useState<PoemFilterMode>('ALL')
 
   const [userData, setUserData] = useState<UserData>()
   const [followers, setFollowers] = useState<FollowerData[]>()
@@ -53,7 +50,7 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
   function reset() {
     setPageTab('MY_POEMS')
     setConnectionsFilterMode('FOLLOWERS')
-    setPoemVisibilityFilterMode('ALL')
+    setPoemFilterMode('ALL')
   }
 
   // Get the user's data, followers, and following users
@@ -120,10 +117,18 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
               ))}
             </div>
 
-            <PoemVisibilityFilters
+            <PoemFilters
               className="p-2 pt-0"
-              mode={poemVisibilityFilterMode}
-              setMode={setPoemVisibilityFilterMode}
+              mode={poemFilterMode}
+              modeOptions={
+                [
+                  'ALL',
+                  ...(isMe
+                    ? ['PUBLIC', 'PRIVATE']
+                    : ['AI_ASSISTED', 'HANDWRITTEN']),
+                ] as PoemFilterMode[]
+              }
+              setMode={setPoemFilterMode}
             />
 
             <div className="flex flex-col gap-2 p-2">
@@ -223,10 +228,18 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
               {pageTab === 'MY_POEMS' ? (
                 // My Poems tab
                 <>
-                  <PoemVisibilityFilters
+                  <PoemFilters
                     className="pb-4"
-                    mode={poemVisibilityFilterMode}
-                    setMode={setPoemVisibilityFilterMode}
+                    mode={poemFilterMode}
+                    modeOptions={
+                      [
+                        'ALL',
+                        ...(isMe
+                          ? ['PUBLIC', 'PRIVATE']
+                          : ['AI_ASSISTED', 'HANDWRITTEN']),
+                      ] as PoemFilterMode[]
+                    }
+                    setMode={setPoemFilterMode}
                   />
 
                   <div className="grid grid-cols-2 gap-4">
