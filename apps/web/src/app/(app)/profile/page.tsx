@@ -21,7 +21,7 @@ export default async function Profile({ searchParams }: Props) {
 
   return (
     <ProfilePageContents
-      userId={userId ?? sessionUserId}
+      viewingUserId={userId ?? sessionUserId}
       isMyPage={!userId || userId === sessionUserId}
     />
   )
