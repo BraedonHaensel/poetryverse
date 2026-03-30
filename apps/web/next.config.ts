@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
         hostname: 'lh3.googleusercontent.com',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: process.env.NEXT_PUBLIC_API_URL ?? 'localhost:3001',
+        pathname: '/**',
+      },
     ],
   },
 }

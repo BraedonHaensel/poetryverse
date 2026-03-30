@@ -11,6 +11,7 @@ import {
   getUserFollowing,
   getUsers,
   unfollowUser,
+  updateMyProfilePicture,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
@@ -79,5 +80,7 @@ router.delete(
   validate(unfollowUserSchema),
   asyncHandler(unfollowUser)
 )
+
+router.put('/me/image', requireAuth, asyncHandler(updateMyProfilePicture))
 
 export default router

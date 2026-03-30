@@ -7,6 +7,14 @@ export const getUserSchema = z.object({
   }),
 })
 
+export const updateProfilePictureSchema = z.object({
+  image: z
+    .instanceof(File, { message: 'Image file required.' })
+    .refine((file) => file.type.startsWith('image/'), {
+      message: 'File must be an image.',
+    }),
+})
+
 /** Validates `GET /api/users/following/:id` route params. */
 export const getUserFollowingSchema = getUserSchema
 
