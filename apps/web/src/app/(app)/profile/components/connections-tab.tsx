@@ -44,7 +44,7 @@ export default function ConnectionsTab({
         <PageLoadingIndicator className="py-3" />
       ) : followers.length === 0 ? (
         <p className="text-muted-foreground my-3 text-center">
-          You don&apos;t have any followers.
+          {isMyPage ? 'You have no followers.' : 'This user has no followers.'}
         </p>
       ) : (
         followers.map((follower) => (
@@ -63,7 +63,9 @@ export default function ConnectionsTab({
       <PageLoadingIndicator className="py-3" />
     ) : following.length === 0 ? (
       <p className="text-muted-foreground my-3 text-center">
-        You don&apos;t have any followers.
+        {isMyPage
+          ? 'You are not following anyone.'
+          : 'This user is not following anyone.'}
       </p>
     ) : (
       following.map((following) => (
