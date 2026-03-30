@@ -318,9 +318,11 @@ export const updateMyProfilePicture = async (
   const uploadDirectoryPath = getUploadDirectoryPath()
   const imageFilePath = path.join(uploadDirectoryPath, fileName)
 
+  // Make upload directory if it doesnt exist and upload new profile picture.
   await fs.mkdir(uploadDirectoryPath, { recursive: true })
   await fs.writeFile(imageFilePath, file.buffer)
 
+  // Update DB with new image url.
   const imageUrl = `${config.PUBLIC_API_URL}/images/${fileName}`
 
   await prisma.user.update({
@@ -330,10 +332,10 @@ export const updateMyProfilePicture = async (
     },
   })
 
-  const oldImageFileName = existingUser.image
-    ? path.basename(existingUser.image)
-    : ''
-  if (oldImageFileName) {
+  // Cleanup old profile picture if it exists.
+  const oldImageUrl = existingUser.image
+  if (oldImageUrl?.startsWith(config.PUBLIC_API_URL)) {
+    const oldImageFileName = path.basename(oldImageUrl)
     const oldImageFilePath = path.join(uploadDirectoryPath, oldImageFileName)
 
     if (oldImageFilePath !== imageFilePath) {
