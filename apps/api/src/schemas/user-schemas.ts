@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { PROFILE_IMAGE_MAX_SIZE_BYTES } from '../middleware/upload-image'
+
 /** Validates `GET /api/users/:id` route params. */
 export const getUserSchema = z.object({
   params: z.object({
@@ -8,10 +10,23 @@ export const getUserSchema = z.object({
 })
 
 export const updateProfilePictureSchema = z.object({
-  image: z
-    .instanceof(File, { message: 'Image file required.' })
-    .refine((file) => file.type.startsWith('image/'), {
+  file: z
+    .object({
+      fieldname: z.string(),
+      originalname: z.string(),
+      encoding: z.string(),
+      mimetype: z.string(),
+      size: z.number().int().positive(),
+      buffer: z.instanceof(Buffer),
+    })
+    .refine((file) => file.fieldname === 'image', {
+      message: 'Image must be sent with field name "image".',
+    })
+    .refine((file) => file.mimetype.startsWith('image/'), {
       message: 'File must be an image.',
+    })
+    .refine((file) => file.size <= PROFILE_IMAGE_MAX_SIZE_BYTES, {
+      message: `Image file too large. Max size is ${Math.floor(PROFILE_IMAGE_MAX_SIZE_BYTES / (1024 * 1024))}MB.`,
     }),
 })
 

@@ -15,6 +15,7 @@ import {
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
+import { uploadProfileImage } from '../middleware/upload-image'
 import { validate } from '../middleware/validate'
 import {
   followUserSchema,
@@ -22,6 +23,7 @@ import {
   getUserFollowingSchema,
   getUserSchema,
   unfollowUserSchema,
+  updateProfilePictureSchema,
 } from '../schemas/user-schemas'
 
 const router = Router()
@@ -81,6 +83,12 @@ router.delete(
   asyncHandler(unfollowUser)
 )
 
-router.put('/me/image', requireAuth, asyncHandler(updateMyProfilePicture))
+router.put(
+  '/me/image',
+  requireAuth,
+  uploadProfileImage,
+  validate(updateProfilePictureSchema),
+  asyncHandler(updateMyProfilePicture)
+)
 
 export default router

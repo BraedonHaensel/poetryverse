@@ -1,6 +1,10 @@
 import type { Prisma } from '@prisma/client'
+import { randomUUID } from 'crypto'
 import type { NextFunction, Request, Response } from 'express'
+import fs from 'fs/promises'
+import path from 'path'
 
+import config from '../lib/config'
 import { prisma } from '../lib/db'
 import { badRequest, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
@@ -297,6 +301,91 @@ export const unfollowUser = async (
 
   return res.status(204).send()
 }
+
+export const updateMyProfilePicture = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const userId = req.auth.userId
+  const file = (req as Request & { file: Express.Multer.File }).file
+
+  const existingUser = await getAndValidateUser(userId)
+
+  const extension = getImageExtension(file.mimetype)
+  const fileName = `${userId}-${randomUUID()}.${extension}`
+  const uploadDirectoryPath = getUploadDirectoryPath()
+  const imageFilePath = path.join(uploadDirectoryPath, fileName)
+
+  await fs.mkdir(uploadDirectoryPath, { recursive: true })
+  await fs.writeFile(imageFilePath, file.buffer)
+
+  const imageUrl = `${config.PUBLIC_API_URL}/images/${fileName}`
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      image: imageUrl,
+    },
+  })
+
+  const oldImageFileName = getLocalImageFileName(existingUser.image)
+  if (oldImageFileName) {
+    const oldImageFilePath = path.join(uploadDirectoryPath, oldImageFileName)
+
+    if (oldImageFilePath !== imageFilePath) {
+      await fs.unlink(oldImageFilePath).catch(() => {
+        logger.warn(
+          `Could not delete previous profile image userId=${userId} imagePath=${oldImageFilePath}`
+        )
+      })
+    }
+  }
+
+  logger.info(`Updated profile image userId=${userId} imageUrl=${imageUrl}`)
+  return res.status(200).json({
+    data: {
+      image: imageUrl,
+    },
+  })
+}
+
+const getUploadDirectoryPath = () => path.resolve(process.cwd(), 'uploads')
+
+const getLocalImageFileName = (imageUrl: string | null) => {
+  if (!imageUrl) {
+    return null
+  }
+
+  try {
+    const pathname = new URL(imageUrl).pathname
+    if (!pathname.startsWith('/images/')) {
+      return null
+    }
+    return path.basename(pathname)
+  } catch {
+    if (!imageUrl.startsWith('/images/')) {
+      return null
+    }
+    return path.basename(imageUrl)
+  }
+}
+
+const getImageExtension = (mimetype: string) => {
+  switch (mimetype) {
+    case 'image/jpeg':
+      return 'jpg'
+    case 'image/png':
+      return 'png'
+    case 'image/webp':
+      return 'webp'
+    case 'image/gif':
+      return 'gif'
+    default:
+      return 'bin'
+  }
+}
+
 /**
  * Fetches follower users for a target user and appends requester follow state in batch.
  * @param userId Target user ID.
