@@ -9,6 +9,7 @@ import {
   getUserFollowersRequest,
   getUserFollowingRequest,
   getUserRequest,
+  updateUserInfoRequest,
 } from '../schemas/user-schemas'
 
 // Standardized prisma select statement for getting a user.
@@ -201,6 +202,24 @@ export const getMyFollowing = async (
   const followingUsers = await getFollowingForUser(userId, userId)
 
   return res.status(200).json({ data: followingUsers })
+}
+
+export const updateMyUserInfo = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const userId = req.auth.userId
+  const updateData = req.body as updateUserInfoRequest
+
+  const updatedInfo = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...updateData,
+    },
+  })
+
+  return res.status(200).json({ data: updatedInfo })
 }
 
 /**

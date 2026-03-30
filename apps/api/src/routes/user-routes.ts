@@ -9,6 +9,7 @@ import {
   getUserFollowers,
   getUserFollowing,
   getUsers,
+  updateMyUserInfo,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
@@ -17,6 +18,7 @@ import {
   getUserFollowersSchema,
   getUserFollowingSchema,
   getUserSchema,
+  updateUserInfoSchema,
 } from '../schemas/user-schemas'
 
 const router = Router()
@@ -69,6 +71,6 @@ router.patch(
   asyncHandler(updateMyUserInfo)
 )
 
-router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
+// router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
 
 export default router

@@ -1,9 +1,26 @@
 import { z } from 'zod'
 
+// Validation limits
+const USERNAME_MIN = 5
+const USERNAME_MAX = 32
+
 /** Validates `GET /api/users/:id` route params. */
 export const getUserSchema = z.object({
   params: z.object({
     id: z.cuid('User ID must be a valid CUID.'),
+  }),
+})
+
+export const updateUserInfoSchema = z.object({
+  body: z.object({
+    username: z
+      .string()
+      .min(
+        USERNAME_MIN,
+        `Username must be at least ${USERNAME_MIN} characters.`
+      )
+      .max(USERNAME_MAX, `Username must be at most ${USERNAME_MAX} characters.`)
+      .optional(),
   }),
 })
 
@@ -25,3 +42,5 @@ export type getUserFollowingRequest = z.infer<
 export type getUserFollowersRequest = z.infer<
   typeof getUserFollowersSchema
 >['params']
+
+export type updateUserInfoRequest = z.infer<typeof updateUserInfoSchema>['body']
