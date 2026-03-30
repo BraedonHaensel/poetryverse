@@ -12,16 +12,23 @@ type DataTableProps<T> = {
   columns: Column<T>[]
   data: T[]
   renderActions?: (row: T) => React.ReactNode
+  gridClassName?: string
 }
 
 export function DataTable<T extends { id: number }>({
   columns,
   data,
   renderActions,
+  gridClassName = 'grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px]',
 }: DataTableProps<T>) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="bg-admin-sidebar-active grid grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px] items-center rounded-2xl px-6 py-4 text-sm font-semibold text-black">
+      <div
+        className={[
+          'bg-admin-sidebar-active grid items-center rounded-2xl px-6 py-4 text-sm font-semibold text-black',
+          gridClassName,
+        ].join(' ')}
+      >
         {columns.map((col) => (
           <div
             key={String(col.key)}
@@ -41,14 +48,17 @@ export function DataTable<T extends { id: number }>({
         {data.map((row) => (
           <div
             key={row.id}
-            className="grid grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px] items-start rounded-2xl bg-white px-6 py-6 shadow-sm"
+            className={[
+              'grid items-center rounded-2xl bg-white px-6 py-6 shadow-sm',
+              gridClassName,
+            ].join(' ')}
           >
             {columns.map((col) => (
               <div
                 key={String(col.key)}
                 className={[
                   'min-w-0 text-sm leading-6 text-black',
-                  col.key === 'id' ? 'pt-1 text-center font-semibold' : '',
+                  col.key === 'id' ? 'text-center font-semibold' : '',
                   col.className ?? '',
                 ].join(' ')}
               >
@@ -56,7 +66,7 @@ export function DataTable<T extends { id: number }>({
               </div>
             ))}
 
-            <div className="flex items-start justify-center gap-4 pt-1">
+            <div className="flex items-center justify-center gap-4">
               {renderActions?.(row)}
             </div>
           </div>
