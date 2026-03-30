@@ -11,7 +11,7 @@ import {
   getUsers,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
-import { requireAuth, requireRole } from '../middleware/auth'
+import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
   getUserFollowersSchema,
@@ -41,7 +41,7 @@ router.get('/me/following', requireAuth, asyncHandler(getMyFollowing))
 /** GET /api/users/followers/{id} */
 router.get(
   '/:id/followers',
-  requireAuth,
+  optionalAuth,
   validate(getUserFollowersSchema),
   asyncHandler(getUserFollowers)
 )
@@ -49,7 +49,7 @@ router.get(
 /** GET /api/users/following/{id} */
 router.get(
   '/:id/following',
-  requireAuth,
+  optionalAuth,
   validate(getUserFollowingSchema),
   asyncHandler(getUserFollowing)
 )
@@ -57,7 +57,7 @@ router.get(
 /** Get /api/users/{id} */
 router.get(
   '/:id',
-  requireAuth,
+  optionalAuth,
   validate(getUserSchema),
   asyncHandler(getUserById)
 )
