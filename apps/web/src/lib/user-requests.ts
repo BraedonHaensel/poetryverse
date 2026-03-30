@@ -29,6 +29,9 @@ export type UserData = {
   updatedAt: Date
 
   _count: UserStats
+
+  // Extra field for the Profile page
+  isFollowingUser?: boolean
 }
 
 /**

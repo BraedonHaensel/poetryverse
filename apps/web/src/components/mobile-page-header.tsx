@@ -45,7 +45,7 @@ export default function MobilePageHeader({
       <div className="flex min-w-0 items-center gap-4">
         {showBackButton && (
           <ArrowLeftFromLine
-            className="-mr-2 cursor-pointer hover:opacity-70"
+            className="-mr-2 shrink-0 cursor-pointer hover:opacity-70"
             size={32}
             onClick={onBackButton}
           />

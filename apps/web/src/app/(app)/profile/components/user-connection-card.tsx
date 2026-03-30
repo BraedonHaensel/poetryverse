@@ -16,6 +16,8 @@ type Props = {
   isMyConnectionsPage: boolean
   userConnectionData: FollowerData | FollowingData
   mode: ConnectionsFilterMode
+  sendFollow: (userId: string) => void
+  sendUnfollow: (userId: string) => void
 }
 
 /**
@@ -24,29 +26,21 @@ type Props = {
  * @param isMyConnectionPage Whether the currently signed in user's page is being viewed.
  * @param userConnectionData Data of the user in the connection.
  * @param mode Whether a "Followers" or "Following" connections tab is being viewed.
+ * @param sendFollow Callback to follow a user.
+ * @param sendUnfollow Callback to unfollow a user.
  */
 export default function UserConnectionCard({
   className = '',
   isMyConnectionsPage,
   userConnectionData,
   mode,
+  sendFollow,
+  sendUnfollow,
 }: Props) {
   const session = useSession()
   const myUserId = session.data?.user.id
 
   const stats = userConnectionData._count
-
-  /** Sends a follow request for the user connection */
-  function sendFollow() {
-    // TODO send follow request to the API
-    console.log('Follow:', userConnectionData.id)
-  }
-
-  /** Sends an unfollow request for the user connection */
-  function sendUnfollow() {
-    // TODO send unfollow request to the API
-    console.log('Unfollow:', userConnectionData.id)
-  }
 
   // Determine the type of button to display
   const buttonData = (() => {
@@ -107,7 +101,7 @@ export default function UserConnectionCard({
                     'cursor-pointer hover:bg-gray-300'
                 )
           )}
-          onClick={buttonData.onClick}
+          onClick={() => buttonData.onClick?.(userConnectionData.id)}
         >
           <buttonData.icon />
           <span>{buttonData.text}</span>

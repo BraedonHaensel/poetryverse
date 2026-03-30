@@ -1,8 +1,10 @@
 'use client'
 
-import { BookOpen, Users } from 'lucide-react'
+import { BookOpen, UserMinus, UserPlus, Users } from 'lucide-react'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { useCallback, useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
@@ -18,6 +20,7 @@ import {
   getUserFollowing,
   UserData,
 } from '@/lib/user-requests'
+import { cn } from '@/lib/utils'
 
 import { ConnectionsFilterMode } from './components/connections-filters'
 import ConnectionsTab from './components/connections-tab'
@@ -46,25 +49,54 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
   const [followers, setFollowers] = useState<FollowerData[]>()
   const [following, setFollowing] = useState<FollowingData[]>()
 
-  // Resets the page state for switching between users' profile pages
+  const session = useSession()
+  const isGuest = session.status === 'unauthenticated'
+
+  const router = useRouter()
+
+  /** Resets the page state. Used when switching between different users' profile pages. */
   function reset() {
     setPageTab('MY_POEMS')
     setConnectionsFilterMode('FOLLOWERS')
     setPoemFilterMode('ALL')
   }
 
-  // Get the user's data, followers, and following users
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    reset()
-
+  /** Refreshes the user's data. */
+  const refreshData = useCallback(() => {
     getUserData(userId).then(setUserData)
     getUserFollowers(userId).then(setFollowers)
     getUserFollowing(userId).then(setFollowing)
   }, [userId])
 
+  // Refresh the user's data on mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    reset()
+    refreshData()
+  }, [userId, refreshData])
+
   // Display a loading indicator until the user data has loaded
   if (userData === undefined) return <PageLoadingIndicator />
+
+  /** Sends a follow request for the user connection */
+  function sendFollow(userId: string | undefined) {
+    if (!userId) return
+
+    // TODO send follow request to the API
+    console.log('Follow:', userId)
+
+    refreshData()
+  }
+
+  /** Sends an unfollow request for the user connection */
+  function sendUnfollow(userId: string | undefined) {
+    if (!userId) return
+
+    // TODO send unfollow request to the API
+    console.log('Unfollow:', userId)
+
+    refreshData()
+  }
 
   const profileStats = [
     {
@@ -95,8 +127,11 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-2 divide-y-2 divide-gray-300 md:hidden">
         <MobilePageHeader
-          showBackButton={pageTab === 'CONNECTIONS'}
-          onBackButton={() => setPageTab('MY_POEMS')}
+          showBackButton={pageTab === 'CONNECTIONS' || !isMe}
+          onBackButton={() => {
+            if (isMe || pageTab !== 'MY_POEMS') setPageTab('MY_POEMS')
+            else router.push('/profile') // return to my profile page
+          }}
           title={`@${userData.username}`}
         />
 
@@ -147,6 +182,8 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
             following={following}
             mode={connectionsFilterMode}
             setMode={setConnectionsFilterMode}
+            sendFollow={sendFollow}
+            sendUnfollow={sendUnfollow}
           />
         )}
       </div>
@@ -185,6 +222,32 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
                 ))}
               </div>
             </div>
+
+            {/* Follow/Unfollow button when viewing another user while signed in */}
+            {!isMe && !isGuest && (
+              <>
+                <Button
+                  className={cn(
+                    'mx-4 my-4 cursor-pointer justify-start',
+                    userData.isFollowingUser &&
+                      'bg-off-white border border-black text-black hover:bg-gray-300'
+                  )}
+                  onClick={() =>
+                    userData.isFollowingUser
+                      ? sendUnfollow(userId)
+                      : sendFollow(userId)
+                  }
+                >
+                  {userData.isFollowingUser ? <UserMinus /> : <UserPlus />}
+                  <span>
+                    {userData.isFollowingUser ? 'Unfollow' : 'Follow'}
+                  </span>
+                </Button>
+
+                {/* Divider line */}
+                <div className="mx-4 h-0.5 bg-gray-300" />
+              </>
+            )}
 
             {/* Page tab selectors */}
             <nav className="flex flex-col gap-4 px-4 py-4">
@@ -258,6 +321,8 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
                   following={following}
                   mode={connectionsFilterMode}
                   setMode={setConnectionsFilterMode}
+                  sendFollow={sendFollow}
+                  sendUnfollow={sendUnfollow}
                 />
               )}
             </div>

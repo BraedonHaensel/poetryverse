@@ -13,6 +13,8 @@ type Props = {
   following: FollowingData[] | undefined
   mode: ConnectionsFilterMode
   setMode: (mode: ConnectionsFilterMode) => void
+  sendFollow: (userId: string) => void
+  sendUnfollow: (userId: string) => void
 }
 
 /**
@@ -21,12 +23,16 @@ type Props = {
  * @param following Following users.
  * @param mode Whether a "Followers" or "Following" connections tab is being viewed.
  * @param setMode Callback to set the connections tab mode.
+ * @param sendFollow Callback to follow a user.
+ * @param sendUnfollow Callback to unfollow a user.
  */
 export default function ConnectionsTab({
   followers,
   following,
   mode,
   setMode,
+  sendFollow,
+  sendUnfollow,
 }: Props) {
   /** Renders the list of user cards */
   function renderUsersList() {
@@ -45,6 +51,8 @@ export default function ConnectionsTab({
             isMyConnectionsPage={true}
             userConnectionData={follower}
             mode={mode}
+            sendFollow={sendFollow}
+            sendUnfollow={sendUnfollow}
           />
         ))
       )
@@ -62,6 +70,8 @@ export default function ConnectionsTab({
           isMyConnectionsPage={true}
           userConnectionData={following}
           mode={mode}
+          sendFollow={sendFollow}
+          sendUnfollow={sendUnfollow}
         />
       ))
     )
