@@ -1,9 +1,14 @@
 import type { NextConfig } from 'next'
 
+const apiUrl = new URL(
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+)
+
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -11,8 +16,9 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'http',
-        hostname: process.env.NEXT_PUBLIC_API_URL ?? 'localhost:3001',
+        protocol: apiUrl.protocol === 'https:' ? 'https' : 'http',
+        hostname: apiUrl.hostname,
+        port: apiUrl.port || '',
         pathname: '/**',
       },
     ],
