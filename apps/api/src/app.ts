@@ -4,6 +4,7 @@ import express from 'express'
 import path from 'path'
 
 import config from './lib/config'
+import { getUploadDirectoryPath } from './lib/utils'
 import { errorHandler } from './middleware/error-handler'
 import apiRouter from './routes/api-router'
 
@@ -13,7 +14,7 @@ const app = express()
 app.use(cookieParser())
 app.use(cors({ origin: config.NEXT_PUBLIC_FRONTEND_URL, credentials: true }))
 app.use(express.json())
-app.use('/images', express.static(path.resolve(process.cwd(), 'uploads')))
+app.use('/images', express.static(getUploadDirectoryPath()))
 
 // Health check
 app.get('/health', (_req, res) => {
