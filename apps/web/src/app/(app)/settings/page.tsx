@@ -9,7 +9,6 @@ import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getUserData, UserData } from '@/lib/user-requests'
-import { cn } from '@/lib/utils'
 
 import UserSettingsForms from './forms/user-settings-forms'
 
@@ -57,7 +56,7 @@ export default function UserSettings() {
 
       {/* Desktop layout */}
       <div className="m-auto hidden w-full p-10 md:block">
-        <ShadowCard className={cn('m-auto max-w-170')}>
+        <ShadowCard className="m-auto max-w-170">
           {isGuest ? (
             <CardContent className="text-center">
               There are no settings available for guest users.
