@@ -23,7 +23,6 @@ import {
   getUserFollowingSchema,
   getUserSchema,
   unfollowUserSchema,
-  updateProfilePictureSchema,
 } from '../schemas/user-schemas'
 
 const router = Router()
@@ -89,7 +88,6 @@ router.put(
   '/me/image',
   requireAuth,
   uploadProfileImage,
-  validate(updateProfilePictureSchema),
   asyncHandler(updateMyProfilePicture)
 )
 
