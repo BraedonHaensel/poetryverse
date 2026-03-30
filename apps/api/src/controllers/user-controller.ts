@@ -2,13 +2,15 @@ import type { Prisma } from '@prisma/client'
 import type { NextFunction, Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
-import { notFound } from '../lib/http-errors'
+import { badRequest, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
+  followUserRequest,
   getUserFollowersRequest,
   getUserFollowingRequest,
   getUserRequest,
+  unfollowUserRequest,
 } from '../schemas/user-schemas'
 
 // Standardized prisma select statement for getting a user.
@@ -203,6 +205,98 @@ export const getMyFollowing = async (
   return res.status(200).json({ data: followingUsers })
 }
 
+/**
+ * Follows a target user for the authenticated requester.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing the follow record.
+ * @throws {HttpError} 400 if the requester tries to follow themselves.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
+export const followUser = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as followUserRequest
+  logger.info(
+    `Following user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  if (requesterUserId === targetUserId) {
+    logger.warn(
+      `Invalid follow attempt requesterUserId=${requesterUserId} targetUserId=${targetUserId} reason=self-follow`
+    )
+    throw badRequest('You cannot follow yourself.')
+  }
+
+  await validateUserExists(targetUserId)
+
+  const follow = await prisma.follow.upsert({
+    where: {
+      followerId_followingId: {
+        followerId: requesterUserId,
+        followingId: targetUserId,
+      },
+    },
+    update: {},
+    create: {
+      followerId: requesterUserId,
+      followingId: targetUserId,
+    },
+  })
+
+  logger.info(
+    `Followed user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  return res.status(200).json({ data: follow })
+}
+
+/**
+ * Unfollows a target user for the authenticated requester.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 204 response with no body.
+ * @throws {HttpError} 400 if the requester tries to unfollow themselves.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
+export const unfollowUser = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as unfollowUserRequest
+  logger.info(
+    `Unfollowing user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  if (requesterUserId === targetUserId) {
+    logger.warn(
+      `Invalid unfollow attempt requesterUserId=${requesterUserId} targetUserId=${targetUserId} reason=self-unfollow`
+    )
+    throw badRequest('You cannot unfollow yourself.')
+  }
+
+  await validateUserExists(targetUserId)
+
+  await prisma.follow.deleteMany({
+    where: {
+      followerId: requesterUserId,
+      followingId: targetUserId,
+    },
+  })
+
+  logger.info(
+    `Unfollowed user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  return res.status(204).send()
+}
 /**
  * Fetches follower users for a target user and appends requester follow state in batch.
  * @param userId Target user ID.

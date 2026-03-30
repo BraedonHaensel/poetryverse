@@ -13,6 +13,12 @@ export const getUserFollowingSchema = getUserSchema
 /** Validates `GET /api/users/followers/:id` route params. */
 export const getUserFollowersSchema = getUserSchema
 
+/** Validates `PUT /api/users/me/following/:id` route params. */
+export const followUserSchema = getUserSchema
+
+/** Validates `DELETE /api/users/me/following/:id` route params. */
+export const unfollowUserSchema = getUserSchema
+
 /** Route params type for `getUserSchema`. */
 export type getUserRequest = z.infer<typeof getUserSchema>['params']
 
@@ -25,3 +31,9 @@ export type getUserFollowingRequest = z.infer<
 export type getUserFollowersRequest = z.infer<
   typeof getUserFollowersSchema
 >['params']
+
+/** Route params type for `followUserSchema */
+export type followUserRequest = z.infer<typeof followUserSchema>['params']
+
+/** Route params type for `unfollowUserSchema */
+export type unfollowUserRequest = z.infer<typeof unfollowUserSchema>['params']
