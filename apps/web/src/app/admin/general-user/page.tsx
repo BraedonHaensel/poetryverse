@@ -81,14 +81,25 @@ export default function GeneralUserManagement() {
           <DataTable
             columns={columns}
             data={filteredUsers}
+            gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
             renderActions={(user) => (
-              <div className="flex items-center gap-4">
-                <button onClick={() => handleDelete(user.id)}>
-                  <Trash2 className="h-5 w-5 text-gray-700 hover:text-red-500" />
+              <div className="flex items-center justify-center gap-5">
+                <button
+                  type="button"
+                  className="text-black transition hover:opacity-70"
+                  onClick={() => handleDelete(user.id)}
+                  aria-label="Delete user"
+                >
+                  <Trash2 size={28} strokeWidth={2.25} />
                 </button>
 
-                <button onClick={() => handlePromote(user.id)}>
-                  <CircleCheckBig className="h-5 w-5 text-gray-700 hover:text-green-500" />
+                <button
+                  type="button"
+                  className="text-black transition hover:opacity-70"
+                  onClick={() => handlePromote(user.id)}
+                  aria-label="Promote user"
+                >
+                  <CircleCheckBig size={30} strokeWidth={2.25} />
                 </button>
               </div>
             )}
