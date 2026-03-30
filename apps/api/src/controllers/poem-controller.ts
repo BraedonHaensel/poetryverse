@@ -41,6 +41,7 @@ const poemIncludeStatement = {
  * @param _req Incoming Express request.
  * @param res Express response used to return poems.
  * @returns A 200 response containing the list of poems.
+ * @throws {HttpError} 404 if a user with the specified authorId does not exist.
  */
 export const getPoems = async (
   req: AuthRequest,
