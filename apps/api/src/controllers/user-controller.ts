@@ -1,8 +1,8 @@
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import type { NextFunction, Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
-import { notFound } from '../lib/http-errors'
+import { conflict, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
@@ -212,12 +212,21 @@ export const updateMyUserInfo = async (
   const userId = req.auth.userId
   const updateData = req.body as updateUserInfoRequest
 
-  const updatedInfo = await prisma.user.update({
-    where: { id: userId },
-    data: {
-      ...updateData,
-    },
-  })
+  let updatedInfo
+  try {
+    updatedInfo = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    })
+  } catch (err: unknown) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === 'P2002') {
+        throw conflict('Username is already taken.')
+      }
+    }
+
+    throw err
+  }
 
   return res.status(200).json({ data: updatedInfo })
 }

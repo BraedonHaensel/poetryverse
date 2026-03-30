@@ -12,16 +12,24 @@ export const getUserSchema = z.object({
 })
 
 export const updateUserInfoSchema = z.object({
-  body: z.object({
-    username: z
-      .string()
-      .min(
-        USERNAME_MIN,
-        `Username must be at least ${USERNAME_MIN} characters.`
-      )
-      .max(USERNAME_MAX, `Username must be at most ${USERNAME_MAX} characters.`)
-      .optional(),
-  }),
+  body: z
+    .object({
+      username: z
+        .string()
+        .min(
+          USERNAME_MIN,
+          `Username must be at least ${USERNAME_MIN} characters.`
+        )
+        .max(
+          USERNAME_MAX,
+          `Username must be at most ${USERNAME_MAX} characters.`
+        )
+        .optional(),
+    })
+    .strict()
+    .refine((data) => Object.keys(data).length > 0, {
+      message: 'Request body must include at least one updatable field.',
+    }),
 })
 
 /** Validates `GET /api/users/following/:id` route params. */

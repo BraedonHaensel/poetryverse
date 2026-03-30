@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import type { NextFunction, Request, Response } from 'express'
 
 import { HttpError } from '../lib/http-errors'
@@ -17,6 +18,16 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ) {
+  // Check common Prisma error.
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2025') {
+      logger.warn('Prisma record not found (P2025)')
+      return res.status(404).json({
+        message: 'Not Found',
+      })
+    }
+  }
+
   if (err instanceof HttpError) {
     logger.error(
       `Sending HttpError with status ${err.status} and details`,
