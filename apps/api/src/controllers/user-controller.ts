@@ -222,6 +222,20 @@ export const updateMyUserInfo = async (
   return res.status(200).json({ data: updatedInfo })
 }
 
+export const deleteMyAccount = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const userId = req.auth.userId
+
+  await prisma.user.delete({
+    where: { id: userId },
+  })
+
+  return res.status(204).send()
+}
+
 /**
  * Fetches follower users for a target user and appends requester follow state in batch.
  * @param userId Target user ID.

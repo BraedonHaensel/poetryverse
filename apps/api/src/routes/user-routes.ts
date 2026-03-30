@@ -2,6 +2,7 @@ import { RoleEnum } from '@prisma/client'
 import { Router } from 'express'
 
 import {
+  deleteMyAccount,
   getMyFollowers,
   getMyFollowing,
   getMyUserInfo,
@@ -71,6 +72,6 @@ router.patch(
   asyncHandler(updateMyUserInfo)
 )
 
-// router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
+router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
 
 export default router
