@@ -11,10 +11,17 @@ import { badRequest } from '../lib/http-errors'
  */
 export const validate =
   (schema: ZodType) => (req: Request, _res: Response, next: NextFunction) => {
+    const multipartReq = req as Request & {
+      file?: unknown
+      files?: unknown
+    }
+
     const result = schema.safeParse({
       body: req.body as unknown,
       params: req.params,
       query: req.query,
+      file: multipartReq.file,
+      files: multipartReq.files,
     })
 
     if (!result.success) {

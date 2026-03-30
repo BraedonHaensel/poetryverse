@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
+import path from 'path'
 
 import config from './lib/config'
 import { errorHandler } from './middleware/error-handler'
@@ -12,6 +13,7 @@ const app = express()
 app.use(cookieParser())
 app.use(cors({ origin: config.NEXT_PUBLIC_FRONTEND_URL, credentials: true }))
 app.use(express.json())
+app.use('/images', express.static(path.resolve(process.cwd(), 'uploads')))
 
 // Health check
 app.get('/health', (_req, res) => {
