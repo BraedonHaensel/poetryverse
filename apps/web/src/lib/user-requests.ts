@@ -7,6 +7,12 @@ export const UserRole = {
 } as const
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
+type UserStats = {
+  authoredPoems: number
+  followers: number
+  following: number
+}
+
 /** User data structure. */
 export type UserData = {
   id: string
@@ -21,15 +27,20 @@ export type UserData = {
 
   createdAt: Date
   updatedAt: Date
+
+  _count: UserStats
 }
 
 /**
  * Gets a user's data.
+ * @param userId ID of the user to query.
  * @returns The user's data.
  */
-export async function getUserData(): Promise<UserData | undefined> {
+export async function getUserData(
+  userId?: string
+): Promise<UserData | undefined> {
   return api
-    .get('/api/users/me')
+    .get(`/api/users/${userId ? userId : 'me'}`)
     .then((response) => {
       const data = response.data.data
       console.log('User data:', data)
@@ -56,11 +67,7 @@ export type FollowerData = {
   image: string
   isFollowingUser: boolean
   username: string
-  _count: {
-    authoredPoems: number
-    followers: number
-    following: number
-  }
+  _count: UserStats
 }
 
 /** Following user data structure. */
@@ -68,11 +75,14 @@ export type FollowingData = FollowerData
 
 /**
  * Gets a user's followers.
+ * @param userId ID of the user to query.
  * @returns The user's followers.
  */
-export async function getUserFollowers(): Promise<FollowerData[] | undefined> {
+export async function getUserFollowers(
+  userId?: string
+): Promise<FollowerData[] | undefined> {
   return api
-    .get(`/api/users/me/followers`)
+    .get(`/api/users/${userId ? userId : 'me'}/followers`)
     .then((response) => {
       const data = response.data.data
       console.log('Followers:', data)
@@ -86,11 +96,14 @@ export async function getUserFollowers(): Promise<FollowerData[] | undefined> {
 
 /**
  * Gets a user's following users.
+ * @param userId ID of the user to query.
  * @returns The user's following users.
  */
-export async function getUserFollowing(): Promise<FollowingData[] | undefined> {
+export async function getUserFollowing(
+  userId?: string
+): Promise<FollowingData[] | undefined> {
   return api
-    .get(`/api/users/me/following`)
+    .get(`/api/users/${userId ? userId : 'me'}/following`)
     .then((response) => {
       const data = response.data.data
       console.log('Following users:', data)

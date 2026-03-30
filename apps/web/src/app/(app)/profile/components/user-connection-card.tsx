@@ -1,5 +1,9 @@
+'use client'
+
 import { UserMinus, UserPlus, Users } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 import { Button } from '@/components/ui/button'
 import { FollowerData, FollowingData } from '@/lib/user-requests'
@@ -27,6 +31,9 @@ export default function UserConnectionCard({
   userConnectionData,
   mode,
 }: Props) {
+  const session = useSession()
+  const myUserId = session.data?.user.id
+
   const stats = userConnectionData._count
 
   /** Sends a follow request for the user connection */
@@ -63,9 +70,10 @@ export default function UserConnectionCard({
   return (
     <div className={cn('flex items-center justify-between gap-4', className)}>
       {/* Left side */}
-      <div
+      <Link
         className="flex flex-1 cursor-pointer items-center gap-4 hover:opacity-70 max-[420px]:gap-2"
-        onClick={() => console.log('Redirect to user page')}
+        // On click, redirect to the user's profile page
+        href={`/profile?userId=${userConnectionData.id}`}
       >
         <div className="relative aspect-square h-12">
           <Image
@@ -84,25 +92,27 @@ export default function UserConnectionCard({
             {stats.authoredPoems} Poems · {stats.followers} Followers
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Right side */}
-      <Button
-        className={cn(
-          'w-33 justify-start',
-          buttonData.onClick === sendFollow
-            ? 'cursor-pointer'
-            : cn(
-                'bg-off-white hover:bg-off-white border border-black text-black',
-                buttonData.onClick !== undefined &&
-                  'cursor-pointer hover:bg-gray-300'
-              )
-        )}
-        onClick={buttonData.onClick}
-      >
-        <buttonData.icon />
-        <span>{buttonData.text}</span>
-      </Button>
+      {userConnectionData.id !== myUserId && (
+        <Button
+          className={cn(
+            'w-33 justify-start',
+            buttonData.onClick === sendFollow
+              ? 'cursor-pointer'
+              : cn(
+                  'bg-off-white hover:bg-off-white border border-black text-black',
+                  buttonData.onClick !== undefined &&
+                    'cursor-pointer hover:bg-gray-300'
+                )
+          )}
+          onClick={buttonData.onClick}
+        >
+          <buttonData.icon />
+          <span>{buttonData.text}</span>
+        </Button>
+      )}
     </div>
   )
 }
