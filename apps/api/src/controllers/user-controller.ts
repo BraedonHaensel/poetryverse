@@ -303,6 +303,14 @@ export const unfollowUser = async (
   return res.status(204).send()
 }
 
+/**
+ * Updates the authenticated user's profile picture.
+ * @param req Authenticated Express request with multipart `image` file already parsed/validated by middleware.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing the persisted public image URL.
+ * @throws {HttpError} 404 if the authenticated user no longer exists.
+ */
 export const updateMyProfilePicture = async (
   req: AuthRequest,
   res: Response,

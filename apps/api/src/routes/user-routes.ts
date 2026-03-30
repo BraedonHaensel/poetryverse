@@ -84,7 +84,8 @@ router.delete(
   asyncHandler(unfollowUser)
 )
 
-router.put(
+/** PATCH /api/users/me/image */
+router.patch(
   '/me/image',
   requireAuth,
   uploadProfileImage,
