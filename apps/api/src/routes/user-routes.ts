@@ -65,6 +65,7 @@ router.get(
   asyncHandler(getUserById)
 )
 
+/** PATCH /api/users/me */
 router.patch(
   '/me',
   requireAuth,
@@ -72,6 +73,7 @@ router.patch(
   asyncHandler(updateMyUserInfo)
 )
 
+/** DELETE /api/users/me */
 router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
 
 export default router

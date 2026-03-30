@@ -11,6 +11,7 @@ export const getUserSchema = z.object({
   }),
 })
 
+/** Validates `PATCH /api/users/me` request body. */
 export const updateUserInfoSchema = z.object({
   body: z
     .object({
@@ -51,4 +52,5 @@ export type getUserFollowersRequest = z.infer<
   typeof getUserFollowersSchema
 >['params']
 
+/** Request body type for `updateUserInfoSchema`. */
 export type updateUserInfoRequest = z.infer<typeof updateUserInfoSchema>['body']

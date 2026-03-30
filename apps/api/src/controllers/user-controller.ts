@@ -204,6 +204,14 @@ export const getMyFollowing = async (
   return res.status(200).json({ data: followingUsers })
 }
 
+/**
+ * Updates editable profile fields for the authenticated user.
+ * @param req Authenticated Express request with validated update payload.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 200 response containing the updated user record.
+ * @throws {HttpError} 409 if the requested username is already in use.
+ */
 export const updateMyUserInfo = async (
   req: AuthRequest,
   res: Response,
@@ -211,6 +219,9 @@ export const updateMyUserInfo = async (
 ) => {
   const userId = req.auth.userId
   const updateData = req.body as updateUserInfoRequest
+  logger.info(
+    `Updating current user profile userId=${userId} fields=${Object.keys(updateData).join(',') || 'none'}`
+  )
 
   let updatedInfo
   try {
@@ -221,6 +232,9 @@ export const updateMyUserInfo = async (
   } catch (err: unknown) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === 'P2002') {
+        logger.warn(
+          `Failed to update current user profile userId=${userId} reason=username-conflict`
+        )
         throw conflict('Username is already taken.')
       }
     }
@@ -228,19 +242,31 @@ export const updateMyUserInfo = async (
     throw err
   }
 
+  logger.info(`Updated current user profile userId=${userId}`)
+
   return res.status(200).json({ data: updatedInfo })
 }
 
+/**
+ * Deletes the authenticated user's account.
+ * @param req Authenticated Express request.
+ * @param res Express response object.
+ * @param _next Next middleware function (unused).
+ * @returns A 204 response with no body.
+ */
 export const deleteMyAccount = async (
   req: AuthRequest,
   res: Response,
   _next: NextFunction
 ) => {
   const userId = req.auth.userId
+  logger.info(`Deleting current user account userId=${userId}`)
 
   await prisma.user.delete({
     where: { id: userId },
   })
+
+  logger.info(`Deleted current user account userId=${userId}`)
 
   return res.status(204).send()
 }
