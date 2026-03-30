@@ -34,7 +34,7 @@ export default function CreatePoemFromScratch() {
 
   useEffect((): (() => void) => {
     // Prevent the body scrollbar from appearing, as the page has its own scrollbar
-    document.body.style.overflow = 'hidden'
+    document.body.style.overflowY = 'hidden'
     // Restore the body scrollbar upon leaving the page
     return () => (document.body.style.overflow = '')
   }, [])
@@ -74,11 +74,10 @@ export default function CreatePoemFromScratch() {
         console.log('Poem published successfully:', data)
         toast.success('Poem published successfully')
         router.push('/profile')
+        // Note: Keep isPublishing false to prevent resubmits
       })
       .catch((error) => {
         displayApiError(error, 'Failed to publish poem')
-      })
-      .finally(() => {
         setIsPublishing(false)
       })
   }
@@ -92,7 +91,7 @@ export default function CreatePoemFromScratch() {
           <MobilePageHeader
             title="Create From Scratch"
             image="/stylus-icon.svg"
-            className="max-[340]:text-[22px]"
+            className="max-[360px]:text-[22px]"
           />
           <div className="flex flex-1 flex-col gap-2 p-4">
             <CreatePoemFromScratchForm

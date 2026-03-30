@@ -46,7 +46,7 @@ export default function CreatePoemWithAI() {
 
   // Prevent the body scrollbar from appearing, as the page has its own scrollbar
   useEffect((): (() => void) => {
-    document.body.style.overflow = 'hidden'
+    document.body.style.overflowY = 'hidden'
     // Restore the body scrollbar upon leaving the page
     return () => (document.body.style.overflow = '')
   }, [])
@@ -124,11 +124,10 @@ export default function CreatePoemWithAI() {
         console.log('Poem published successfully:', data)
         toast.success('Poem published successfully')
         router.push('/profile')
+        // Note: Keep isPublishing false to prevent resubmits
       })
       .catch((error) => {
         displayApiError(error, 'Failed to publish poem')
-      })
-      .finally(() => {
         setIsPublishing(false)
       })
   }

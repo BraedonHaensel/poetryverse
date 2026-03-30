@@ -3,6 +3,7 @@ import { Router } from 'express'
 
 import {
   deleteMyAccount,
+  followUser,
   getMyFollowers,
   getMyFollowing,
   getMyUserInfo,
@@ -10,15 +11,18 @@ import {
   getUserFollowers,
   getUserFollowing,
   getUsers,
+  unfollowUser,
   updateMyUserInfo,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
+  followUserSchema,
   getUserFollowersSchema,
   getUserFollowingSchema,
   getUserSchema,
+  unfollowUserSchema,
   updateUserInfoSchema,
 } from '../schemas/user-schemas'
 
@@ -63,6 +67,20 @@ router.get(
   optionalAuth,
   validate(getUserSchema),
   asyncHandler(getUserById)
+)
+
+router.put(
+  '/me/following/:id',
+  requireAuth,
+  validate(followUserSchema),
+  asyncHandler(followUser)
+)
+
+router.delete(
+  '/me/following/:id',
+  requireAuth,
+  validate(unfollowUserSchema),
+  asyncHandler(unfollowUser)
 )
 
 /** PATCH /api/users/me */

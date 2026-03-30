@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import type { Request, Response } from 'express'
+import type { Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
 import { prisma } from '../lib/db'
