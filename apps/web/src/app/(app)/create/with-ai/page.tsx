@@ -46,7 +46,7 @@ export default function CreatePoemWithAI() {
 
   // Prevent the body scrollbar from appearing, as the page has its own scrollbar
   useEffect((): (() => void) => {
-    document.body.style.overflow = 'hidden'
+    document.body.style.overflowY = 'hidden'
     // Restore the body scrollbar upon leaving the page
     return () => (document.body.style.overflow = '')
   }, [])

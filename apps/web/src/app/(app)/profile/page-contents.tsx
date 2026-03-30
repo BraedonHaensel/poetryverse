@@ -133,17 +133,38 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
             else router.push('/profile') // return to my profile page
           }}
           title={`@${userData.username}`}
-        />
+        >
+          {!isMe && !isGuest && (
+            <Button
+              className={cn(
+                'w-35 cursor-pointer justify-start',
+                userData.isFollowingUser &&
+                  'bg-off-white border border-black text-black hover:bg-gray-300'
+              )}
+              onClick={() =>
+                userData.isFollowingUser
+                  ? sendUnfollow(userId)
+                  : sendFollow(userId)
+              }
+            >
+              {userData.isFollowingUser ? <UserMinus /> : <UserPlus />}
+              <span>{userData.isFollowingUser ? 'Unfollow' : 'Follow'}</span>
+            </Button>
+          )}
+        </MobilePageHeader>
 
         {pageTab === 'MY_POEMS' ? (
           // My Poems tab
           <>
             {/* Profile stats */}
             <div className="flex items-center divide-x-2 divide-gray-300 border-b border-black/30 pb-2">
-              {profileStats.map((item) => (
+              {profileStats.map((item, i) => (
                 <div
                   key={item.title}
-                  className="flex flex-1 cursor-pointer items-center justify-center gap-2 px-2 hover:opacity-70"
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-2 px-2',
+                    i !== 0 && 'cursor-pointer hover:opacity-70' // Can't click Poems on mobile
+                  )}
                   onClick={item.onClick}
                 >
                   <span className="font-medium">{item.title}</span>
@@ -178,6 +199,7 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
           </>
         ) : (
           <ConnectionsTab
+            isMyConnectionsPage={isMe}
             followers={followers}
             following={following}
             mode={connectionsFilterMode}
@@ -317,6 +339,7 @@ export default function ProfilePageContents({ userId, isMe }: Props) {
                 </>
               ) : (
                 <ConnectionsTab
+                  isMyConnectionsPage={isMe}
                   followers={followers}
                   following={following}
                   mode={connectionsFilterMode}

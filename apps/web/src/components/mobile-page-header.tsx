@@ -13,6 +13,7 @@ type Props = {
   title: string
   showSignInButton?: boolean
   image?: string
+  children?: React.ReactNode
 }
 
 /**
@@ -24,6 +25,7 @@ type Props = {
  * @param title The page title to display in the header.
  * @param showSignInButton Whether to show the sign in button.
  * @param image An optional image to display on the right side of the header.
+ * @param children An optional child component to render on the right side.
  */
 export default function MobilePageHeader({
   showBackButton = false,
@@ -33,11 +35,12 @@ export default function MobilePageHeader({
   showSignInButton = false,
   image,
   className = '',
+  children,
 }: Props) {
   return (
     <div
       className={cn(
-        'sticky top-0 z-10 flex h-16 items-center justify-between border-b-2 border-black/30 bg-white px-4 text-2xl font-extrabold',
+        'sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b-2 border-black/30 bg-white px-4 text-2xl font-extrabold',
         className
       )}
     >
@@ -65,10 +68,10 @@ export default function MobilePageHeader({
       {/* Right side */}
       {showSignInButton ? (
         <SignInButton className="w-26" />
+      ) : image !== undefined ? (
+        <Image src={image} alt="" width={40} height={40} />
       ) : (
-        image !== undefined && (
-          <Image src={image} alt="" width={40} height={40} />
-        )
+        <>{children}</>
       )}
     </div>
   )

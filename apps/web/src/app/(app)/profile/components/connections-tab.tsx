@@ -9,6 +9,7 @@ import ConnectionsFilters, {
 import UserConnectionCard from './user-connection-card'
 
 type Props = {
+  isMyConnectionsPage: boolean
   followers: FollowerData[] | undefined
   following: FollowingData[] | undefined
   mode: ConnectionsFilterMode
@@ -19,6 +20,7 @@ type Props = {
 
 /**
  * Followers and following users connection tab contents.
+ * @param isMyConnectionsPage Whether the user is viewing their own page.
  * @param followers Follower users.
  * @param following Following users.
  * @param mode Whether a "Followers" or "Following" connections tab is being viewed.
@@ -27,6 +29,7 @@ type Props = {
  * @param sendUnfollow Callback to unfollow a user.
  */
 export default function ConnectionsTab({
+  isMyConnectionsPage,
   followers,
   following,
   mode,
@@ -67,7 +70,7 @@ export default function ConnectionsTab({
         <UserConnectionCard
           key={following.id}
           className="py-3 max-[420px]:gap-2"
-          isMyConnectionsPage={true}
+          isMyConnectionsPage={isMyConnectionsPage}
           userConnectionData={following}
           mode={mode}
           sendFollow={sendFollow}
