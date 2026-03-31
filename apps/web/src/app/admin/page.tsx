@@ -48,6 +48,7 @@ const columns: Column<ReportedPoem>[] = [
   {
     key: 'poem',
     label: 'Poem',
+    className: 'justify-start text-left',
     render: (row) => <div className="text-left text-sm">{row.poem}</div>,
   },
 
