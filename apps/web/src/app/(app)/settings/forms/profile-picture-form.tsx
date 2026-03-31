@@ -55,7 +55,8 @@ export function ProfilePictureForm({ imageUrl }: Props) {
     const formData = new FormData()
     formData.append('image', data.imageFile)
 
-    const _ = await api.patch('/api/users/me/image', formData, {
+    // TODO sent to backend
+    const _ = await api.patch('/TODO', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
