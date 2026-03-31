@@ -13,7 +13,7 @@ const upload = multer({
   },
   fileFilter: (_req, file, callback) => {
     if (!file.mimetype.startsWith('image/')) {
-      throw badRequest('File must be an image.')
+      return callback(badRequest('File must be an image.'))
     }
 
     return callback(null, true)
@@ -42,9 +42,9 @@ export const uploadProfileImage = (
         )
       }
 
-      throw badRequest(err.message)
+      return next(badRequest(err.message))
     }
 
-    throw err
+    return next(err)
   })
 }

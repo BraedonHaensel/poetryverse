@@ -327,7 +327,7 @@ export const updateMyProfilePicture = async (
   const uploadDirectoryPath = getUploadDirectoryPath()
   const imageFilePath = path.join(uploadDirectoryPath, fileName)
 
-  // Make upload directory if it doesnt exist and upload new profile picture.
+  // Make upload directory if it doesn't exist and upload new profile picture.
   await fs.mkdir(uploadDirectoryPath, { recursive: true })
   await fs.writeFile(imageFilePath, file.buffer)
 
