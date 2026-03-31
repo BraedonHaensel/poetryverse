@@ -4,6 +4,8 @@ import { Router } from 'express'
 import { getReports } from '../controllers/report-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth, requireRole } from '../middleware/auth'
+import { validate } from '../middleware/validate'
+import { resolveReportRequestSchema } from '../schemas/report-schemas'
 
 const router = Router()
 
@@ -26,7 +28,8 @@ router.patch(
   '/:id',
   requireAuth,
   requireRole(RoleEnum.ADMIN),
-  asyncHandler(updateReport)
+  validate(resolveReportRequestSchema),
+  asyncHandler(resolveReport)
 )
 
 export default router
