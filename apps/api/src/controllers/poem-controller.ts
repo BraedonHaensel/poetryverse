@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
 import { prisma } from '../lib/db'
@@ -86,6 +86,60 @@ export const getPoems = async (
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
   }
+}
+
+/**
+ * Retrieves a poem by poem ID with the database and returns it as JSON.
+ * @param _req Incoming Express request.
+ * @param res Express response used to return poems.
+ * @returns A 200 response containing the list of poems.
+ * @throws {HttpError} 401 if the poem is not public and the authenticated user is not the author.
+ * @throws {HttpError} 404 if a poem with the specified id does not exist.
+ */
+export const getPoemById = async (
+  req: Request,
+  res: Response,
+) => {
+
+  // const query = req.query as GetPoemsRequest
+  // const authorId = query?.authorId
+
+  // if (authorId) {
+  //   await validateUserExists(authorId)
+
+  //   if (authorId === req.auth.userId) {
+  //     // If this user is requesting their own poems, return all of their poems
+  //     logger.info(`Fetching all poems with authorId=${authorId}`)
+  //     const poems = await prisma.poem.findMany({
+  //       where: { authorId },
+  //       include: poemIncludeStatement,
+  //     })
+  //     logger.info(`Fetched all poems with authorId=${authorId}, count=${poems.length}`)
+  //     return res.status(200).json(poems)
+  //   } else {
+
+  //     // If this user is requesting poems authored by another user, only return that user's public poems
+  //     logger.info(`Fetching all public poems with authorId=${authorId}`)
+  //     const poems = await prisma.poem.findMany({
+  //       where: { 
+  //         authorId,
+  //         isPublic: true
+  //       },
+  //       include: poemIncludeStatement,
+  //     })
+  //     logger.info(`Fetched all public poems with authorId=${authorId}, count=${poems.length}`)
+  //     return res.status(200).json(poems)
+  //   }
+  // } else {
+  //   // If authorId is not provided, return all public poems
+  //   logger.info('Fetching all public poems')
+  //   const poems = await prisma.poem.findMany({
+  //     where: { isPublic: true },
+  //     include: poemIncludeStatement,
+  //   })
+  //   logger.info(`Fetched all public poems count=${poems.length}`)
+  //   return res.status(200).json(poems)
+  // }
 }
 
 /**

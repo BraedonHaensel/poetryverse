@@ -3,6 +3,7 @@ import { Router } from 'express'
 import {
   createPoem,
   generateAIPoem,
+  getPoemById,
   getPoems,
   interpretPoem,
   likePoem,
@@ -10,10 +11,11 @@ import {
   unlikePoem,
 } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
-import { requireAuth } from '../middleware/auth'
+import { optionalAuth, requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
   CreatePoemRequestSchema,
+  GetPoemByIdRequestSchema,
   GetPoemsRequestSchema,
   LikePoemRequestSchema,
   PoemAIRequestSchema,
@@ -31,6 +33,9 @@ const router = Router()
  */
 /** TODO: Make this guest-accessible once !49 is merged */
 router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPoems))
+
+/** GET /api/poems/{id} */
+router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
 
 /** POST /api/poems */
 router.post(
