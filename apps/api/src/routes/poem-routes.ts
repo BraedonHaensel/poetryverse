@@ -3,6 +3,7 @@ import { Router } from 'express'
 import {
   createPoem,
   generateAIPoem,
+  getPoems,
   interpretPoem,
   likePoem,
   reportPoem,
@@ -13,6 +14,7 @@ import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
   CreatePoemRequestSchema,
+  GetPoemsRequestSchema,
   LikePoemRequestSchema,
   PoemAIRequestSchema,
   PoemInterpretRequestSchema,
@@ -21,6 +23,14 @@ import {
 } from '../schemas/poem-schemas'
 
 const router = Router()
+
+/** GET /api/poems
+ * 
+ * Query params:
+ * - authorId (optional): string - filter returned poems by authorId
+ */
+/** TODO: Make this guest-accessible once !49 is merged */
+router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPoems))
 
 /** POST /api/poems */
 router.post(

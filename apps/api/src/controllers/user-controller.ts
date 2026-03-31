@@ -411,7 +411,7 @@ const addRequesterFollowState = async (
  * @param userId Target user ID.
  * @throws {HttpError} 404 if the target user does not exist.
  */
-const validateUserExists = async (userId: string) => {
+export const validateUserExists = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true },
