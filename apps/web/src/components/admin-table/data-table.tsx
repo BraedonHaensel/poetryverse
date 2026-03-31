@@ -53,7 +53,7 @@ export function DataTable<T extends { id: number }>({
       </div>
 
       {/* Table contents */}
-      <div className="flex max-h-125 flex-col gap-1.5 overflow-y-auto">
+      <div className="flex max-h-125 min-w-[900px] flex-col gap-1.5 overflow-x-auto overflow-y-auto">
         {data.map((row) => (
           // Table rows
           <div
