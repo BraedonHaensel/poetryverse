@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import type { NextFunction, Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
 import { badRequest, conflict, notFound } from '../lib/http-errors'
@@ -40,14 +40,9 @@ type UserWithFollowState = SelectedUser & {
  * Retrieves all users from the database and returns them as JSON.
  * @param _req Incoming Express request.
  * @param res Express response used to return users.
- * @param _next Next middleware function (unused).
  * @returns Promise that resolves after sending the users response.
  */
-export const getUsers = async (
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getUsers = async (_req: Request, res: Response) => {
   logger.info('Fetching all users')
 
   const users = await prisma.user.findMany()
@@ -60,15 +55,10 @@ export const getUsers = async (
  * Retrieves a user profile by target user ID and includes whether requester follows them.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing the user profile payload.
  * @throws {HttpError} 404 if the target user does not exist.
  */
-export const getUserById = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getUserById = async (req: Request, res: Response) => {
   const authReq = req as OptionalAuthRequest
   const requesterUserId = authReq.auth?.userId
   const { id: targetUserId } = req.params as getUserRequest
@@ -86,15 +76,10 @@ export const getUserById = async (
  * Retrieves the authenticated user's profile details.
  * @param req Authenticated Express request.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing the authenticated user's profile.
  * @throws {HttpError} 404 if the authenticated user no longer exists.
  */
-export const getMyUserInfo = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getMyUserInfo = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
   logger.info(`Fetching current user profile userId=${userId}`)
 
@@ -125,14 +110,9 @@ export const getMyUserInfo = async (
  * Retrieves followers for a target user and annotates each result with requester follow state.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users who follow the target user.
  */
-export const getUserFollowers = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getUserFollowers = async (req: Request, res: Response) => {
   const requesterUserId = (req as OptionalAuthRequest).auth?.userId
   const { id: targetUserId } = req.params as getUserFollowersRequest
 
@@ -147,14 +127,9 @@ export const getUserFollowers = async (
  * Retrieves users followed by a target user and annotates each with requester follow state.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users followed by the target user.
  */
-export const getUserFollowing = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getUserFollowing = async (req: Request, res: Response) => {
   const requesterUserId = (req as OptionalAuthRequest).auth?.userId
   const { id: targetUserId } = req.params as getUserFollowingRequest
 
@@ -172,14 +147,9 @@ export const getUserFollowing = async (
  * Retrieves followers for the authenticated user and annotates follow state.
  * @param req Authenticated Express request.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users who follow the authenticated user.
  */
-export const getMyFollowers = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getMyFollowers = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
 
   const followers = await getFollowersForUser(userId, userId)
@@ -191,14 +161,9 @@ export const getMyFollowers = async (
  * Retrieves users followed by the authenticated user and annotates follow state.
  * @param req Authenticated Express request.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users followed by the authenticated user.
  */
-export const getMyFollowing = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getMyFollowing = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
 
   const followingUsers = await getFollowingForUser(userId, userId)
@@ -210,15 +175,10 @@ export const getMyFollowing = async (
  * Updates editable profile fields for the authenticated user.
  * @param req Authenticated Express request with validated update payload.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing the updated user record.
  * @throws {HttpError} 409 if the requested username is already in use.
  */
-export const updateMyUserInfo = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const updateMyUserInfo = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
   const updateData = req.body as updateUserInfoRequest
   logger.info(
@@ -253,14 +213,9 @@ export const updateMyUserInfo = async (
  * Deletes the authenticated user's account.
  * @param req Authenticated Express request.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 204 response with no body.
  */
-export const deleteMyAccount = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const deleteMyAccount = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
   logger.info(`Deleting current user account userId=${userId}`)
 
@@ -277,16 +232,11 @@ export const deleteMyAccount = async (
  * Follows a target user for the authenticated requester.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing the follow record.
  * @throws {HttpError} 400 if the requester tries to follow themselves.
  * @throws {HttpError} 404 if the target user does not exist.
  */
-export const followUser = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const followUser = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as followUserRequest
   logger.info(
@@ -327,16 +277,11 @@ export const followUser = async (
  * Unfollows a target user for the authenticated requester.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 204 response with no body.
  * @throws {HttpError} 400 if the requester tries to unfollow themselves.
  * @throws {HttpError} 404 if the target user does not exist.
  */
-export const unfollowUser = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const unfollowUser = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as unfollowUserRequest
   logger.info(
