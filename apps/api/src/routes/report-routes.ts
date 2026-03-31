@@ -15,4 +15,18 @@ router.get(
   asyncHandler(getReports)
 )
 
+router.get(
+  '/:id',
+  requireAuth,
+  requireRole(RoleEnum.ADMIN),
+  asyncHandler(getReportById)
+)
+
+router.patch(
+  '/:id',
+  requireAuth,
+  requireRole(RoleEnum.ADMIN),
+  asyncHandler(updateReport)
+)
+
 export default router
