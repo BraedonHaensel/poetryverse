@@ -48,21 +48,13 @@ const columns: Column<ReportedPoem>[] = [
   {
     key: 'poem',
     label: 'Poem',
-    render: (row) => (
-      <div className="line-clamp-4 max-w-[300px] text-sm leading-6 break-words whitespace-pre-line">
-        {row.poem}
-      </div>
-    ),
+    render: (row) => <div className="text-left text-sm">{row.poem}</div>,
   },
 
   {
     key: 'reason',
     label: 'Reason',
-    render: (row) => (
-      <div className="line-clamp-4 max-w-[320px] text-sm leading-6 break-words">
-        {row.reason}
-      </div>
-    ),
+    render: (row) => <div className="text-left text-sm">{row.reason}</div>,
   },
 ]
 
@@ -134,7 +126,7 @@ function AnalyticsView() {
           </CardTitle>
         </CardHeader>
 
-        <ShadowCard className="bg-admin-panel rounded-[20px] px-10 py-12">
+        <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
           <CardContent className="grid grid-cols-1 gap-8 p-0 md:grid-cols-3">
             <StatCard title="Number of Poems" value="50" />
             <StatCard title="Number of AI Poems" value="23" />
@@ -150,13 +142,13 @@ function AnalyticsView() {
           </CardTitle>
         </CardHeader>
 
-        <ShadowCard className="rounded-[20px] bg-admin-panel p-3">
-          <CardContent className="max-h-[470px] overflow-y-auto p-0">
+        <ShadowCard className="bg-admin-panel rounded-4xl p-3">
+          <CardContent className="max-h-117.5 overflow-y-auto p-0">
             <DataTable
               columns={columns}
               data={reportedPoems}
               renderActions={(_row) => (
-                <div className="flex items-center justify-center gap-5">
+                <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
                     className="text-black transition hover:opacity-70"
@@ -184,11 +176,9 @@ function AnalyticsView() {
 
 function StatCard({ title, value }: { title: string; value: string }) {
   return (
-    <div className="flex min-h-[px] flex-col items-center justify-center rounded-[20px] bg-white px-6 py-8 text-center shadow-md">
+    <div className="flex min-h-[px] flex-col items-center justify-center rounded-4xl bg-white px-6 py-8 text-center shadow-md">
       <div className="mb-5 text-xl font-semibold text-black">{title}</div>
-      <div className="text-6xl leading-none font-bold text-black">
-        {value}
-      </div>
+      <div className="text-6xl leading-none font-bold text-black">{value}</div>
     </div>
   )
 }
