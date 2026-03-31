@@ -79,12 +79,14 @@ services:
       dockerfile: apps/web/Dockerfile.web
       args:
         DATABASE_URL: *database_url
+        NEXT_INTERNAL_API_URL: http://api:3001
 
     depends_on:
       - api
 
     environment:
       DATABASE_URL: *database_url
+      NEXT_INTERNAL_API_URL: http://api:3001
 
     env_file:
       - .env

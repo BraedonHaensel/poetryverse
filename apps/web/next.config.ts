@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
-const apiUrl = new URL(
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+const internalApiUrl = new URL(
+  process.env.NEXT_INTERNAL_API_URL ?? 'http://localhost:3001'
 )
 
 const nextConfig: NextConfig = {
@@ -15,12 +15,20 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: apiUrl.protocol === 'https:' ? 'https' : 'http',
-        hostname: apiUrl.hostname,
-        port: apiUrl.port || '',
+        protocol: internalApiUrl.protocol === 'https:' ? 'https' : 'http',
+        hostname: internalApiUrl.hostname,
+        port: internalApiUrl.port || '',
         pathname: '/**',
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/images/:path*',
+        destination: `${internalApiUrl.origin}/images/:path*`,
+      },
+    ]
   },
 }
 

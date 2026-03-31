@@ -4,7 +4,6 @@ import type { NextFunction, Request, Response } from 'express'
 import fs from 'fs/promises'
 import path from 'path'
 
-import config from '../lib/config'
 import { prisma } from '../lib/db'
 import { badRequest, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
@@ -17,6 +16,8 @@ import {
   getUserRequest,
   unfollowUserRequest,
 } from '../schemas/user-schemas'
+
+const IMAGES_PATH_PREFIX = '/images'
 
 // Standardized prisma select statement for getting a user.
 const SELECT_USER_STATEMENT = {
@@ -331,7 +332,7 @@ export const updateMyProfilePicture = async (
   await fs.writeFile(imageFilePath, file.buffer)
 
   // Update DB with new image url.
-  const imageUrl = `${config.PUBLIC_API_URL}/images/${fileName}`
+  const imageUrl = `${IMAGES_PATH_PREFIX}/${fileName}`
 
   await prisma.user.update({
     where: { id: userId },
@@ -342,7 +343,7 @@ export const updateMyProfilePicture = async (
 
   // Cleanup old profile picture if it exists.
   const oldImageUrl = existingUser.image
-  if (oldImageUrl?.startsWith(config.PUBLIC_API_URL)) {
+  if (oldImageUrl?.startsWith(IMAGES_PATH_PREFIX)) {
     const oldImageFileName = path.basename(oldImageUrl)
     const oldImageFilePath = path.join(uploadDirectoryPath, oldImageFileName)
 
