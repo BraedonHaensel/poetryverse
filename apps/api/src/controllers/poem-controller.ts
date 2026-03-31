@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
 import { prisma } from '../lib/db'
@@ -7,7 +7,7 @@ import { badRequest, HttpError, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
-import type { AuthRequest } from '../middleware/auth'
+import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
   GetPoemsRequest,
@@ -44,16 +44,19 @@ const poemIncludeStatement = {
  * @throws {HttpError} 404 if a user with the specified authorId does not exist.
  */
 export const getPoems = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
 ) => {
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
+
   const query = req.query as GetPoemsRequest
   const authorId = query?.authorId
 
   if (authorId) {
     await validateUserExists(authorId)
 
-    if (authorId === req.auth.userId) {
+    if (requesterUserId && authorId === requesterUserId) {
       // If this user is requesting their own poems, return all of their poems
       logger.info(`Fetching all poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
@@ -63,8 +66,7 @@ export const getPoems = async (
       logger.info(`Fetched all poems with authorId=${authorId}, count=${poems.length}`)
       return res.status(200).json(poems)
     } else {
-
-      // If this user is requesting poems authored by another user, only return that user's public poems
+      // Guest or user is requsting someone else's poems, return only public poems
       logger.info(`Fetching all public poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
         where: { 
