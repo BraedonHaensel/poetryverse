@@ -2,6 +2,7 @@ import { RoleEnum } from '@prisma/client'
 import { Router } from 'express'
 
 import {
+  deleteMyAccount,
   followUser,
   getMyFollowers,
   getMyFollowing,
@@ -11,6 +12,7 @@ import {
   getUserFollowing,
   getUsers,
   unfollowUser,
+  updateMyUserInfo,
   updateMyProfilePicture,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
@@ -23,6 +25,7 @@ import {
   getUserFollowingSchema,
   getUserSchema,
   unfollowUserSchema,
+  updateUserInfoSchema,
 } from '../schemas/user-schemas'
 
 const router = Router()
@@ -83,6 +86,17 @@ router.delete(
   validate(unfollowUserSchema),
   asyncHandler(unfollowUser)
 )
+
+/** PATCH /api/users/me */
+router.patch(
+  '/me',
+  requireAuth,
+  validate(updateUserInfoSchema),
+  asyncHandler(updateMyUserInfo)
+)
+
+/** DELETE /api/users/me */
+router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
 
 /** PATCH /api/users/me/image */
 router.patch(
