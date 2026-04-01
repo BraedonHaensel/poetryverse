@@ -1,9 +1,8 @@
 import { Prisma, ReportStatus, ResolutionType } from '@prisma/client'
-import { timeStamp } from 'console'
 import { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
-import { notFound } from '../lib/http-errors'
+import { conflict, notFound } from '../lib/http-errors'
 import { AuthRequest } from '../middleware/auth'
 import {
   getReportByIdRequest,
@@ -47,8 +46,8 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
 
   const existingReport = await getAndValidateReport(reportId)
 
-  if (existingReport.status == ReportStatus.RESOLVED) {
-    // already resolved, maybe throw
+  if (existingReport.status === ReportStatus.RESOLVED) {
+    throw conflict('Report has already been resolved')
   }
 
   if (resolveData.resolutionType === ResolutionType.REMOVE) {
@@ -62,12 +61,13 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
     })
   }
 
-  const resolveDataForPrisma = {
-    ...resolveData,
+  const resolveDataForPrisma: Prisma.ReportUncheckedUpdateInput = {
+    resolution: resolveData.resolutionType,
+    adminNote: resolveData.adminNote,
     resolvedByUserId: userId,
     status: ReportStatus.RESOLVED,
-    resolvedAt: Date.now(),
-  } as Prisma.ReportUpdateInput
+    resolvedAt: new Date(),
+  }
 
   const resolvedReport = await prisma.report.update({
     where: { id: reportId },
@@ -88,10 +88,4 @@ const getAndValidateReport = async (id: number) => {
   }
 
   return report
-}
-
-const removePoem = async (id: string) => {
-  await prisma.poem.delete({
-    where: { id: id },
-  })
 }
