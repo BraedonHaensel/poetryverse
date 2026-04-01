@@ -10,6 +10,7 @@ import { logger } from '../lib/logger'
 export type AuthRequest = Request & { auth: { userId: string } }
 export type OptionalAuthRequest = Request & { auth?: { userId: string } }
 
+/** Gets the userId from the token. */
 const getTokenUserId = async (req: Request) => {
   const token = await getToken({
     req: req,
@@ -24,6 +25,7 @@ const getTokenUserId = async (req: Request) => {
   return token.id
 }
 
+/** Uses RoleEnum value to get corresponding role level. */
 const getRoleLevel = (role: RoleEnum) => {
   switch (role) {
     case RoleEnum.SUPER_ADMIN:
@@ -35,6 +37,16 @@ const getRoleLevel = (role: RoleEnum) => {
     default:
       return 0
   }
+}
+
+/** Helps validate the session by checking the user exists. */
+const userExists = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  })
+
+  return !!user
 }
 
 /**
@@ -53,13 +65,18 @@ export const requireAuth = async (
     const userId = await getTokenUserId(req)
 
     if (!userId) {
-      return next(unauthorized())
+      throw unauthorized()
+    }
+
+    // Check that auth and database state are synced.
+    if (!(await userExists(userId))) {
+      throw unauthorized()
     }
 
     ;(req as AuthRequest).auth = { userId }
     return next()
   } catch {
-    return next(unauthorized())
+    throw unauthorized()
   }
 }
 
@@ -78,7 +95,7 @@ export const optionalAuth = async (
   try {
     const userId = await getTokenUserId(req)
 
-    if (userId) {
+    if (userId && (await userExists(userId))) {
       ;(req as OptionalAuthRequest).auth = { userId }
     }
   } catch {
