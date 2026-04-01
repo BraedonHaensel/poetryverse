@@ -5,6 +5,15 @@ import { notFound } from '../lib/http-errors'
 import { AuthRequest } from '../middleware/auth'
 import { getReportByIdRequest } from '../schemas/report-schemas'
 
+const REPORT_INCLUDE_STATEMENT = {
+  poem: {
+    select: {
+      title: true,
+      body: true,
+    },
+  },
+}
+
 /**
  * Retrieves all poem reports.
  * @param _req Incoming Express request (unused).
@@ -28,6 +37,7 @@ export const getReportById = async (req: Request, res: Response) => {
 const getAndValidateReport = async (id: number) => {
   const report = await prisma.report.findUnique({
     where: { id: id },
+    include: REPORT_INCLUDE_STATEMENT,
   })
 
   if (!report) {
