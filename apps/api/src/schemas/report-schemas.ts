@@ -12,7 +12,7 @@ export const resolveReportRequestSchema = z.object({
     id: z.string().regex(/^\d+$/),
   }),
   body: {
-    resolutionType: z.enum(ResolutionType).optional(),
+    resolutionType: z.enum(ResolutionType),
     adminNote: z.string().optional(),
   },
 })
@@ -20,4 +20,9 @@ export const resolveReportRequestSchema = z.object({
 export type getReportByIdRequest = z.infer<
   typeof getReportByIdRequestSchema
 >['params']
-export type resolveReportRequest = z.infer<typeof resolveReportRequestSchema>
+export type resolveReportRequestParams = z.infer<
+  typeof resolveReportRequestSchema
+>['params']
+export type resolveReportRequest = z.infer<
+  typeof resolveReportRequestSchema
+>['body']
