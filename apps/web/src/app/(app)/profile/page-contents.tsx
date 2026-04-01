@@ -9,6 +9,7 @@ import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { PoemFilterMode } from '@/components/poem-filters'
 import { Button } from '@/components/ui/button'
+import { api, displayApiError } from '@/lib/api'
 import {
   FollowerData,
   FollowingData,
@@ -90,20 +91,42 @@ export default function ProfilePageContents({
   function sendFollow(userId: string | undefined) {
     if (!userId) return
 
-    // TODO send follow request to the API
-    console.log('Follow:', userId)
-
-    refreshData()
+    setFollowers(undefined)
+    setFollowing(undefined)
+    api
+      .put(`/api/users/me/following/${userId}`)
+      .then(() => {
+        console.log('Successfully followed', userId)
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to follow user')
+      })
+      .finally(() => {
+        // Refresh the list of followers/following users
+        getUserFollowers(viewingUserId).then(setFollowers)
+        getUserFollowing(viewingUserId).then(setFollowing)
+      })
   }
 
   /** Sends an unfollow request for the user connection */
   function sendUnfollow(userId: string | undefined) {
     if (!userId) return
 
-    // TODO send unfollow request to the API
-    console.log('Unfollow:', userId)
-
-    refreshData()
+    setFollowers(undefined)
+    setFollowing(undefined)
+    api
+      .delete(`/api/users/me/following/${userId}`)
+      .then(() => {
+        console.log('Successfully unfollowed', userId)
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to unfollow user')
+      })
+      .finally(() => {
+        // Refresh the list of followers/following users
+        getUserFollowers(viewingUserId).then(setFollowers)
+        getUserFollowing(viewingUserId).then(setFollowing)
+      })
   }
 
   // Get the profile stats to display
