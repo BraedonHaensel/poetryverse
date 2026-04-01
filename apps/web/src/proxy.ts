@@ -14,12 +14,6 @@ export async function proxy(req: NextRequest) {
       return NextResponse.redirect(new URL('/', req.url))
     }
 
-    // TODO require an admin user for the admin pages. Pseudocode:
-    // if (pathname.startsWith('/admin') && <is_not_an_admin>) {
-    //   // User must be an admin to access the admin pages
-    //   return NextResponse.redirect(new URL('/', req.url))
-    // }
-
     // Signed in, proceed to the page
     return NextResponse.next()
   }

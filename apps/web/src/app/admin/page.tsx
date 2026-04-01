@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAdminUser } from '@/context/admin-user-context'
 type ReportedPoem = {
   id: number
   title: string
@@ -69,6 +70,8 @@ const columns: Column<ReportedPoem>[] = [
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
 
+  const { role } = useAdminUser()
+
   return (
     <div className="flex min-h-[calc(100vh-72px)] w-full bg-white">
       <aside className="w-[278px] border-r border-black/10">
@@ -83,11 +86,13 @@ export default function AdminPage() {
             active={activeTab === 'general'}
             onClick={() => setActiveTab('general')}
           />
-          <SidebarItem
-            label="Admin User Management"
-            active={activeTab === 'admin'}
-            onClick={() => setActiveTab('admin')}
-          />
+          {role === 'SUPER_ADMIN' && (
+            <SidebarItem
+              label="Admin User Management"
+              active={activeTab === 'admin'}
+              onClick={() => setActiveTab('admin')}
+            />
+          )}
         </div>
       </aside>
 
@@ -150,7 +155,7 @@ function AnalyticsView() {
           </CardTitle>
         </CardHeader>
 
-        <ShadowCard className="rounded-[20px] bg-admin-panel p-3">
+        <ShadowCard className="bg-admin-panel rounded-[20px] p-3">
           <CardContent className="max-h-[470px] overflow-y-auto p-0">
             <DataTable
               columns={columns}
@@ -186,9 +191,7 @@ function StatCard({ title, value }: { title: string; value: string }) {
   return (
     <div className="flex min-h-[px] flex-col items-center justify-center rounded-[20px] bg-white px-6 py-8 text-center shadow-md">
       <div className="mb-5 text-xl font-semibold text-black">{title}</div>
-      <div className="text-6xl leading-none font-bold text-black">
-        {value}
-      </div>
+      <div className="text-6xl leading-none font-bold text-black">{value}</div>
     </div>
   )
 }
