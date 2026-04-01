@@ -2,12 +2,14 @@
 
 import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import SignOutButton from '@/components/auth-buttons/sign-out-button'
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { api, displayApiError } from '@/lib/api'
 import { getUserData, UserData } from '@/lib/user-requests'
 
 import UserSettingsForms from './forms/user-settings-forms'
@@ -32,6 +34,40 @@ export default function UserSettings() {
   // Display a loading indicator until the user data has loaded
   if (userData === undefined) return <PageLoadingIndicator />
 
+  /** Submit a username change. */
+  async function onUsernameSubmit(username: string) {
+    await api
+      .patch('/api/users/me', { username })
+      .then(async () => {
+        console.log('Username updated to', username)
+        await getUserData().then(setUserData)
+        toast.success('Username updated')
+      })
+      .catch((error) => displayApiError(error, 'Failed to update username'))
+  }
+
+  /** Submit a profile picture change. */
+  async function onProfilePictureSubmit(imageFile: File) {
+    // Use a FormData to handle uploading the profile picture image file
+    const formData = new FormData()
+    formData.append('image', imageFile)
+
+    await api
+      .patch('/api/users/me/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then(async () => {
+        console.log('Profile picture updated')
+        await getUserData().then(setUserData)
+        toast.success('Profile picture updated')
+      })
+      .catch((error) =>
+        displayApiError(error, 'Failed to update profile picture')
+      )
+  }
+
   return (
     <>
       {/* Mobile layout */}
@@ -46,7 +82,11 @@ export default function UserSettings() {
             </ShadowCard>
           ) : (
             <>
-              <UserSettingsForms userData={userData} />
+              <UserSettingsForms
+                userData={userData}
+                onProfilePictureSubmit={onProfilePictureSubmit}
+                onUsernameSubmit={onUsernameSubmit}
+              />
               {/* Mobile-only sign out button */}
               <SignOutButton className="mt-auto" />
             </>
@@ -69,7 +109,11 @@ export default function UserSettings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex h-full flex-col gap-5">
-                <UserSettingsForms userData={userData} />
+                <UserSettingsForms
+                  userData={userData}
+                  onProfilePictureSubmit={onProfilePictureSubmit}
+                  onUsernameSubmit={onUsernameSubmit}
+                />
               </CardContent>
             </>
           )}
