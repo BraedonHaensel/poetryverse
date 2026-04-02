@@ -48,14 +48,12 @@ const columns: Column<ReportedPoem>[] = [
   {
     key: 'poem',
     label: 'Poem',
-    className: 'justify-start text-left',
-    render: (row) => <div className="text-left text-sm">{row.poem}</div>,
+    className: 'justify-start text-left text-sm',
   },
-
   {
     key: 'reason',
     label: 'Reason',
-    render: (row) => <div className="text-left text-sm">{row.reason}</div>,
+    className: 'justify-start text-left text-sm',
   },
 ]
 
@@ -64,7 +62,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-72px)] w-full bg-white">
-      <aside className="w-[278px] border-r border-black/10">
+      <aside className="w-69.5 border-r border-black/10">
         <div className="flex flex-col pt-0">
           <SidebarItem
             label="Analytics"
