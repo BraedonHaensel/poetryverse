@@ -13,6 +13,7 @@ import {
   getUsers,
   unfollowUser,
   updateMyUserInfo,
+  updateRole,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
@@ -24,6 +25,7 @@ import {
   getUserSchema,
   unfollowUserSchema,
   updateUserInfoSchema,
+  updateUserRoleRequestSchema,
 } from '../schemas/user-schemas'
 
 const router = Router()
@@ -93,5 +95,13 @@ router.patch(
 
 /** DELETE /api/users/me */
 router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
+
+router.patch(
+  '/:id/role',
+  requireAuth,
+  requireRole(RoleEnum.SUPER_ADMIN),
+  validate(updateUserRoleRequestSchema),
+  asyncHandler(updateRole)
+)
 
 export default router

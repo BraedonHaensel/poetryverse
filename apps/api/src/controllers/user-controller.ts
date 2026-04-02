@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, RoleEnum } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
@@ -317,6 +317,10 @@ export const updateRole = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as updateRoleRequestParams
   const { role: newRole } = req.body as updateRoleRequest
+
+  if (newRole === RoleEnum.SUPER_ADMIN) {
+    throw badRequest('Users cannot be promoted to Super Admin.')
+  }
 
   if (requesterUserId === targetUserId) {
     throw badRequest('You cannot change your own role.')
