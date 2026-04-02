@@ -2,35 +2,64 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
-import { LargeButton } from '@/components/large-button'
 import { LoadingDialog } from '@/components/loading-dialog'
+import MobilePageHeader from '@/components/mobile-page-header'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { api, displayApiError } from '@/lib/api'
-import { CreateWithAISchema } from '@/schemas/create-poem-schemas'
+import {
+  getPoemTags,
+  getPoemTypes,
+  PoemTag,
+  PoemType,
+} from '@/lib/poem-requests'
+import { cn } from '@/lib/utils'
+import {
+  CreateFromScratchSchema,
+  CreateWithAISchema,
+} from '@/schemas/create-poem-schemas'
 
-import { PoemContentsField } from '../fields/poem-contents-field'
-import { PoemPromptField } from '../fields/poem-prompt-field'
-import { PoemTagsField } from '../fields/poem-tags-field'
-import { PoemTitleField } from '../fields/poem-title-field'
-import { PoemTypeField } from '../fields/poem-type-field'
-import { PoemVisibilityField } from '../fields/poem-visibility-field'
+import CreatePoemWithAIForm from './with-ai-form'
 
 /**
  * Create poem with AI page.
  */
 export default function CreatePoemWithAI() {
   // Whether an AI poem has been generated
-  const [isGenerated, setIsGenerated] = useState<boolean>(false)
+  const [isGenerated, setIsGenerated] = useState(false)
   // Whether the AI poem generation is in progress
-  const [isGenerating, setIsGenerating] = useState<boolean>(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   // Whether the regenerate poem confirmation is open
-  const [isRegenConfirmOpen, setIsRegenConfirmOpen] = useState<boolean>(false)
+  const [isRegenConfirmOpen, setIsRegenConfirmOpen] = useState(false)
+
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
+  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
+  const router = useRouter()
+
+  // Prevent the body scrollbar from appearing, as the page has its own scrollbar
+  useEffect((): (() => void) => {
+    document.body.style.overflowY = 'hidden'
+    // Restore the body scrollbar upon leaving the page
+    return () => (document.body.style.overflow = '')
+  }, [])
+
+  // Get the list of poem tags and types from the API
+  const didFetch = useRef(false)
+  useEffect(() => {
+    if (didFetch.current) return // Prevent double fetch in strict mode
+    didFetch.current = true
+
+    getPoemTypes().then(setPoemTypes)
+    getPoemTags().then(setPoemTags)
+  }, [])
 
   // Create poem with AI form
   const form = useForm<CreateWithAISchema>({
@@ -58,15 +87,7 @@ export default function CreatePoemWithAI() {
     setIsGenerating(true)
     const { typeId, prompt } = form.getValues()
     api
-      .post(
-        '/api/poems/generate',
-        { typeId, prompt },
-        {
-          headers: {
-            Authorization: `Bearer ${'<TODO GET AUTH TOKEN>'}`,
-          },
-        }
-      )
+      .post('/api/poems/generate', { typeId, prompt })
       .then((response) => {
         // Parse the generated poem from the response
         const data = response.data.data
@@ -83,11 +104,35 @@ export default function CreatePoemWithAI() {
       })
   }
 
-  // Handle submitting the completed form
+  // Handle submitting the form (publishing a poem)
   function onSubmit(data: CreateWithAISchema) {
-    console.log(`TODO Submit form: ${JSON.stringify(data)}`)
+    setIsPublishing(true)
+
+    // Discard the prompt field, and indicated it was created with AI
+    const { prompt: _, ...rest } = data
+    const submissionData: CreateFromScratchSchema = {
+      ...rest,
+      createdWithAI: true,
+    }
+
+    console.log('Publishing poem:', submissionData)
+    api
+      .post('/api/poems', submissionData)
+      .then((response) => {
+        // Publish successful
+        const data = response.data.data
+        console.log('Poem published successfully:', data)
+        toast.success('Poem published successfully')
+        router.push('/profile')
+        // Note: Keep isPublishing false to prevent resubmits
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to publish poem')
+        setIsPublishing(false)
+      })
   }
 
+  // Handle clicking the Generate button.
   async function handleGenerateClick() {
     if (!isGenerated) {
       generate()
@@ -98,11 +143,10 @@ export default function CreatePoemWithAI() {
     if (isValid) setIsRegenConfirmOpen(true)
   }
 
-  const control = form.control
-
   return (
     <>
       <LoadingDialog isOpen={isGenerating} message="Generating poem..." />
+      <LoadingDialog isOpen={isPublishing} message="Publishing poem..." />
       <ConfirmationDialog
         isOpen={isRegenConfirmOpen}
         title="Are you sure you want to regenerate?"
@@ -110,49 +154,48 @@ export default function CreatePoemWithAI() {
         onClose={() => setIsRegenConfirmOpen(false)}
         onAction={generate}
       />
-      <ShadowCard
-        className={`m-auto ${!isGenerated ? 'w-full max-w-150' : ''}`}
-      >
-        <CardHeader>
-          <div className="flex items-center justify-center gap-3">
-            <CardTitle className="text-2xl font-bold">Create With AI</CardTitle>
-            <Image src="/robot-icon.svg" alt="" width={40} height={40} />
+      <Form {...form}>
+        {/* Mobile layout */}
+        <div className="flex flex-1 flex-col md:hidden">
+          <MobilePageHeader title="Create With AI" image="/robot-icon.svg" />
+          <div className="flex flex-1 flex-col gap-2 p-4">
+            <CreatePoemWithAIForm
+              form={form}
+              onSubmit={onSubmit}
+              isGenerated={isGenerated}
+              onGenerateClick={handleGenerateClick}
+              poemTypes={poemTypes}
+              poemTags={poemTags}
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className={`grid grid-cols-1 gap-x-5 ${isGenerated ? 'md:grid-cols-2' : ''}`}
-            >
-              {/* Left column fields */}
-              <div className="space-y-3">
-                <PoemTypeField control={control} />
-                <PoemPromptField control={control} />
+        </div>
 
-                {/* Generate/regenerate button */}
-                <LargeButton type="button" onClick={handleGenerateClick}>
-                  {isGenerated ? 'Regenerate' : 'Generate'}
-                </LargeButton>
-
-                {isGenerated && <PoemTitleField control={control} />}
+        {/* Desktop layout */}
+        <div className="m-auto hidden w-full p-10 md:block">
+          <ShadowCard
+            className={cn('m-auto max-w-170', isGenerated && 'max-w-6xl')}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-center gap-3">
+                <CardTitle className="text-2xl font-bold">
+                  Create With AI
+                </CardTitle>
+                <Image src="/robot-icon.svg" alt="" width={40} height={40} />
               </div>
-
-              {/* Right column fields */}
-              {isGenerated && (
-                <div className="space-y-3">
-                  <PoemContentsField control={control} showAIDescription />
-                  <PoemTagsField control={control} />
-                  <PoemVisibilityField control={control} />
-
-                  {/* Publish button */}
-                  <LargeButton type="submit">Publish</LargeButton>
-                </div>
-              )}
-            </form>
-          </Form>
-        </CardContent>
-      </ShadowCard>
+            </CardHeader>
+            <CardContent>
+              <CreatePoemWithAIForm
+                form={form}
+                onSubmit={onSubmit}
+                isGenerated={isGenerated}
+                onGenerateClick={handleGenerateClick}
+                poemTypes={poemTypes}
+                poemTags={poemTags}
+              />
+            </CardContent>
+          </ShadowCard>
+        </div>
+      </Form>
     </>
   )
 }

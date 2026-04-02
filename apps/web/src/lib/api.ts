@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios'
+import { signOut } from 'next-auth/react'
 import { toast } from 'sonner'
 
 /**
@@ -22,7 +23,7 @@ interface ApiErrorResponse {
  * @param prefix The prefix to display before the error.
  * Ex: "Search failed" => "Search failed: Network Error"
  */
-export function displayApiError(
+export async function displayApiError(
   error: AxiosError<ApiErrorResponse>,
   prefix: string
 ) {
@@ -30,7 +31,14 @@ export function displayApiError(
   const apiErrorData = error?.response?.data
   const apiError =
     apiErrorData?.displayMessage ?? apiErrorData?.message ?? apiErrorData?.error
+
   if (apiError) {
+    if (apiError === 'Invalid user ID.') {
+      // Invalid session, log the user out
+      await signOut({ callbackUrl: '/' })
+      return
+    }
+
     console.error(`API error: ${apiError}`)
     toast.error(`${toastPrefix}${apiError}`)
   } else {

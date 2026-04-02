@@ -1,8 +1,26 @@
 'use client'
-import { SessionProvider } from 'next-auth/react'
+
+import { SessionProvider, useSession } from 'next-auth/react'
 import React from 'react'
 
+import PageLoadingIndicator from './page-loading-indicator'
 import { TooltipProvider } from './ui/tooltip'
+
+type SessionLoaderProps = {
+  children: React.ReactNode
+}
+
+/**
+ * Render a loading indicator until the session has been loaded.
+ */
+function SessionLoader({ children }: SessionLoaderProps) {
+  const { status } = useSession()
+
+  if (status === 'loading') return <PageLoadingIndicator />
+
+  // Session loaded, display the page contents
+  return <>{children}</>
+}
 
 type Props = {
   children: React.ReactNode
@@ -11,7 +29,9 @@ type Props = {
 function Provider({ children }: Props) {
   return (
     <SessionProvider>
-      <TooltipProvider>{children}</TooltipProvider>
+      <SessionLoader>
+        <TooltipProvider>{children}</TooltipProvider>
+      </SessionLoader>
     </SessionProvider>
   )
 }
