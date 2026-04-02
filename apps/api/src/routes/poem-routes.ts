@@ -2,6 +2,7 @@ import { Router } from 'express'
 
 import {
   createPoem,
+  deletePoem,
   generateAIPoem,
   getPoemById,
   getPoems,
@@ -9,12 +10,14 @@ import {
   likePoem,
   reportPoem,
   unlikePoem,
+  updatePoem,
 } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
   CreatePoemRequestSchema,
+  DeletePoemSchema,
   GetPoemByIdRequestSchema,
   GetPoemsRequestSchema,
   LikePoemRequestSchema,
@@ -22,6 +25,7 @@ import {
   PoemInterpretRequestSchema,
   ReportPoemRequestSchema,
   UnlikePoemRequestSchema,
+  UpdatePoemSchema,
 } from '../schemas/poem-schemas'
 
 const router = Router()
@@ -37,12 +41,11 @@ router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPo
 /** GET /api/poems/{id} */
 router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
 
-//TODO: update schemas and functions called here
 /** PATCH /api/poems/{id} */
-router.patch('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
+router.patch('/:id', optionalAuth, validate(UpdatePoemSchema), asyncHandler(updatePoem))
 
 /** DELETE /api/poems/{id} */
-router.delete('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
+router.delete('/:id', optionalAuth, validate(DeletePoemSchema), asyncHandler(deletePoem))
 
 /** POST /api/poems */
 router.post(

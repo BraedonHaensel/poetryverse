@@ -25,6 +25,12 @@ export const GetPoemByIdRequestSchema = z.object({
   }),
 })
 
+/** Validates `PATCH /api/poems/:id` route params. */
+export const UpdatePoemSchema = GetPoemByIdRequestSchema
+
+/** Validates `DELETE /api/poems/:id` route params. */
+export const DeletePoemSchema = GetPoemByIdRequestSchema
+
 /** Validates `POST /api/poems` request bodies. */
 export const CreatePoemRequestSchema = z.object({
   body: z.object({
@@ -128,6 +134,12 @@ export type GetPoemsRequest = z.infer<typeof GetPoemsRequestSchema>
 
 /** Route params type for `GetPoemByIdRequestSchema`. */
 export type GetPoemByIdRequest = z.infer<typeof GetPoemByIdRequestSchema>['params']
+
+/** Route params type for `UpdatePoemSchema`. */
+export type UpdatePoemRequest = z.infer<typeof UpdatePoemSchema>['params']
+
+/** Route params type for `DeletePoemSchema`. */
+export type DeletePoemRequest = z.infer<typeof DeletePoemSchema>['params']
 
 /** Request body type for `CreatePoemRequestSchema`. */
 export type CreatePoemRequest = z.infer<typeof CreatePoemRequestSchema>['body']

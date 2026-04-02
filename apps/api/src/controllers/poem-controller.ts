@@ -10,6 +10,7 @@ import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
+  DeletePoemRequest,
   GetPoemByIdRequest,
   GetPoemsRequest,
   LikePoemRequest,
@@ -19,6 +20,7 @@ import {
   PoemInterpretResponseSchema,
   ReportPoemRequest,
   UnlikePoemRequest,
+  UpdatePoemRequest,
 } from '../schemas/poem-schemas'
 import { validateUserExists } from './user-controller'
 
@@ -112,6 +114,60 @@ export const getPoemById = async (
     logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
     throw notFound('Poem not found')
   }
+}
+
+/**
+ * Retrieves a poem by poem ID with the database and returns it as JSON.
+ * @param _req Incoming Express request.
+ * @param res Express response used to return the updated poem.
+ * @returns A 200 response containing the updated poem.
+ * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
+ */
+export const updatePoem = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const requesterUserId = req.auth.userId
+  const { id: poemId } = req.params as UpdatePoemRequest
+
+  //TODO: should admins be able to update poems? or just delete them?
+
+  // const poemData = await validateAndReturnPoem(poemId)
+  // if (poemData.isPublic || poemData.authorId === requesterUserId) {
+  //   logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
+  //   return res.status(200).json(poemData)
+  // } else {
+  //   logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
+  //   throw notFound('Poem not found')
+  // }
+}
+
+/**
+ * Deletes a poem with the specified ID.
+ * @param _req Incoming Express request.
+ * @param res Express response object.
+ * @returns A 204 response with no body. 
+ * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
+ */
+export const deletePoem = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const requesterUserId = req.auth.userId
+  const { id: poemId } = req.params as DeletePoemRequest
+
+  // Check if the requester is the same as the author, or if the requester is an admin user
+
+  // const poemData = await validateAndReturnPoem(poemId)
+  // if (poemData.isPublic || poemData.authorId === requesterUserId) {
+  //   logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
+  //   return res.status(200).json(poemData)
+  // } else {
+  //   logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
+  //   throw notFound('Poem not found')
+  // }
+
+  return res.status(204).send()
 }
 
 /**
