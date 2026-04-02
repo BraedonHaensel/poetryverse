@@ -46,6 +46,7 @@ export const updateUserInfoSchema = z.object({
     }),
 })
 
+/** Validates `PATCH /api/users/:id/role` params and request body. */
 export const updateUserRoleRequestSchema = z.object({
   params: z.object({
     id: z.cuid('User ID must be a valid CUID.'),
@@ -70,6 +71,7 @@ export const followUserSchema = getUserSchema
 /** Validates `DELETE /api/users/me/following/:id` route params. */
 export const unfollowUserSchema = getUserSchema
 
+/** Validates `DELETE /api/users/:id` route params. */
 export const deleteUserSchema = getUserSchema
 
 /** Route params type for `getUserSchema`. */
@@ -97,12 +99,15 @@ export type unfollowUserRequest = z.infer<typeof unfollowUserSchema>['params']
 /** Request body type for `updateUserInfoSchema`. */
 export type updateUserInfoRequest = z.infer<typeof updateUserInfoSchema>['body']
 
+/** Route params type for `updateUserRoleRequestSchema`. */
 export type updateRoleRequestParams = z.infer<
   typeof updateUserRoleRequestSchema
 >['params']
 
+/** Request body type for `updateUserRoleRequestSchema`. */
 export type updateRoleRequest = z.infer<
   typeof updateUserRoleRequestSchema
 >['body']
 
+/** Route params type for `deleteUserSchema`. */
 export type deleteUserRequest = z.infer<typeof deleteUserSchema>['params']

@@ -100,6 +100,7 @@ router.patch(
 /** DELETE /api/users/me */
 router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
 
+/** DELETE /api/users/{id} */
 router.delete(
   '/:id',
   requireAuth,
@@ -108,6 +109,7 @@ router.delete(
   asyncHandler(deleteUser)
 )
 
+/** PATCH /api/users/{id}/role */
 router.patch(
   '/:id/role',
   requireAuth,

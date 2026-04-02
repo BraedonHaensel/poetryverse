@@ -322,6 +322,15 @@ export const unfollowUser = async (req: AuthRequest, res: Response) => {
   return res.status(204).send()
 }
 
+/**
+ * Deletes a target user account by ID.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @returns A 204 response with no body.
+ * @throws {HttpError} 400 if requester attempts to delete themselves.
+ * @throws {HttpError} 403 if target user is a SUPER_ADMIN.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
 export const deleteUser = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as deleteUserRequest
@@ -362,6 +371,15 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   return res.status(204).send()
 }
 
+/**
+ * Updates a target user's role.
+ * @param req Authenticated Express request with validated params and body.
+ * @param res Express response object.
+ * @returns A 200 response containing the updated user record.
+ * @throws {HttpError} 400 if assigning SUPER_ADMIN or updating own role.
+ * @throws {HttpError} 403 if target user is a SUPER_ADMIN.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
 export const updateRole = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as updateRoleRequestParams
