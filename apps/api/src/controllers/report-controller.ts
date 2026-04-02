@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
 import { conflict, notFound } from '../lib/http-errors'
+import { logger } from '../lib/logger'
 import { AuthRequest } from '../middleware/auth'
 import {
   getReportByIdRequest,
@@ -26,10 +27,14 @@ const REPORT_INCLUDE_STATEMENT = {
  * @returns A 200 response containing the list of reports.
  */
 export const getReports = async (_req: Request, res: Response) => {
+  logger.info('Fetching open reports')
+
   const reports = await prisma.report.findMany({
     where: { status: ReportStatus.OPEN },
     include: REPORT_INCLUDE_STATEMENT,
   })
+
+  logger.info(`Fetched open reports count=${reports.length}`)
 
   return res.status(200).json({ data: reports })
 }
@@ -43,6 +48,7 @@ export const getReports = async (_req: Request, res: Response) => {
  */
 export const getReportById = async (req: Request, res: Response) => {
   const id = parseInt((req.params as getReportByIdRequest).id)
+  logger.info(`Fetching report by id reportId=${id}`)
 
   const report = await getAndValidateReport(id)
 
@@ -61,6 +67,9 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
   const reportId = parseInt((req.params as resolveReportRequestParams).id)
   const resolveData = req.body as resolveReportRequest
+  logger.info(
+    `Resolving report reportId=${reportId} adminUserId=${userId} resolutionType=${resolveData.resolutionType}`
+  )
 
   const existingReport = await getAndValidateReport(reportId)
 
@@ -71,6 +80,9 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
 
   // Admin selected to remove the poem.
   if (resolveData.resolutionType === ResolutionType.REMOVE) {
+    logger.info(
+      `Deleting poem poemId=${existingReport.poemId} per admin request adminUserId=${userId}`
+    )
     await prisma.poem.delete({
       where: { id: existingReport.poemId },
     })
@@ -99,6 +111,8 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
     data: resolveDataForPrisma,
     include: REPORT_INCLUDE_STATEMENT,
   })
+
+  logger.info(`Resolved report reportId=${reportId} adminUserId=${userId}`)
 
   return res.status(200).json({ data: resolvedReport })
 }
