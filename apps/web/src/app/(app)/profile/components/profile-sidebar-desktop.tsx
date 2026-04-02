@@ -63,7 +63,7 @@ export function ProfileSidebarDesktop({
         {/* Profile stats */}
         <div className="border-y border-black/30 bg-gray-200/65 py-4">
           <div className="flex items-center divide-x-2 divide-black/30 px-4">
-            {profileStats.map((item, i) => (
+            {profileStats.map((item) => (
               <div
                 key={item.title}
                 className="flex flex-1 flex-col items-center"

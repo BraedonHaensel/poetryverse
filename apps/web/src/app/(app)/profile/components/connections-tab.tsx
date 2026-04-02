@@ -41,7 +41,7 @@ export default function ConnectionsTab({
   function renderUsersList() {
     return filterMode === 'FOLLOWERS' ? (
       followers === undefined ? (
-        <PageLoadingIndicator className="py-3" />
+        <PageLoadingIndicator />
       ) : followers.length === 0 ? (
         <p className="text-muted-foreground my-3 text-center">
           {isMyPage ? 'You have no followers.' : 'This user has no followers.'}
@@ -60,7 +60,7 @@ export default function ConnectionsTab({
         ))
       )
     ) : following === undefined ? (
-      <PageLoadingIndicator className="py-3" />
+      <PageLoadingIndicator />
     ) : following.length === 0 ? (
       <p className="text-muted-foreground my-3 text-center">
         {isMyPage

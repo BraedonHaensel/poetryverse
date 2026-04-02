@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
 import { prisma } from '../lib/db'
@@ -7,7 +7,7 @@ import { badRequest, HttpError, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
-import type { AuthRequest } from '../middleware/auth'
+import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
   GetPoemsRequest,
@@ -44,16 +44,19 @@ const poemIncludeStatement = {
  * @throws {HttpError} 404 if a user with the specified authorId does not exist.
  */
 export const getPoems = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
 ) => {
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
+
   const query = req.query as GetPoemsRequest
   const authorId = query?.authorId
 
   if (authorId) {
     await validateUserExists(authorId)
 
-    if (authorId === req.auth.userId) {
+    if (requesterUserId && authorId === requesterUserId) {
       // If this user is requesting their own poems, return all of their poems
       logger.info(`Fetching all poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
@@ -63,8 +66,7 @@ export const getPoems = async (
       logger.info(`Fetched all poems with authorId=${authorId}, count=${poems.length}`)
       return res.status(200).json(poems)
     } else {
-
-      // If this user is requesting poems authored by another user, only return that user's public poems
+      // Guest or user is requsting someone else's poems, return only public poems
       logger.info(`Fetching all public poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
         where: { 
@@ -409,4 +411,99 @@ const validateAndReturnPoem = async (poemId: string) => {
     throw notFound('Invalid poem ID')
   }
   return poem
+}
+
+/** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
+async function getPoemOfDay() {
+  //Retrieve the timestamp of the previous 24 hours.
+  const DAY_MS = 24 * 60 * 60 * 1000
+  const now = new Date()
+  const lastDayTimestamp = new Date(now.getTime() - DAY_MS)
+
+  //Retrieve the poemId from public poems with the greatest number of likes in the past 24 hours.
+  const topLikedPoem = await prisma.poemLike.groupBy({
+    by: ['poemId'],
+    where: {
+      createdAt: {
+        gte: lastDayTimestamp,
+      },
+      poem: {
+        isPublic: true,
+      },
+    },
+    _count: {
+      poemId: true,
+    },
+    _max: {
+      createdAt: true,
+    },
+    orderBy: [{ _count: { poemId: 'desc' } }, { _max: { createdAt: 'desc' } }],
+    take: 1,
+  })
+
+  //Fetch the poem using the poemId with the greatest number of likes in the past 24 hours. Ensure the author, number of likes, and tags are included.
+  if (topLikedPoem.length > 0) {
+    const poem = await prisma.poem.findFirst({
+      where: {
+        id: topLikedPoem[0].poemId,
+        isPublic: true,
+      },
+      include: {
+        author: true,
+        likes: true,
+        poemTags: {
+          include: { tag: true },
+        },
+      },
+    })
+    if (poem) {
+      return poem
+    }
+  }
+
+  // If each poem does not have a like. Then fetch a random poem from the poems database
+  const count = await prisma.poem.count({
+    where: { isPublic: true },
+  })
+  if (count === 0) {
+    return null
+  }
+  const randIndex = Math.floor(Math.random() * count)
+
+  const randPoem = await prisma.poem.findFirst({
+    skip: randIndex,
+    take: 1,
+    where: { isPublic: true },
+    include: {
+      author: true,
+      likes: true,
+      poemTags: { include: { tag: true } },
+    },
+  })
+  return randPoem
+}
+
+/**
+ * Determine poem of the day from poetryverse database.
+ * @param req Express request.
+ * @param res Express response.
+ * @returns A 200 response with the poem of the day information.
+ * @throws {HttpError} 404 if the poem does not exist.
+ */
+export const getDailyPoem = async (req: Request, res: Response) => {
+  logger.info('Fetch new poem of the day.')
+  const poem = await getPoemOfDay()
+  if (!poem) {
+    logger.warn('Poem of the day failed to retrieve')
+    throw new HttpError(
+      404,
+      'No poems found',
+      null,
+      'There are no poems available right now.'
+    )
+  }
+
+  logger.info(`Poem of the day: ${poem.id}`)
+
+  return res.status(200).json({ data: poem })
 }
