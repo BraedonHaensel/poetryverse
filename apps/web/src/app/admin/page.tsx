@@ -152,7 +152,7 @@ function AnalyticsView() {
                 <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
-                    className="text-black transition hover:opacity-70"
+                    className="cursor-pointer text-black transition hover:opacity-70"
                     aria-label="Delete report"
                   >
                     <Trash2 size={28} strokeWidth={2.25} />
@@ -160,7 +160,7 @@ function AnalyticsView() {
 
                   <button
                     type="button"
-                    className="text-black transition hover:opacity-70"
+                    className="cursor-pointer text-black transition hover:opacity-70"
                     aria-label="Approve report"
                   >
                     <CircleCheckBig size={30} strokeWidth={2.25} />
