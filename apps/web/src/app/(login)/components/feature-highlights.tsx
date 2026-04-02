@@ -47,7 +47,7 @@ export function FeaturesCarousel({ className = '' }: Props) {
   return (
     <div
       {...swipeHandlers}
-      className={cn('flex flex-col gap-4 overflow-hidden', className)}
+      className={cn('flex flex-col gap-8 overflow-hidden', className)}
     >
       {/* Features carousel */}
       <div
