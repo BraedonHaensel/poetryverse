@@ -48,15 +48,22 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
 
   const existingReport = await getAndValidateReport(reportId)
 
+  // Can't resolve a report that's already resolved.
   if (existingReport.status === ReportStatus.RESOLVED) {
     throw conflict('Report has already been resolved')
   }
 
+  // Admin selected to remove the poem.
   if (resolveData.resolutionType === ResolutionType.REMOVE) {
     await prisma.poem.delete({
       where: { id: existingReport.poemId },
     })
-  } else if (resolveData.resolutionType === ResolutionType.UPDATE_AI_TAG) {
+    // Send empty success, as report will be deleted as well.
+    return res.status(204).send()
+  }
+
+  // Admin decided that poem was likely AI generated, and should be tagged as such.
+  if (resolveData.resolutionType === ResolutionType.UPDATE_AI_TAG) {
     await prisma.poem.update({
       where: { id: existingReport.poemId },
       data: { isAIAssisted: true },
@@ -74,6 +81,7 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
   const resolvedReport = await prisma.report.update({
     where: { id: reportId },
     data: resolveDataForPrisma,
+    include: REPORT_INCLUDE_STATEMENT,
   })
 
   return res.status(200).json({ data: resolvedReport })
