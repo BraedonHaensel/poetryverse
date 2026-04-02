@@ -10,6 +10,7 @@ import {
   getUserFollowersRequest,
   getUserFollowingRequest,
   getUserRequest,
+  getUsersSchema,
   unfollowUserRequest,
   updateRoleRequest,
   updateRoleRequestParams,
@@ -44,12 +45,19 @@ type UserWithFollowState = SelectedUser & {
  * @param res Express response used to return users.
  * @returns Promise that resolves after sending the users response.
  */
-export const getUsers = async (_req: Request, res: Response) => {
-  logger.info('Fetching all users')
+export const getUsers = async (req: Request, res: Response) => {
+  const {
+    query: { role },
+  } = getUsersSchema.parse({ query: req.query })
+  logger.info(`Fetching all users roleFilter=${role ?? 'none'}`)
 
-  const users = await prisma.user.findMany()
+  const users = await prisma.user.findMany({
+    where: role ? { role } : undefined,
+  })
 
-  logger.info(`Fetched all users count=${users.length}`)
+  logger.info(
+    `Fetched all users count=${users.length} roleFilter=${role ?? 'none'}`
+  )
   return res.status(200).json(users)
 }
 

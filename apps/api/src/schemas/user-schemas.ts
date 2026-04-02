@@ -12,6 +12,18 @@ export const getUserSchema = z.object({
   }),
 })
 
+/** Validates `GET /api/users` query params. */
+export const getUsersSchema = z.object({
+  query: z.object({
+    role: z
+      .preprocess(
+        (value) => (typeof value === 'string' ? value.toUpperCase() : value),
+        z.enum(RoleEnum)
+      )
+      .optional(),
+  }),
+})
+
 /** Validates `PATCH /api/users/me` request body. */
 export const updateUserInfoSchema = z.object({
   body: z
@@ -57,6 +69,9 @@ export const unfollowUserSchema = getUserSchema
 
 /** Route params type for `getUserSchema`. */
 export type getUserRequest = z.infer<typeof getUserSchema>['params']
+
+/** Query params type for `getUsersSchema`. */
+export type getUsersRequestQuery = z.infer<typeof getUsersSchema>['query']
 
 /** Route params type for `getUserFollowingSchema`. */
 export type getUserFollowingRequest = z.infer<

@@ -23,6 +23,7 @@ import {
   getUserFollowersSchema,
   getUserFollowingSchema,
   getUserSchema,
+  getUsersSchema,
   unfollowUserSchema,
   updateUserInfoSchema,
   updateUserRoleRequestSchema,
@@ -35,6 +36,7 @@ router.get(
   '/',
   requireAuth,
   requireRole(RoleEnum.ADMIN),
+  validate(getUsersSchema),
   asyncHandler(getUsers)
 )
 
