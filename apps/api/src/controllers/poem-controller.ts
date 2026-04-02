@@ -104,15 +104,14 @@ export const getPoemById = async (
   const requesterUserId = authReq.auth?.userId
   const { id: poemId } = req.params as GetPoemByIdRequest
 
-  validateAndReturnPoem(poemId).then((poem) => {
-    if (poem.isPublic || poem.authorId === requesterUserId) {
-      logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
-      return res.status(200).json(poem)
-    } else {
-      logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
-      throw notFound('Poem not found')
-    }
-  })
+  const poemData = await validateAndReturnPoem(poemId)
+  if (poemData.isPublic || poemData.authorId === requesterUserId) {
+    logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
+    return res.status(200).json(poemData)
+  } else {
+    logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
+    throw notFound('Poem not found')
+  }
 }
 
 /**
