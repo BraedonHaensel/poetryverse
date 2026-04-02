@@ -227,7 +227,7 @@ export default function ProfilePageContents({
         {/* Main contents */}
         <div className="flex-1 overflow-y-auto">
           <div className="flex min-h-full flex-col px-4 py-4 xl:px-10">
-            <div className="flex flex-col gap-4 divide-y-2 divide-gray-300">
+            <div className="flex flex-1 flex-col gap-4 divide-y-2 divide-gray-300">
               {pageTab === 'MY_POEMS' ? (
                 <PoemsTab
                   isMyPage={isMyPage}
