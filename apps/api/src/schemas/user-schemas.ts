@@ -1,3 +1,4 @@
+import { RoleEnum } from '@prisma/client'
 import { z } from 'zod'
 
 // Validation limits
@@ -31,6 +32,15 @@ export const updateUserInfoSchema = z.object({
     .refine((data) => Object.keys(data).length > 0, {
       message: 'Request body must include at least one updatable field.',
     }),
+})
+
+export const updateUserRoleRequestSchema = z.object({
+  params: z.object({
+    id: z.cuid('User ID must be a valid CUID.'),
+  }),
+  body: z.object({
+    role: z.enum(RoleEnum),
+  }),
 })
 
 /** Validates `GET /api/users/following/:id` route params. */
