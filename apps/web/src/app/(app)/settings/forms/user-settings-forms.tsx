@@ -12,6 +12,7 @@ type Props = {
   userData: UserData
   onProfilePictureSubmit: (imageFile: File) => Promise<void>
   onUsernameSubmit: (username: string) => Promise<void>
+  onDeleteAccount: () => Promise<void>
 }
 
 /**
@@ -21,6 +22,7 @@ export default function UserSettingsForms({
   userData,
   onUsernameSubmit,
   onProfilePictureSubmit,
+  onDeleteAccount,
 }: Props) {
   return (
     <>
@@ -40,7 +42,7 @@ export default function UserSettingsForms({
           <Link href="/admin">Enter Admin Mode</Link>
         </Button>
       )}
-      <AdvancedSettingsForm />
+      <AdvancedSettingsForm onDeleteAccount={onDeleteAccount} />
     </>
   )
 }
