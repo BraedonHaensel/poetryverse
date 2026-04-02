@@ -29,12 +29,13 @@ import { UsernameSchema } from '@/schemas/user-settings-schemas'
 
 type Props = {
   username: string
+  onUsernameSubmit: (username: string) => Promise<void>
 }
 
 /**
  * Username form.
  */
-export function UsernameForm({ username }: Props) {
+export function UsernameForm({ username, onUsernameSubmit }: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   // Username form
@@ -46,13 +47,14 @@ export function UsernameForm({ username }: Props) {
   })
 
   // Handle submitting the username change
-  function onSubmit(data: UsernameSchema) {
+  async function onSubmit(data: UsernameSchema) {
     if (data.username === username) {
       // Username did not change
       setIsOpen(false)
       return
     }
-    console.log(`TODO Submit form: ${JSON.stringify(data)}`)
+
+    await onUsernameSubmit(data.username)
     setIsOpen(false)
   }
 
@@ -86,7 +88,7 @@ export function UsernameForm({ username }: Props) {
           <DialogTitle>Edit Username</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={control}
               name="username"
