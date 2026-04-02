@@ -67,6 +67,8 @@ export const followUserSchema = getUserSchema
 /** Validates `DELETE /api/users/me/following/:id` route params. */
 export const unfollowUserSchema = getUserSchema
 
+export const deleteUserSchema = getUserSchema
+
 /** Route params type for `getUserSchema`. */
 export type getUserRequest = z.infer<typeof getUserSchema>['params']
 
@@ -99,3 +101,5 @@ export type updateRoleRequestParams = z.infer<
 export type updateRoleRequest = z.infer<
   typeof updateUserRoleRequestSchema
 >['body']
+
+export type deleteUserRequest = z.infer<typeof deleteUserSchema>['params']

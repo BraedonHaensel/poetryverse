@@ -6,6 +6,7 @@ import { badRequest, conflict, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
+  deleteUserRequest,
   followUserRequest,
   getUserFollowersRequest,
   getUserFollowingRequest,
@@ -317,6 +318,24 @@ export const unfollowUser = async (req: AuthRequest, res: Response) => {
   logger.info(
     `Unfollowed user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
   )
+
+  return res.status(204).send()
+}
+
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as deleteUserRequest
+
+  if (requesterUserId === targetUserId) {
+    throw badRequest(
+      "This endpoint does not handle deleting a user's own account.",
+      'Please use the account settings page to delete your account.'
+    )
+  }
+
+  await prisma.user.delete({
+    where: { id: targetUserId },
+  })
 
   return res.status(204).send()
 }

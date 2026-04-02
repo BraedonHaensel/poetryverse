@@ -3,6 +3,7 @@ import { Router } from 'express'
 
 import {
   deleteMyAccount,
+  deleteUser,
   followUser,
   getMyFollowers,
   getMyFollowing,
@@ -19,6 +20,7 @@ import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
+  deleteUserSchema,
   followUserSchema,
   getUserFollowersSchema,
   getUserFollowingSchema,
@@ -97,6 +99,14 @@ router.patch(
 
 /** DELETE /api/users/me */
 router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
+
+router.delete(
+  '/:id',
+  requireAuth,
+  requireRole(RoleEnum.SUPER_ADMIN),
+  validate(deleteUserSchema),
+  asyncHandler(deleteUser)
+)
 
 router.patch(
   '/:id/role',
