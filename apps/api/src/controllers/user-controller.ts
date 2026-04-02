@@ -11,6 +11,8 @@ import {
   getUserFollowingRequest,
   getUserRequest,
   unfollowUserRequest,
+  updateRoleRequest,
+  updateRoleRequestParams,
   updateUserInfoRequest,
 } from '../schemas/user-schemas'
 
@@ -310,6 +312,24 @@ export const unfollowUser = async (req: AuthRequest, res: Response) => {
 
   return res.status(204).send()
 }
+
+export const updateRole = async (req: AuthRequest, res: Response) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as updateRoleRequestParams
+  const { role: newRole } = req.body as updateRoleRequest
+
+  if (requesterUserId === targetUserId) {
+    throw badRequest('You cannot change your own role.')
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: targetUserId },
+    data: { role: newRole },
+  })
+
+  return res.status(200).json({ data: updatedUser })
+}
+
 /**
  * Fetches follower users for a target user and appends requester follow state in batch.
  * @param userId Target user ID.

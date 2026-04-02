@@ -76,3 +76,11 @@ export type unfollowUserRequest = z.infer<typeof unfollowUserSchema>['params']
 
 /** Request body type for `updateUserInfoSchema`. */
 export type updateUserInfoRequest = z.infer<typeof updateUserInfoSchema>['body']
+
+export type updateRoleRequestParams = z.infer<
+  typeof updateUserRoleRequestSchema
+>['params']
+
+export type updateRoleRequest = z.infer<
+  typeof updateUserRoleRequestSchema
+>['body']
