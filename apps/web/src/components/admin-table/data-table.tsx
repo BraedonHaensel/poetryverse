@@ -23,7 +23,6 @@ export function DataTable<T extends { id: number }>({
   renderActions,
   gridClassName = 'grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px]',
 }: DataTableProps<T>) {
-  const gridCols = 'grid-cols-[70px_1fr_1fr_2fr_2fr_100px]'
   const cellStyles =
     'text-md [display:flex] min-w-0 items-center justify-center py-4 px-2 xl:px-4 text-center wrap-break-word line-clamp-4'
 
@@ -33,7 +32,7 @@ export function DataTable<T extends { id: number }>({
       <div
         className={cn(
           'bg-admin-sidebar-active grid divide-x-3 divide-black rounded-2xl',
-          gridCols
+          gridClassName
         )}
       >
         {columns.map((col) => (
@@ -62,7 +61,7 @@ export function DataTable<T extends { id: number }>({
             key={row.id}
             className={cn(
               'grid divide-x-3 divide-black/30 rounded-2xl bg-white shadow-sm',
-              gridCols
+              gridClassName
             )}
           >
             {columns.map((col) => (
