@@ -104,7 +104,7 @@ router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
 router.delete(
   '/:id',
   requireAuth,
-  requireRole(RoleEnum.SUPER_ADMIN),
+  requireRole(RoleEnum.ADMIN),
   validate(deleteUserSchema),
   asyncHandler(deleteUser)
 )
