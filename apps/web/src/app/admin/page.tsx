@@ -4,7 +4,7 @@ import { CircleCheckBig, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import AdminUserManagement from '@/app/admin/admin-user/page'
-import GeneralUserManagement from '@/app/admin/general-user/page'
+import GeneralUserManagement from '@/app/admin/general-user/page-contents'
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
