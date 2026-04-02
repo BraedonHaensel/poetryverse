@@ -89,6 +89,26 @@ export const optionalAuth = async (
 }
 
 /**
+ * Checks if the user has at least the required role level (synchronous, for use in controllers).
+ * @param userId The user ID to check.
+ * @param role The minimum role required.
+ * @returns True if the user has the role or higher, false otherwise.
+ */
+export const hasRole = async (userId: string, role: RoleEnum): Promise<boolean> => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  })
+
+  if (!user) return false
+
+  const userLevel = getRoleLevel(user.role)
+  const targetLevel = getRoleLevel(role)
+
+  return userLevel >= targetLevel
+}
+
+/**
  * Verifies that the authenticated user has at least the required role.
  * @param role Minimum role required for access.
  * @returns Express middleware that allows or rejects the request.

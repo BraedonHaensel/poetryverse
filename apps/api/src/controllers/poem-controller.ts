@@ -1,13 +1,17 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, RoleEnum } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
 import { prisma } from '../lib/db'
-import { badRequest, HttpError, notFound } from '../lib/http-errors'
+import { badRequest, HttpError, notFound, unauthorized } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
-import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
+import {
+  hasRole,
+  type AuthRequest,
+  type OptionalAuthRequest,
+} from '../middleware/auth'
 import {
   CreatePoemRequest,
   DeletePoemRequest,
@@ -46,10 +50,7 @@ const poemIncludeStatement = {
  * @returns A 200 response containing the list of poems.
  * @throws {HttpError} 404 if a user with the specified authorId does not exist.
  */
-export const getPoems = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const getPoems = async (req: AuthRequest, res: Response) => {
   const query = req.query as GetPoemsRequest
   const authorId = query?.authorId
 
@@ -63,20 +64,23 @@ export const getPoems = async (
         where: { authorId },
         include: poemIncludeStatement,
       })
-      logger.info(`Fetched all poems with authorId=${authorId}, count=${poems.length}`)
+      logger.info(
+        `Fetched all poems with authorId=${authorId}, count=${poems.length}`
+      )
       return res.status(200).json(poems)
     } else {
-
       // If this user is requesting poems authored by another user, only return that user's public poems
       logger.info(`Fetching all public poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
-        where: { 
+        where: {
           authorId,
-          isPublic: true
+          isPublic: true,
         },
         include: poemIncludeStatement,
       })
-      logger.info(`Fetched all public poems with authorId=${authorId}, count=${poems.length}`)
+      logger.info(
+        `Fetched all public poems with authorId=${authorId}, count=${poems.length}`
+      )
       return res.status(200).json(poems)
     }
   } else {
@@ -98,10 +102,7 @@ export const getPoems = async (
  * @returns A 200 response containing the requested poem.
  * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
  */
-export const getPoemById = async (
-  req: Request,
-  res: Response,
-) => {
+export const getPoemById = async (req: Request, res: Response) => {
   const authReq = req as OptionalAuthRequest
   const requesterUserId = authReq.auth?.userId
   const { id: poemId } = req.params as GetPoemByIdRequest
@@ -111,7 +112,9 @@ export const getPoemById = async (
     logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
     return res.status(200).json(poemData)
   } else {
-    logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
+    logger.warn(
+      `Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`
+    )
     throw notFound('Poem not found')
   }
 }
@@ -123,10 +126,7 @@ export const getPoemById = async (
  * @returns A 200 response containing the updated poem.
  * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
  */
-export const updatePoem = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const updatePoem = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: poemId } = req.params as UpdatePoemRequest
 
@@ -146,28 +146,30 @@ export const updatePoem = async (
  * Deletes a poem with the specified ID.
  * @param _req Incoming Express request.
  * @param res Express response object.
- * @returns A 204 response with no body. 
+ * @returns A 204 response with no body.
  * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
  */
-export const deletePoem = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+export const deletePoem = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: poemId } = req.params as DeletePoemRequest
 
-  // Check if the requester is the same as the author, or if the requester is an admin user
-
-  // const poemData = await validateAndReturnPoem(poemId)
-  // if (poemData.isPublic || poemData.authorId === requesterUserId) {
-  //   logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
-  //   return res.status(200).json(poemData)
-  // } else {
-  //   logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
-  //   throw notFound('Poem not found')
-  // }
-
-  return res.status(204).send()
+  const poemData = await validateAndReturnPoem(poemId)
+  // Check if the requester is the same as the author, or if the requester is an admin or above
+  const isAdminOrAbove = await hasRole(requesterUserId, RoleEnum.ADMIN)
+  if (requesterUserId === poemData.authorId || isAdminOrAbove) {
+    logger.info(`Deleting poem poemId=${poemId}`)
+    await prisma.poem.deleteMany({
+      where: {
+        id: poemId,
+      },
+    })
+    return res.status(204).send()
+  } else {
+    logger.warn(
+      `Unauthorized delete attempt for poemId=${poemId} by userId=${requesterUserId}`
+    )
+    throw unauthorized('You do not have permission to delete this poem.')
+  }
 }
 
 /**
