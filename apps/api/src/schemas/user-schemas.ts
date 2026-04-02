@@ -51,7 +51,10 @@ export const updateUserRoleRequestSchema = z.object({
     id: z.cuid('User ID must be a valid CUID.'),
   }),
   body: z.object({
-    role: z.enum(RoleEnum),
+    role: z.preprocess(
+      (value) => (typeof value === 'string' ? value.toUpperCase() : value),
+      z.enum(RoleEnum)
+    ),
   }),
 })
 

@@ -2,7 +2,7 @@ import { Prisma, RoleEnum } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
-import { badRequest, conflict, notFound } from '../lib/http-errors'
+import { badRequest, conflict, forbidden, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
@@ -337,6 +337,20 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     )
   }
 
+  // Get target user's current role information.
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true },
+  })
+
+  if (!targetUser) {
+    throw notFound('Invalid user ID.')
+  }
+
+  if (targetUser.role === RoleEnum.SUPER_ADMIN) {
+    throw forbidden('Super Admin accounts cannot be deleted.')
+  }
+
   await prisma.user.delete({
     where: { id: targetUserId },
   })
@@ -362,6 +376,20 @@ export const updateRole = async (req: AuthRequest, res: Response) => {
 
   if (requesterUserId === targetUserId) {
     throw badRequest('You cannot change your own role.')
+  }
+
+  // Get target user's current role information.
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true },
+  })
+
+  if (!targetUser) {
+    throw notFound('Invalid user ID.')
+  }
+
+  if (targetUser.role === RoleEnum.SUPER_ADMIN) {
+    throw forbidden('Super Admin role cannot be changed.')
   }
 
   const updatedUser = await prisma.user.update({
