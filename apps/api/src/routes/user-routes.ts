@@ -3,6 +3,7 @@ import { Router } from 'express'
 
 import {
   deleteMyAccount,
+  deleteUser,
   followUser,
   getMyFollowers,
   getMyFollowing,
@@ -13,17 +14,21 @@ import {
   getUsers,
   unfollowUser,
   updateMyUserInfo,
+  updateRole,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
+  deleteUserSchema,
   followUserSchema,
   getUserFollowersSchema,
   getUserFollowingSchema,
   getUserSchema,
+  getUsersSchema,
   unfollowUserSchema,
   updateUserInfoSchema,
+  updateUserRoleRequestSchema,
 } from '../schemas/user-schemas'
 
 const router = Router()
@@ -33,6 +38,7 @@ router.get(
   '/',
   requireAuth,
   requireRole(RoleEnum.ADMIN),
+  validate(getUsersSchema),
   asyncHandler(getUsers)
 )
 
@@ -93,5 +99,23 @@ router.patch(
 
 /** DELETE /api/users/me */
 router.delete('/me', requireAuth, asyncHandler(deleteMyAccount))
+
+/** DELETE /api/users/{id} */
+router.delete(
+  '/:id',
+  requireAuth,
+  requireRole(RoleEnum.ADMIN),
+  validate(deleteUserSchema),
+  asyncHandler(deleteUser)
+)
+
+/** PATCH /api/users/{id}/role */
+router.patch(
+  '/:id/role',
+  requireAuth,
+  requireRole(RoleEnum.SUPER_ADMIN),
+  validate(updateUserRoleRequestSchema),
+  asyncHandler(updateRole)
+)
 
 export default router

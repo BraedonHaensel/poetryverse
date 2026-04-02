@@ -1,16 +1,20 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, RoleEnum } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
-import { badRequest, conflict, notFound } from '../lib/http-errors'
+import { badRequest, conflict, forbidden, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
+  deleteUserRequest,
   followUserRequest,
   getUserFollowersRequest,
   getUserFollowingRequest,
   getUserRequest,
+  getUsersSchema,
   unfollowUserRequest,
+  updateRoleRequest,
+  updateRoleRequestParams,
   updateUserInfoRequest,
 } from '../schemas/user-schemas'
 
@@ -42,12 +46,20 @@ type UserWithFollowState = SelectedUser & {
  * @param res Express response used to return users.
  * @returns Promise that resolves after sending the users response.
  */
-export const getUsers = async (_req: Request, res: Response) => {
-  logger.info('Fetching all users')
+export const getUsers = async (req: Request, res: Response) => {
+  const {
+    query: { role },
+  } = getUsersSchema.parse({ query: req.query })
+  logger.info(`Fetching all users roleFilter=${role ?? 'none'}`)
 
-  const users = await prisma.user.findMany()
+  const users = await prisma.user.findMany({
+    where: role ? { role } : undefined,
+    orderBy: { username: 'asc' },
+  })
 
-  logger.info(`Fetched all users count=${users.length}`)
+  logger.info(
+    `Fetched all users count=${users.length} roleFilter=${role ?? 'none'}`
+  )
   return res.status(200).json(users)
 }
 
@@ -310,6 +322,111 @@ export const unfollowUser = async (req: AuthRequest, res: Response) => {
 
   return res.status(204).send()
 }
+
+/**
+ * Deletes a target user account by ID.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @returns A 204 response with no body.
+ * @throws {HttpError} 400 if requester attempts to delete themselves.
+ * @throws {HttpError} 403 if target user is a SUPER_ADMIN.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as deleteUserRequest
+  logger.info(
+    `Deleting user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  if (requesterUserId === targetUserId) {
+    throw badRequest(
+      "This endpoint does not handle deleting a user's own account.",
+      undefined,
+      'Please use the account settings page to delete your account.'
+    )
+  }
+
+  // Get target user's current role information.
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true },
+  })
+
+  if (!targetUser) {
+    throw notFound('Invalid user ID.')
+  }
+
+  if (targetUser.role === RoleEnum.SUPER_ADMIN) {
+    throw forbidden('Super Admin accounts cannot be deleted.')
+  }
+
+  if (targetUser.role === RoleEnum.ADMIN && req.auth.role === RoleEnum.ADMIN) {
+    throw forbidden('Only Super Admins can delete Admin accounts.')
+  }
+
+  await prisma.user.delete({
+    where: { id: targetUserId },
+  })
+
+  logger.info(
+    `Deleted user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  return res.status(204).send()
+}
+
+/**
+ * Updates a target user's role.
+ * @param req Authenticated Express request with validated params and body.
+ * @param res Express response object.
+ * @returns A 200 response containing the updated user record.
+ * @throws {HttpError} 400 if assigning SUPER_ADMIN or updating own role.
+ * @throws {HttpError} 403 if target user is a SUPER_ADMIN.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
+export const updateRole = async (req: AuthRequest, res: Response) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as updateRoleRequestParams
+  const { role: newRole } = req.body as updateRoleRequest
+  logger.info(
+    `Updating role requesterUserId=${requesterUserId} targetUserId=${targetUserId} newRole=${newRole}`
+  )
+
+  if (newRole === RoleEnum.SUPER_ADMIN) {
+    throw badRequest('Users cannot be promoted to Super Admin.')
+  }
+
+  if (requesterUserId === targetUserId) {
+    throw badRequest('You cannot change your own role.')
+  }
+
+  // Get target user's current role information.
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true },
+  })
+
+  if (!targetUser) {
+    throw notFound('Invalid user ID.')
+  }
+
+  if (targetUser.role === RoleEnum.SUPER_ADMIN) {
+    throw forbidden('Super Admin role cannot be changed.')
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: targetUserId },
+    data: { role: newRole },
+  })
+
+  logger.info(
+    `Updated role requesterUserId=${requesterUserId} targetUserId=${targetUserId} newRole=${newRole}`
+  )
+
+  return res.status(200).json({ data: updatedUser })
+}
+
 /**
  * Fetches follower users for a target user and appends requester follow state in batch.
  * @param userId Target user ID.

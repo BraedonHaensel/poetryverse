@@ -1,3 +1,4 @@
+import { RoleEnum } from '@prisma/client'
 import { z } from 'zod'
 
 // Validation limits
@@ -8,6 +9,18 @@ const USERNAME_MAX = 32
 export const getUserSchema = z.object({
   params: z.object({
     id: z.cuid('User ID must be a valid CUID.'),
+  }),
+})
+
+/** Validates `GET /api/users` query params. */
+export const getUsersSchema = z.object({
+  query: z.object({
+    role: z
+      .preprocess(
+        (value) => (typeof value === 'string' ? value.toUpperCase() : value),
+        z.enum(RoleEnum)
+      )
+      .optional(),
   }),
 })
 
@@ -33,6 +46,19 @@ export const updateUserInfoSchema = z.object({
     }),
 })
 
+/** Validates `PATCH /api/users/:id/role` params and request body. */
+export const updateUserRoleRequestSchema = z.object({
+  params: z.object({
+    id: z.cuid('User ID must be a valid CUID.'),
+  }),
+  body: z.object({
+    role: z.preprocess(
+      (value) => (typeof value === 'string' ? value.toUpperCase() : value),
+      z.enum(RoleEnum)
+    ),
+  }),
+})
+
 /** Validates `GET /api/users/following/:id` route params. */
 export const getUserFollowingSchema = getUserSchema
 
@@ -45,8 +71,14 @@ export const followUserSchema = getUserSchema
 /** Validates `DELETE /api/users/me/following/:id` route params. */
 export const unfollowUserSchema = getUserSchema
 
+/** Validates `DELETE /api/users/:id` route params. */
+export const deleteUserSchema = getUserSchema
+
 /** Route params type for `getUserSchema`. */
 export type getUserRequest = z.infer<typeof getUserSchema>['params']
+
+/** Query params type for `getUsersSchema`. */
+export type getUsersRequestQuery = z.infer<typeof getUsersSchema>['query']
 
 /** Route params type for `getUserFollowingSchema`. */
 export type getUserFollowingRequest = z.infer<
@@ -66,3 +98,16 @@ export type unfollowUserRequest = z.infer<typeof unfollowUserSchema>['params']
 
 /** Request body type for `updateUserInfoSchema`. */
 export type updateUserInfoRequest = z.infer<typeof updateUserInfoSchema>['body']
+
+/** Route params type for `updateUserRoleRequestSchema`. */
+export type updateRoleRequestParams = z.infer<
+  typeof updateUserRoleRequestSchema
+>['params']
+
+/** Request body type for `updateUserRoleRequestSchema`. */
+export type updateRoleRequest = z.infer<
+  typeof updateUserRoleRequestSchema
+>['body']
+
+/** Route params type for `deleteUserSchema`. */
+export type deleteUserRequest = z.infer<typeof deleteUserSchema>['params']
