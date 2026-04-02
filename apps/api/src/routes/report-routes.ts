@@ -9,7 +9,10 @@ import {
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth, requireRole } from '../middleware/auth'
 import { validate } from '../middleware/validate'
-import { resolveReportRequestSchema } from '../schemas/report-schemas'
+import {
+  getReportByIdRequestSchema,
+  resolveReportRequestSchema,
+} from '../schemas/report-schemas'
 
 const router = Router()
 
@@ -26,6 +29,7 @@ router.get(
   '/:id',
   requireAuth,
   requireRole(RoleEnum.ADMIN),
+  validate(getReportByIdRequestSchema),
   asyncHandler(getReportById)
 )
 
