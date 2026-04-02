@@ -54,6 +54,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
   const users = await prisma.user.findMany({
     where: role ? { role } : undefined,
+    orderBy: { username: 'asc' },
   })
 
   logger.info(
@@ -361,7 +362,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   }
 
   if (targetUser.role === RoleEnum.ADMIN && req.auth.role === RoleEnum.ADMIN) {
-    throw forbidden("Only Super Admin's can delete Admin accounts.")
+    throw forbidden('Only Super Admins can delete Admin accounts.')
   }
 
   await prisma.user.delete({
