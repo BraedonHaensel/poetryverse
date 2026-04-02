@@ -28,6 +28,7 @@ const REPORT_INCLUDE_STATEMENT = {
 export const getReports = async (_req: Request, res: Response) => {
   const reports = await prisma.report.findMany({
     where: { status: ReportStatus.OPEN },
+    include: REPORT_INCLUDE_STATEMENT,
   })
 
   return res.status(200).json({ data: reports })
