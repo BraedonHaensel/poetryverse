@@ -325,10 +325,14 @@ export const unfollowUser = async (req: AuthRequest, res: Response) => {
 export const deleteUser = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as deleteUserRequest
+  logger.info(
+    `Deleting user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
 
   if (requesterUserId === targetUserId) {
     throw badRequest(
       "This endpoint does not handle deleting a user's own account.",
+      undefined,
       'Please use the account settings page to delete your account.'
     )
   }
@@ -337,6 +341,10 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     where: { id: targetUserId },
   })
 
+  logger.info(
+    `Deleted user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
   return res.status(204).send()
 }
 
@@ -344,6 +352,9 @@ export const updateRole = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as updateRoleRequestParams
   const { role: newRole } = req.body as updateRoleRequest
+  logger.info(
+    `Updating role requesterUserId=${requesterUserId} targetUserId=${targetUserId} newRole=${newRole}`
+  )
 
   if (newRole === RoleEnum.SUPER_ADMIN) {
     throw badRequest('Users cannot be promoted to Super Admin.')
@@ -357,6 +368,10 @@ export const updateRole = async (req: AuthRequest, res: Response) => {
     where: { id: targetUserId },
     data: { role: newRole },
   })
+
+  logger.info(
+    `Updated role requesterUserId=${requesterUserId} targetUserId=${targetUserId} newRole=${newRole}`
+  )
 
   return res.status(200).json({ data: updatedUser })
 }
