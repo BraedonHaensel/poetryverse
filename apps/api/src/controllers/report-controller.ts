@@ -34,6 +34,13 @@ export const getReports = async (_req: Request, res: Response) => {
   return res.status(200).json({ data: reports })
 }
 
+/**
+ * Retrieves a single report by ID.
+ * @param req Express request containing a validated report id param.
+ * @param res Express response object.
+ * @returns A 200 response containing the requested report.
+ * @throws {HttpError} 404 if the report does not exist.
+ */
 export const getReportById = async (req: Request, res: Response) => {
   const id = parseInt((req.params as getReportByIdRequest).id)
 
@@ -42,6 +49,14 @@ export const getReportById = async (req: Request, res: Response) => {
   return res.status(200).json({ data: report })
 }
 
+/**
+ * Resolves an open report.
+ * @param req Authenticated Express request with validated report id and resolution payload.
+ * @param res Express response object.
+ * @returns A 200 response with the resolved report, or 204 when the poem is removed.
+ * @throws {HttpError} 404 if the report does not exist.
+ * @throws {HttpError} 409 if the report has already been resolved.
+ */
 export const resolveReport = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
   const reportId = parseInt((req.params as resolveReportRequestParams).id)
@@ -88,6 +103,7 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
   return res.status(200).json({ data: resolvedReport })
 }
 
+/** Retrieves and validates a report with a given id from the database. */
 const getAndValidateReport = async (id: number) => {
   const report = await prisma.report.findUnique({
     where: { id: id },

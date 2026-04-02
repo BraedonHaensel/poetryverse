@@ -21,6 +21,7 @@ router.get(
   asyncHandler(getReports)
 )
 
+/** GET /api/reports/{id} */
 router.get(
   '/:id',
   requireAuth,
@@ -28,6 +29,7 @@ router.get(
   asyncHandler(getReportById)
 )
 
+/** PATCH /api/reports/{id} */
 router.patch(
   '/:id',
   requireAuth,
