@@ -37,6 +37,13 @@ router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPo
 /** GET /api/poems/{id} */
 router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
 
+//TODO: update schemas and functions called here
+/** PATCH /api/poems/{id} */
+router.patch('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
+
+/** DELETE /api/poems/{id} */
+router.delete('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
+
 /** POST /api/poems */
 router.post(
   '/',
