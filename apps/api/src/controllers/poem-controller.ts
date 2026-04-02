@@ -7,9 +7,10 @@ import { badRequest, HttpError, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
-import type { AuthRequest } from '../middleware/auth'
+import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
+  GetPoemByIdRequest,
   GetPoemsRequest,
   LikePoemRequest,
   PoemAIRequest,
@@ -91,55 +92,27 @@ export const getPoems = async (
 /**
  * Retrieves a poem by poem ID with the database and returns it as JSON.
  * @param _req Incoming Express request.
- * @param res Express response used to return poems.
- * @returns A 200 response containing the list of poems.
- * @throws {HttpError} 401 if the poem is not public and the authenticated user is not the author.
- * @throws {HttpError} 404 if a poem with the specified id does not exist.
+ * @param res Express response used to return the requested poem.
+ * @returns A 200 response containing 
+ * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
  */
 export const getPoemById = async (
   req: Request,
   res: Response,
 ) => {
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
+  const { id: poemId } = req.params as GetPoemByIdRequest
 
-  // const query = req.query as GetPoemsRequest
-  // const authorId = query?.authorId
-
-  // if (authorId) {
-  //   await validateUserExists(authorId)
-
-  //   if (authorId === req.auth.userId) {
-  //     // If this user is requesting their own poems, return all of their poems
-  //     logger.info(`Fetching all poems with authorId=${authorId}`)
-  //     const poems = await prisma.poem.findMany({
-  //       where: { authorId },
-  //       include: poemIncludeStatement,
-  //     })
-  //     logger.info(`Fetched all poems with authorId=${authorId}, count=${poems.length}`)
-  //     return res.status(200).json(poems)
-  //   } else {
-
-  //     // If this user is requesting poems authored by another user, only return that user's public poems
-  //     logger.info(`Fetching all public poems with authorId=${authorId}`)
-  //     const poems = await prisma.poem.findMany({
-  //       where: { 
-  //         authorId,
-  //         isPublic: true
-  //       },
-  //       include: poemIncludeStatement,
-  //     })
-  //     logger.info(`Fetched all public poems with authorId=${authorId}, count=${poems.length}`)
-  //     return res.status(200).json(poems)
-  //   }
-  // } else {
-  //   // If authorId is not provided, return all public poems
-  //   logger.info('Fetching all public poems')
-  //   const poems = await prisma.poem.findMany({
-  //     where: { isPublic: true },
-  //     include: poemIncludeStatement,
-  //   })
-  //   logger.info(`Fetched all public poems count=${poems.length}`)
-  //   return res.status(200).json(poems)
-  // }
+  validateAndReturnPoem(poemId).then((poem) => {
+    if (poem.isPublic || poem.authorId === requesterUserId) {
+      logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
+      return res.status(200).json(poem)
+    } else {
+      logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
+      throw notFound('Poem not found')
+    }
+  })
 }
 
 /**
