@@ -12,7 +12,7 @@ type Props = {
 export default function PageLoadingIndicator({ className = '' }: Props) {
   return (
     <LoaderCircle
-      className={cn('mx-auto mt-5 h-10 w-10 animate-spin', className)}
+      className={cn('mx-auto my-5 h-10 w-10 animate-spin', className)}
     />
   )
 }
