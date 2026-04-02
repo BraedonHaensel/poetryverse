@@ -44,6 +44,7 @@ export function AdvancedSettingsForm() {
         {isOpen && (
           <CardContent className="flex flex-col gap-2 px-0">
             <Button
+              className="cursor-pointer"
               variant="destructive"
               onClick={() => setIsDeleteConfirmOpen(true)}
             >

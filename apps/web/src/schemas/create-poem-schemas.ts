@@ -2,11 +2,11 @@ import * as z from 'zod'
 
 // Validation limits
 const TITLE_MIN = 3
-const TITLE_MAX = 30
+const TITLE_MAX = 40
 const POEM_MIN = 20
 const POEM_MAX = 1000
 const MIN_TAGS = 1
-const MAX_TAGS = 5
+export const MAX_TAGS = 5 // exported for use by the tags form field
 const PROMPT_MIN = 20
 const PROMPT_MAX = 1000
 

@@ -1,6 +1,25 @@
-# PoetryVerse Monorepo
+# PoetryVerse
 
-## Repo Organization
+SENG 513 - Web-Based Systems - Winter 2026 - PG 2
+
+PoetryVerse is a mobile-first platform for creating, sharing, and discovering poetry!
+
+## Group Members
+
+| Person          | Lecture | Lab | UCID     |
+| --------------- | ------- | --- | -------- |
+| Carson May      | L01     | B05 | 30139961 |
+| Sukriti Badhwar | L01     | B05 | 30164075 |
+| Feranmi Falade  | L01     | B05 | 30145480 |
+| Chantae Ho      | L01     | B08 | 30141743 |
+| Rohan Kapila    | L01     | B08 | 30145862 |
+| Braedon Haensel | L01     | B02 | 30144363 |
+
+## Database Schema and Seeding Script
+
+Please see [database-schema-and-seeding-script/README.md](database-schema-and-seeding-script/README.md) for instructions on how to run our database schema and seeding script.
+
+## Monorepo Organization
 
 - `apps/web`: Next.js frontend (`http://localhost:3000`)
 - `apps/api`: Express API (`http://localhost:3001`)
@@ -91,6 +110,12 @@ Run this command from root to build and run the containers: `docker compose up -
 
 - `--watch` is used to automatically sync source file changes to the running services.
 
+If you want to seed data in development, run this manually (from repo root):
+
+```bash
+docker compose run --rm migrate npm run db:seed --workspace=packages/database
+```
+
 #### To use Compose in Production:
 
 If running this application in a production environment, create and configure the production env files:
@@ -101,16 +126,22 @@ cp apps/api/.env.production.example apps/api/.env.production
 cp apps/web/.env.production.example apps/web/.env.production
 ```
 
-Then, run this command from root: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up` .
+Then, run this command from root: `docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up` .
 
 - This runs the configurations of the `docker-compose.yml` and the `docker-compose.prod.yml`.
 - `docker-compose.prod.yml` sets the Compose project name to `poetryverse-prod`, which keeps production Docker resources isolated from development resources.
+
+If you need to seed data in production, run this manually (from repo root):
+
+```bash
+docker compose  --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml run --rm migrate npm run db:seed --workspace=packages/database
+```
 
 ### Stopping the Containers:
 
 To stop development containers, run `docker compose down`.
 
-To stop production containers, run `docker compose -f docker-compose.yml -f docker-compose.prod.yml down`.
+To stop production containers, run `docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml down`.
 
 If you would like to remove the database volume for a given environment as well, add `-v` to the matching `down` command.
 

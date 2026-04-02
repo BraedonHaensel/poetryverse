@@ -4,22 +4,38 @@ import {
   createPoem,
   generateAIPoem,
   getDailyPoem,
+  getPoems,
   interpretPoem,
   likePoem,
+  reportPoem,
   unlikePoem,
 } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
-import { requireAuth } from '../middleware/auth'
+import { optionalAuth, requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
   CreatePoemRequestSchema,
+  GetPoemsRequestSchema,
   LikePoemRequestSchema,
   PoemAIRequestSchema,
   PoemInterpretRequestSchema,
+  ReportPoemRequestSchema,
   UnlikePoemRequestSchema,
 } from '../schemas/poem-schemas'
 
 const router = Router()
+
+/** GET /api/poems
+ * 
+ * Query params:
+ * - authorId (optional): string - filter returned poems by authorId
+ */
+router.get(
+  '/', 
+  optionalAuth, 
+  validate(GetPoemsRequestSchema), 
+  asyncHandler(getPoems)
+)
 
 /** POST /api/poems */
 router.post(
@@ -63,5 +79,13 @@ router.delete(
 
 /** GET /api/poems/daily-poem */
 router.get('/daily-poem', asyncHandler(getDailyPoem))
+
+/** POST /api/poems/report */
+router.post(
+  '/report',
+  requireAuth,
+  validate(ReportPoemRequestSchema),
+  asyncHandler(reportPoem)
+)
 
 export default router

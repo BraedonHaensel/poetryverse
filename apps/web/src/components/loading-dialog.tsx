@@ -21,7 +21,7 @@ export function LoadingDialog({ message, isOpen }: Props) {
         aria-describedby={undefined}
       >
         <DialogHeader>
-          <DialogTitle className="text-base font-semibold sm:text-xl">
+          <DialogTitle className="text-center text-base font-semibold sm:text-xl">
             {message}
           </DialogTitle>
         </DialogHeader>
