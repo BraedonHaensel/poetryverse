@@ -93,7 +93,7 @@ export const getPoems = async (
  * Retrieves a poem by poem ID with the database and returns it as JSON.
  * @param _req Incoming Express request.
  * @param res Express response used to return the requested poem.
- * @returns A 200 response containing 
+ * @returns A 200 response containing the requested poem.
  * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
  */
 export const getPoemById = async (
