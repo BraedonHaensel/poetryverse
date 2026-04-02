@@ -12,8 +12,8 @@ import {
   getUserFollowing,
   getUsers,
   unfollowUser,
-  updateMyUserInfo,
   updateMyProfilePicture,
+  updateMyUserInfo,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
