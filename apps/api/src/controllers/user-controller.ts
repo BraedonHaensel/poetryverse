@@ -360,6 +360,10 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     throw forbidden('Super Admin accounts cannot be deleted.')
   }
 
+  if (targetUser.role === RoleEnum.ADMIN && req.auth.role === RoleEnum.ADMIN) {
+    throw forbidden("Only Super Admin's can delete Admin accounts.")
+  }
+
   await prisma.user.delete({
     where: { id: targetUserId },
   })
