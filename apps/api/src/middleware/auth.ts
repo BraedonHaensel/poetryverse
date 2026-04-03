@@ -124,7 +124,7 @@ export const optionalAuth = async (
  * @param role The minimum role required.
  * @returns True if the user has the role or higher, false otherwise.
  */
-export const hasRole = async (userRole: RoleEnum, requiredRole: RoleEnum): Promise<boolean> => {
+export const hasRole = (userRole: RoleEnum, requiredRole: RoleEnum): boolean => {
   const userLevel = getRoleLevel(userRole)
   const targetLevel = getRoleLevel(requiredRole)
   return userLevel >= targetLevel

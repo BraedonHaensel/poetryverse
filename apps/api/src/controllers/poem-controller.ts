@@ -168,7 +168,7 @@ export const deletePoem = async (req: AuthRequest, res: Response) => {
 
   const poemData = await validateAndReturnPoem(poemId)
   // Check if the requester is the same as the author, or if the requester is an admin or above
-  const isAdminOrAbove = await hasRole(req.auth.role, RoleEnum.ADMIN)
+  const isAdminOrAbove = hasRole(req.auth.role, RoleEnum.ADMIN)
   if (requesterUserId === poemData.authorId || isAdminOrAbove) {
     logger.info(`Deleting poem poemId=${poemId}`)
     await prisma.poem.deleteMany({
