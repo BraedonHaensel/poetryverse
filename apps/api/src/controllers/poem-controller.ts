@@ -116,6 +116,7 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     validateAndReturnPoemTags(poemData.tagIds),
   ])
 
+  // Check for plagiarism against existing poems.
   const plagiarismResult = await detectPlagiarism(poemData.poem)
   if (plagiarismResult) {
     logger.info(
