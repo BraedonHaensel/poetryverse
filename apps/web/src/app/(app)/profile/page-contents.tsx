@@ -102,9 +102,8 @@ export default function ProfilePageContents({
         displayApiError(error, 'Failed to follow user')
       })
       .finally(() => {
-        // Refresh the list of followers/following users
-        getUserFollowers(viewingUserId).then(setFollowers)
-        getUserFollowing(viewingUserId).then(setFollowing)
+        // Refresh the user's data
+        refreshData()
       })
   }
 
@@ -123,9 +122,8 @@ export default function ProfilePageContents({
         displayApiError(error, 'Failed to unfollow user')
       })
       .finally(() => {
-        // Refresh the list of followers/following users
-        getUserFollowers(viewingUserId).then(setFollowers)
-        getUserFollowing(viewingUserId).then(setFollowing)
+        // Refresh the user's data
+        refreshData()
       })
   }
 
@@ -170,7 +168,7 @@ export default function ProfilePageContents({
           {!isMyPage && !isGuest && (
             <Button
               className={cn(
-                'w-35 cursor-pointer justify-start',
+                'w-fit cursor-pointer justify-start min-[420px]:w-35',
                 viewingUserData.isFollowingUser &&
                   'bg-off-white border border-black text-black hover:bg-gray-300'
               )}
@@ -181,7 +179,7 @@ export default function ProfilePageContents({
               }
             >
               {viewingUserData.isFollowingUser ? <UserMinus /> : <UserPlus />}
-              <span>
+              <span className="hidden min-[360px]:block">
                 {viewingUserData.isFollowingUser ? 'Unfollow' : 'Follow'}
               </span>
             </Button>
