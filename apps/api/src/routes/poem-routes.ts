@@ -42,10 +42,10 @@ router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPo
 router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
 
 /** PATCH /api/poems/{id} */
-router.patch('/:id', optionalAuth, validate(UpdatePoemParamSchema), asyncHandler(updatePoem))
+router.patch('/:id', requireAuth, validate(UpdatePoemParamSchema), asyncHandler(updatePoem))
 
 /** DELETE /api/poems/{id} */
-router.delete('/:id', optionalAuth, validate(DeletePoemSchema), asyncHandler(deletePoem))
+router.delete('/:id', requireAuth, validate(DeletePoemSchema), asyncHandler(deletePoem))
 
 /** POST /api/poems */
 router.post(
