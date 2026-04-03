@@ -63,8 +63,9 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
 
   return (
-    <div className="flex min-h-[calc(100vh-72px)] w-full bg-white">
-      <aside className="w-69.5 border-r border-black/10">
+    <div className="flex min-h-0 w-fit min-w-full flex-1">
+      {/* Sidebar */}
+      <aside className="w-69.5 shrink-0 border-r border-black/10">
         <div className="flex flex-col pt-0">
           <SidebarItem
             label="Analytics"
@@ -84,11 +85,12 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 px-9 py-10">
+      {/* Main contents */}
+      <div className="flex-1 overflow-y-auto p-10">
         {activeTab === 'analytics' && <AnalyticsView />}
         {activeTab === 'general' && <GeneralUserManagement />}
         {activeTab === 'admin' && <AdminUserManagement />}
-      </main>
+      </div>
     </div>
   )
 }
@@ -117,14 +119,14 @@ function SidebarItem({
 
 function AnalyticsView() {
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex min-w-225 flex-col gap-10">
       <section>
         <CardHeader className="px-0 pt-0 pb-5">
           <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
         </CardHeader>
 
         <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
-          <CardContent className="grid grid-cols-1 gap-8 p-0 md:grid-cols-3">
+          <CardContent className="grid grid-cols-3 gap-8 p-0">
             <StatCard title="Number of Poems" value="50" />
             <StatCard title="Number of AI Poems" value="23" />
             <StatCard title="Number of Handwritten Poems" value="27" />

@@ -61,7 +61,7 @@ export default function GeneralUserManagement() {
   ]
 
   return (
-    <div>
+    <div className="min-w-200">
       <CardHeader className="px-0 pt-0 pb-5">
         <CardTitle className="text-2xl font-bold">
           General User Management
