@@ -38,7 +38,7 @@ function MainNavLink({
   disabled = false,
 }: MainNavLinkProps) {
   const baseClassName = cn(
-    'relative pb-1 font-medium text-black cursor-pointer',
+    'relative pb-1 font-medium cursor-pointer',
     isOnPage ? 'font-semibold' : 'opacity-90'
   )
   const content = (
@@ -158,7 +158,6 @@ export default function DesktopNavbar({ className = '' }: Props) {
               <Settings
                 size={32}
                 strokeWidth={pathname === '/settings' ? 2.8 : 2}
-                className="text-black"
               />
               {pathname === '/settings' && (
                 <span className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded bg-black" />

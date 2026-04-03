@@ -45,7 +45,7 @@ export default function ConnectionsFilters({
             {/* Desktop controls */}
             <button
               className={cn(
-                'relative hidden cursor-pointer pb-1 text-3xl font-medium text-black md:block',
+                'relative hidden cursor-pointer pb-1 text-3xl font-medium md:block',
                 isOnMode ? 'font-bold' : 'opacity-90'
               )}
               type="button"
