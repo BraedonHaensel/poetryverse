@@ -63,7 +63,7 @@ export default function GeneralUserManagement() {
   return (
     <div>
       <CardHeader className="px-0 pt-0 pb-5">
-        <CardTitle className="text-2xl font-bold text-black">
+        <CardTitle className="text-2xl font-bold">
           General User Management
         </CardTitle>
       </CardHeader>
@@ -86,7 +86,7 @@ export default function GeneralUserManagement() {
               <div className="flex items-center justify-center gap-5">
                 <button
                   type="button"
-                  className="text-black transition hover:opacity-70"
+                  className="cursor-pointer transition hover:opacity-70"
                   onClick={() => handleDelete(user.id)}
                   aria-label="Delete user"
                 >
@@ -95,7 +95,7 @@ export default function GeneralUserManagement() {
 
                 <button
                   type="button"
-                  className="text-black transition hover:opacity-70"
+                  className="cursor-pointer transition hover:opacity-70"
                   onClick={() => handlePromote(user.id)}
                   aria-label="Promote user"
                 >

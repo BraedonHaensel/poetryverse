@@ -28,63 +28,60 @@ export function DataTable<T extends { id: number }>({
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* Table header */}
-      <div
-        className={cn(
-          'bg-admin-sidebar-active grid divide-x-3 divide-black rounded-2xl',
-          gridClassName
-        )}
-      >
-        {columns.map((col) => (
-          // Cells within the header
+      <div className="overflow-x-auto">
+        <div className="min-w-225">
+          {/* Table header */}
           <div
-            key={String(col.key)}
             className={cn(
-              cellStyles,
-              'font-bold',
-              col.key === 'id' && 'font-extrabold',
-              col.headerClassName
-            )}
-          >
-            {col.label}
-          </div>
-        ))}
-
-        <div className={cn(cellStyles, 'font-bold')}>Action</div>
-      </div>
-
-      {/* Table contents */}
-      <div className="flex max-h-125 min-w-225 flex-col gap-1.5 overflow-x-auto overflow-y-auto">
-        {data.map((row) => (
-          // Table rows
-          <div
-            key={row.id}
-            className={cn(
-              'grid divide-x-3 divide-black/30 rounded-2xl bg-white shadow-sm',
+              'bg-admin-sidebar-active grid divide-x-3 divide-black rounded-2xl border-2 border-black/40 shadow-md',
               gridClassName
             )}
           >
             {columns.map((col) => (
-              // Cells within each row
               <div
                 key={String(col.key)}
                 className={cn(
                   cellStyles,
-                  col.key === 'id' && 'font-bold',
-                  col.className
+                  'font-bold',
+                  col.key === 'id' && 'font-extrabold',
+                  col.headerClassName
                 )}
               >
-                {col.key === 'action'
-                  ? renderActions?.(row)
-                  : col.render
-                    ? col.render(row)
-                    : String(row[col.key])}
+                {col.label}
               </div>
             ))}
 
-            <div className={cellStyles}>{renderActions?.(row)}</div>
+            <div className={cn(cellStyles, 'font-bold')}>Action</div>
           </div>
-        ))}
+
+          {/* Table contents */}
+          <div className="mt-1.5 flex max-h-125 flex-col gap-1.5 overflow-y-auto">
+            {data.map((row) => (
+              <div
+                key={row.id}
+                className={cn(
+                  'grid divide-x-3 divide-black/30 rounded-2xl border border-black/30 bg-white shadow-sm',
+                  gridClassName
+                )}
+              >
+                {columns.map((col) => (
+                  <div
+                    key={String(col.key)}
+                    className={cn(
+                      cellStyles,
+                      col.key === 'id' && 'font-bold',
+                      col.className
+                    )}
+                  >
+                    {col.render ? col.render(row) : String(row[col.key])}
+                  </div>
+                ))}
+
+                <div className={cellStyles}>{renderActions?.(row)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

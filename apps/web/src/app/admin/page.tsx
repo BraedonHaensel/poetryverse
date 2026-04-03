@@ -3,7 +3,7 @@
 import { CircleCheckBig, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
-import AdminUserManagement from '@/app/admin/admin-user/page'
+import AdminUserManagement from '@/app/admin/admin-user/page-contents'
 import GeneralUserManagement from '@/app/admin/general-user/page-contents'
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ShadowCard } from '@/components/shadow-card'
@@ -84,7 +84,7 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="flex-1 px-9 py-10">
+      <main className="min-w-0 flex-1 px-9 py-10">
         {activeTab === 'analytics' && <AnalyticsView />}
         {activeTab === 'general' && <GeneralUserManagement />}
         {activeTab === 'admin' && <AdminUserManagement />}
@@ -106,10 +106,8 @@ function SidebarItem({
     <button
       onClick={onClick}
       className={[
-        'w-full border-b border-black/10 px-7 py-6 text-left text-[18px] font-semibold transition',
-        active
-          ? 'bg-admin-sidebar-active text-black'
-          : 'hover:bg-admin-hover bg-white text-black',
+        'w-full cursor-pointer border-b border-black/10 px-7 py-6 text-left text-[18px] font-semibold transition',
+        active ? 'bg-admin-sidebar-active' : 'hover:bg-admin-hover bg-white',
       ].join(' ')}
     >
       {label}
@@ -122,9 +120,7 @@ function AnalyticsView() {
     <div className="flex flex-col gap-10">
       <section>
         <CardHeader className="px-0 pt-0 pb-5">
-          <CardTitle className="text-2xl font-bold text-black">
-            Statistics
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
         </CardHeader>
 
         <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
@@ -138,9 +134,7 @@ function AnalyticsView() {
 
       <section>
         <CardHeader className="px-0 pt-0 pb-5">
-          <CardTitle className="text-2xl font-bold text-black">
-            Reported Poems
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold">Reported Poems</CardTitle>
         </CardHeader>
 
         <ShadowCard className="bg-admin-panel rounded-4xl p-3">
@@ -152,7 +146,7 @@ function AnalyticsView() {
                 <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
-                    className="cursor-pointer text-black transition hover:opacity-70"
+                    className="cursor-pointer transition hover:opacity-70"
                     aria-label="Delete report"
                   >
                     <Trash2 size={28} strokeWidth={2.25} />
@@ -160,7 +154,7 @@ function AnalyticsView() {
 
                   <button
                     type="button"
-                    className="cursor-pointer text-black transition hover:opacity-70"
+                    className="cursor-pointer transition hover:opacity-70"
                     aria-label="Approve report"
                   >
                     <CircleCheckBig size={30} strokeWidth={2.25} />
@@ -178,8 +172,8 @@ function AnalyticsView() {
 function StatCard({ title, value }: { title: string; value: string }) {
   return (
     <div className="flex min-h-[px] flex-col items-center justify-center rounded-4xl bg-white px-6 py-8 text-center shadow-md">
-      <div className="mb-5 text-xl font-semibold text-black">{title}</div>
-      <div className="text-6xl leading-none font-bold text-black">{value}</div>
+      <div className="mb-5 text-xl font-semibold">{title}</div>
+      <div className="text-6xl leading-none font-bold">{value}</div>
     </div>
   )
 }

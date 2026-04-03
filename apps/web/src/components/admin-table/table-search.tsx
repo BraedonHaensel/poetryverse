@@ -13,9 +13,9 @@ export function TableSearch({
   placeholder = 'Search users by username...',
 }: TableSearchProps) {
   return (
-    <div className="card rounded-xl px-3 py-3 shadow-sm bg-white">
+    <div className="card rounded-xl bg-white p-3 shadow-sm">
       <div className="relative">
-        <Search className="text-muted-foreground absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
+        <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
         <input
           type="text"
           value={value}
