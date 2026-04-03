@@ -8,8 +8,8 @@ import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import {
-  hasRole,
   type AuthRequest,
+  hasRole,
   type OptionalAuthRequest,
 } from '../middleware/auth'
 import {
@@ -24,8 +24,8 @@ import {
   PoemInterpretResponseSchema,
   ReportPoemRequest,
   UnlikePoemRequest,
-  UpdatePoemParamRequest,
   UpdatePoemBodyRequest,
+  UpdatePoemParamRequest,
 } from '../schemas/poem-schemas'
 import { validateUserExists } from './user-controller'
 
