@@ -25,7 +25,7 @@ import {
   PoemInterpretRequestSchema,
   ReportPoemRequestSchema,
   UnlikePoemRequestSchema,
-  UpdatePoemSchema,
+  UpdatePoemParamSchema,
 } from '../schemas/poem-schemas'
 
 const router = Router()
@@ -42,7 +42,7 @@ router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPo
 router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
 
 /** PATCH /api/poems/{id} */
-router.patch('/:id', optionalAuth, validate(UpdatePoemSchema), asyncHandler(updatePoem))
+router.patch('/:id', optionalAuth, validate(UpdatePoemParamSchema), asyncHandler(updatePoem))
 
 /** DELETE /api/poems/{id} */
 router.delete('/:id', optionalAuth, validate(DeletePoemSchema), asyncHandler(deletePoem))

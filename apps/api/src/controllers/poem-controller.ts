@@ -24,7 +24,8 @@ import {
   PoemInterpretResponseSchema,
   ReportPoemRequest,
   UnlikePoemRequest,
-  UpdatePoemRequest,
+  UpdatePoemParamRequest,
+  UpdatePoemBodyRequest,
 } from '../schemas/poem-schemas'
 import { validateUserExists } from './user-controller'
 
@@ -120,26 +121,31 @@ export const getPoemById = async (req: Request, res: Response) => {
 }
 
 /**
- * Retrieves a poem by poem ID with the database and returns it as JSON.
+ * Updates a poem's public visibility by poem ID.
  * @param _req Incoming Express request.
  * @param res Express response used to return the updated poem.
  * @returns A 200 response containing the updated poem.
- * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
+ * @throws {HttpError} 403 if the requester does not have permission to update the poem.
+ * @throws {HttpError} 404 if a poem with the specified ID does not exist.
  */
 export const updatePoem = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
-  const { id: poemId } = req.params as UpdatePoemRequest
+  const { id: poemId } = req.params as UpdatePoemParamRequest
+  const { isPublic } = req.body as UpdatePoemBodyRequest
 
-  //TODO: should admins be able to update poems? or just delete them?
+  const poemData = await validateAndReturnPoem(poemId)  
 
-  // const poemData = await validateAndReturnPoem(poemId)
-  // if (poemData.isPublic || poemData.authorId === requesterUserId) {
-  //   logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
-  //   return res.status(200).json(poemData)
-  // } else {
-  //   logger.warn(`Unauthorized access attempt for poemId=${poemId} by userId=${requesterUserId}`)
-  //   throw notFound('Poem not found')
-  // }
+  if (poemData.authorId === requesterUserId) {
+    logger.info(`Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`)
+    const updatedPoem = await prisma.poem.update({
+      where: { id: poemId },
+      data: { isPublic },
+      include: poemIncludeStatement,
+    })
+    logger.info(`Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`)
+    return res.status(200).json(updatedPoem)
+  }
+  throw unauthorized('You do not have permission to update this poem.')
 }
 
 /**
@@ -147,6 +153,7 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
  * @param _req Incoming Express request.
  * @param res Express response object.
  * @returns A 204 response with no body.
+ * @throws {HttpError} 403 if the requester does not have permission to delete the poem.
  * @throws {HttpError} 404 if a poem with the specified ID does not exist or if the requester does not have access to the poem.
  */
 export const deletePoem = async (req: AuthRequest, res: Response) => {
