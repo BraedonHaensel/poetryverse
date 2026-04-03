@@ -119,10 +119,10 @@ export const optionalAuth = async (
 }
 
 /**
- * Checks if the user has at least the required role level (synchronous, for use in controllers).
- * @param userId The user ID to check.
- * @param role The minimum role required.
- * @returns True if the user has the role or higher, false otherwise.
+ * Checks if the userRole is at least the required role level.
+ * @param userRole The user role to check.
+ * @param requiredRole The minimum role required.
+ * @returns True if the userRole is the requiredRole or higher, false otherwise.
  */
 export const hasRole = (userRole: RoleEnum, requiredRole: RoleEnum): boolean => {
   const userLevel = getRoleLevel(userRole)
