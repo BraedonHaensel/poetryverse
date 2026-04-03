@@ -1,6 +1,6 @@
 import { CreatePoemRequest } from '../schemas/poem-schemas'
 
-/** Normalizes poem text before running plagiarism similarity checks. */
+/** Normalizes poem text. */
 export const normalizePoemBody = (text: string) =>
   text
     .toLowerCase()

@@ -7,7 +7,10 @@ import { prisma } from '../lib/db'
 import { badRequest, conflict, HttpError, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
-import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
+import {
+  mapCreatePoemRequestToPrismaInput,
+  normalizePoemBody,
+} from '../mappers/poem-mapper'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   CreatePoemRequest,
@@ -484,14 +487,6 @@ const detectPlagiarism = async (poemBody: string) => {
 
   return bestMatch
 }
-
-/** Normalizes poem text before running plagiarism similarity checks. */
-const normalizePoemBody = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/\s+/g, ' ') // Replace whitespace characters
-    .replace(/[^a-z0-9\s]/g, '') // Replace special characters
-    .trim()
 
 /** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
 async function getPoemOfDay() {

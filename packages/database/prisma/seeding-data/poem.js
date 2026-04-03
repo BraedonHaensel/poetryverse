@@ -1,8 +1,10 @@
 import { poemContents } from './poem-contents.js'
+import { normalizePoemBody } from './normalize-poem-body.js'
 import { poemTypeIds } from './poemType.js'
 import { userIds } from './user.js'
 
-const normalizePoemBody = (text) =>
+/** Normalizes poem text. */
+export const normalizePoemBody = (text) =>
   text
     .toLowerCase()
     .replace(/\s+/g, ' ') // Replace whitespace characters
