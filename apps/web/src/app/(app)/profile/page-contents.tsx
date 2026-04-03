@@ -10,6 +10,7 @@ import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { PoemFilterMode } from '@/components/poem-filters'
 import { Button } from '@/components/ui/button'
 import { api, displayApiError } from '@/lib/api'
+import { filterPoems, getUserPoems, PoemData } from '@/lib/poem-requests'
 import {
   FollowerData,
   FollowingData,
@@ -34,7 +35,7 @@ export type ProfileStat = {
 }
 
 type Props = {
-  viewingUserId: string | undefined
+  viewingUserId: string
   isMyPage: boolean
 }
 
@@ -52,6 +53,8 @@ export default function ProfilePageContents({
   const [connectionsFilterMode, setConnectionsFilterMode] =
     useState<ConnectionsFilterMode>('FOLLOWERS')
 
+  const [poems, setPoems] = useState<PoemData[]>()
+  const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [poemFilterMode, setPoemFilterMode] = useState<PoemFilterMode>('ALL')
 
   const [viewingUserData, setViewingUserData] = useState<UserData>()
@@ -71,21 +74,32 @@ export default function ProfilePageContents({
   }
 
   /** Refreshes the user's data. */
-  const refreshData = useCallback(() => {
+  const refreshUserData = useCallback(() => {
     getUserData(viewingUserId).then(setViewingUserData)
     getUserFollowers(viewingUserId).then(setFollowers)
     getUserFollowing(viewingUserId).then(setFollowing)
   }, [viewingUserId])
 
-  // Refresh the user's data on mount
+  // Fetch all data on mount and on viewing user ID changes
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setViewingUserData(undefined)
     reset()
-    refreshData()
-  }, [viewingUserId, refreshData])
+    refreshUserData()
+    getUserPoems(viewingUserId).then(setPoems)
+  }, [viewingUserId, refreshUserData])
 
-  // Display a loading indicator until the user data has loaded
-  if (viewingUserData === undefined) return <PageLoadingIndicator />
+  // Update the filtered poems to display
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilteredPoems(
+      poems === undefined ? [] : filterPoems(poems, poemFilterMode)
+    )
+  }, [poems, poemFilterMode])
+
+  // Display a loading indicator until the user data and poems have been loaded
+  if (viewingUserData === undefined || poems === undefined)
+    return <PageLoadingIndicator />
 
   /** Sends a follow request for the user connection */
   function sendFollow(userId: string | undefined) {
@@ -103,7 +117,7 @@ export default function ProfilePageContents({
       })
       .finally(() => {
         // Refresh the user's data
-        refreshData()
+        refreshUserData()
       })
   }
 
@@ -123,7 +137,7 @@ export default function ProfilePageContents({
       })
       .finally(() => {
         // Refresh the user's data
-        refreshData()
+        refreshUserData()
       })
   }
 
@@ -193,6 +207,7 @@ export default function ProfilePageContents({
             profileStats={profileStats}
             filterMode={poemFilterMode}
             setFilterMode={setPoemFilterMode}
+            filteredPoems={filteredPoems}
           />
         ) : (
           <ConnectionsTab
@@ -232,6 +247,7 @@ export default function ProfilePageContents({
                   profileStats={profileStats}
                   filterMode={poemFilterMode}
                   setFilterMode={setPoemFilterMode}
+                  filteredPoems={filteredPoems}
                 />
               ) : (
                 <ConnectionsTab

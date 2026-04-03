@@ -4,29 +4,30 @@ import { LargeButton } from '@/components/large-button'
 import { PoemFilterMode } from '@/components/poem-filters'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader } from '@/components/ui/card'
+import { PoemData } from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 
 type Props = {
   className?: string
   isMyPage: boolean
-  poems: number[] // TODO get actual poems
   filterMode: PoemFilterMode
+  filteredPoems: PoemData[]
 }
 
 /**
- * Displays a list of the user's poems.
+ * Displays a list of a user's poems.
  * @param className Optional additional className values to apply.
  * @param isMyPage Whether the user is viewing their own page.
- * @param poems The poems to display.
  * @param filterMode The current poem filter mode.
+ * @param poems The filtered list of poems to display.
  */
-export default function PoemsList({
+export default function UserPoemsList({
   className,
   isMyPage,
-  poems,
   filterMode,
+  filteredPoems,
 }: Props) {
-  if (poems.length === 0) {
+  if (filteredPoems.length === 0) {
     // No poems to display
     const containerStyle = 'm-auto px-2 pb-2 md:p-0 text-center'
 
@@ -43,7 +44,7 @@ export default function PoemsList({
         </p>
       )
     }
-    
+
     return (
       // Your page, and you have no poems
       <div className={cn(containerStyle, 'flex w-fit flex-col gap-4')}>
@@ -64,11 +65,12 @@ export default function PoemsList({
 
   return (
     <div className={cn('grid gap-2 md:gap-4 xl:grid-cols-2', className)}>
-      {/* TODO Replace with real poems */}
-      {poems.map((poem) => (
-        <ShadowCard key={poem}>
-          <CardHeader>Placeholder Title {poem}</CardHeader>
-          <CardContent>Placeholder Content {poem}</CardContent>
+      {/* TODO Display proper poem cards */}
+      {/* TODO Display poem visibility and delete controls menu */}
+      {filteredPoems.map((poem) => (
+        <ShadowCard key={poem.id}>
+          <CardHeader>{poem.title}</CardHeader>
+          <CardContent className="whitespace-pre-wrap">{poem.body}</CardContent>
         </ShadowCard>
       ))}
     </div>

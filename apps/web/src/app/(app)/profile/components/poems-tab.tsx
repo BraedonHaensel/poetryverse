@@ -1,14 +1,16 @@
 import PoemFilters, { PoemFilterMode } from '@/components/poem-filters'
+import { PoemData } from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 
 import { ProfileStat } from '../page-contents'
-import PoemsList from './poems-list'
+import UserPoemsList from './user-poems-list'
 
 type Props = {
   isMyPage: boolean
   profileStats: ProfileStat[]
   filterMode: PoemFilterMode
   setFilterMode: (filterMode: PoemFilterMode) => void
+  filteredPoems: PoemData[]
 }
 
 /**
@@ -17,12 +19,14 @@ type Props = {
  * @param profileStats Poem, followers, and following users stats.
  * @param filterMode The current poem filter mode.
  * @param setFilterMode Callback to set the poem filter mode.
+ * @param poems The filtered list of poems to display.
  */
 export default function PoemsTab({
   isMyPage,
   profileStats,
   filterMode,
   setFilterMode,
+  filteredPoems,
 }: Props) {
   return (
     <>
@@ -58,11 +62,11 @@ export default function PoemsTab({
         setFilterMode={setFilterMode}
       />
 
-      <PoemsList
+      <UserPoemsList
         className="m-2 mt-0 md:m-0 md:mx-0 md:gap-4 xl:grid-cols-2"
         isMyPage={isMyPage}
-        poems={[]}
         filterMode={filterMode}
+        filteredPoems={filteredPoems}
       />
     </>
   )

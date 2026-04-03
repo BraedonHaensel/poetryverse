@@ -47,12 +47,7 @@ export default function PoemFilters({
       {modeOptions.map((modeOption) => (
         <Button
           key={modeOption}
-          className={cn(
-            modeOptions.includes('HANDWRITTEN')
-              ? 'text-sm min-[370px]:text-base min-[450px]:text-lg'
-              : 'text-lg',
-            'flex-1 cursor-pointer border-2 border-black/50 font-bold md:max-w-50'
-          )}
+          className="flex-1 cursor-pointer border-2 border-black/50 p-2 font-bold min-[450px]:text-lg md:max-w-50"
           variant={modeOption === filterMode ? 'default' : 'outline'}
           onClick={() => setFilterMode(modeOption)}
         >
