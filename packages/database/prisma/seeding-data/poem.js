@@ -2,6 +2,13 @@ import { poemContents } from './poem-contents.js'
 import { poemTypeIds } from './poemType.js'
 import { userIds } from './user.js'
 
+const normalizePoemBody = (text) =>
+  text
+    .toLowerCase()
+    .replace(/\s+/g, ' ') // Replace whitespace characters
+    .replace(/[^a-z0-9\s]/g, '') // Replace special characters
+    .trim()
+
 export const poemIds = {
   superAdminPoem1: 'cmnauvhd1000b356uw16pnt8t',
   superAdminPoem2: 'cmnauvf8t0009356u8okjd59t',
@@ -19,7 +26,7 @@ export const poemIds = {
   user2Poem2: 'cmn5hq2m4000604kzj8mn2b5p',
 }
 
-export const poemData = [
+const rawPoemData = [
   {
     id: poemIds.superAdminPoem1,
     authorId: userIds.superAdmin,
@@ -154,3 +161,8 @@ export const poemData = [
     updatedAt: new Date('2026-03-10T14:20:45.151Z'),
   },
 ]
+
+export const poemData = rawPoemData.map((poem) => ({
+  ...poem,
+  normalizedBody: normalizePoemBody(poem.body),
+}))
