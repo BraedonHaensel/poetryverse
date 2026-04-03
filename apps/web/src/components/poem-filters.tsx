@@ -38,13 +38,21 @@ export default function PoemFilters({
   setFilterMode,
 }: Props) {
   return (
-    <div className={cn('flex gap-2 md:gap-4', className)}>
+    <div
+      className={cn(
+        'flex gap-1 overflow-x-auto min-[370px]:gap-2 md:gap-4',
+        className
+      )}
+    >
       {modeOptions.map((modeOption) => (
         <Button
           key={modeOption}
-          className={
-            'flex-1 cursor-pointer border-2 border-black/50 text-lg font-bold md:max-w-50'
-          }
+          className={cn(
+            modeOptions.includes('HANDWRITTEN')
+              ? 'text-sm min-[370px]:text-base min-[450px]:text-lg'
+              : 'text-lg',
+            'flex-1 cursor-pointer border-2 border-black/50 font-bold md:max-w-50'
+          )}
           variant={modeOption === filterMode ? 'default' : 'outline'}
           onClick={() => setFilterMode(modeOption)}
         >
