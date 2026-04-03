@@ -4,6 +4,7 @@ import {
   createPoem,
   deletePoem,
   generateAIPoem,
+  getDailyPoem,
   getPoemById,
   getPoems,
   interpretPoem,
@@ -35,8 +36,12 @@ const router = Router()
  * Query params:
  * - authorId (optional): string - filter returned poems by authorId
  */
-/** TODO: Make this guest-accessible once !49 is merged */
-router.get('/', requireAuth, validate(GetPoemsRequestSchema), asyncHandler(getPoems))
+router.get(
+  '/', 
+  optionalAuth, 
+  validate(GetPoemsRequestSchema), 
+  asyncHandler(getPoems)
+)
 
 /** GET /api/poems/{id} */
 router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
@@ -86,6 +91,9 @@ router.delete(
   validate(UnlikePoemRequestSchema),
   asyncHandler(unlikePoem)
 )
+
+/** GET /api/poems/daily-poem */
+router.get('/daily-poem', asyncHandler(getDailyPoem))
 
 /** POST /api/poems/report */
 router.post(

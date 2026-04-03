@@ -1,5 +1,7 @@
 'use client'
 
+import { cn } from '@/lib/utils'
+
 export type Column<T> = {
   key: keyof T
   label: string
@@ -12,53 +14,68 @@ type DataTableProps<T> = {
   columns: Column<T>[]
   data: T[]
   renderActions?: (row: T) => React.ReactNode
+  gridClassName?: string
 }
 
 export function DataTable<T extends { id: number }>({
   columns,
   data,
   renderActions,
+  gridClassName = 'grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px]',
 }: DataTableProps<T>) {
+  const cellStyles =
+    'text-md [display:flex] items-center justify-center py-4 px-2 xl:px-4 text-center wrap-break-word line-clamp-4'
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-admin-sidebar-active grid grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px] items-center rounded-2xl px-6 py-4 text-sm font-semibold text-black">
+    <div className="flex flex-col gap-1.5">
+      {/* Table header */}
+      <div
+        className={cn(
+          'bg-admin-sidebar-active grid divide-x-3 divide-black rounded-2xl border-2 border-black/40 shadow-md',
+          gridClassName
+        )}
+      >
         {columns.map((col) => (
           <div
             key={String(col.key)}
-            className={[
-              'min-w-0 font-bold',
-              col.key === 'id' ? 'text-center' : '',
-              col.headerClassName ?? '',
-            ].join(' ')}
+            className={cn(
+              cellStyles,
+              'font-bold',
+              col.key === 'id' && 'font-extrabold',
+              col.headerClassName
+            )}
           >
             {col.label}
           </div>
         ))}
-        <div className="px-4 text-center font-bold">Action</div>
+
+        <div className={cn(cellStyles, 'font-bold')}>Action</div>
       </div>
 
-      <div className="flex max-h-[500px] flex-col gap-4 overflow-y-auto pr-2">
+      {/* Table contents */}
+      <div className="flex max-h-125 flex-col gap-1.5 overflow-y-auto">
         {data.map((row) => (
           <div
             key={row.id}
-            className="grid grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px] items-start rounded-2xl bg-white px-6 py-6 shadow-sm"
+            className={cn(
+              'grid divide-x-3 divide-black/30 rounded-2xl border border-black/30 bg-white shadow-sm',
+              gridClassName
+            )}
           >
             {columns.map((col) => (
               <div
                 key={String(col.key)}
-                className={[
-                  'min-w-0 text-sm leading-6 text-black',
-                  col.key === 'id' ? 'pt-1 text-center font-semibold' : '',
-                  col.className ?? '',
-                ].join(' ')}
+                className={cn(
+                  cellStyles,
+                  col.key === 'id' && 'font-bold',
+                  col.className
+                )}
               >
                 {col.render ? col.render(row) : String(row[col.key])}
               </div>
             ))}
 
-            <div className="flex items-start justify-center gap-4 pt-1">
-              {renderActions?.(row)}
-            </div>
+            <div className={cellStyles}>{renderActions?.(row)}</div>
           </div>
         ))}
       </div>

@@ -1,16 +1,21 @@
-import type { Prisma } from '@prisma/client'
-import type { NextFunction, Request, Response } from 'express'
+import { Prisma, RoleEnum } from '@prisma/client'
+import type { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
-import { badRequest, notFound } from '../lib/http-errors'
+import { badRequest, conflict, forbidden, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
+  deleteUserRequest,
   followUserRequest,
   getUserFollowersRequest,
   getUserFollowingRequest,
   getUserRequest,
+  getUsersSchema,
   unfollowUserRequest,
+  updateRoleRequest,
+  updateRoleRequestParams,
+  updateUserInfoRequest,
 } from '../schemas/user-schemas'
 
 // Standardized prisma select statement for getting a user.
@@ -39,19 +44,22 @@ type UserWithFollowState = SelectedUser & {
  * Retrieves all users from the database and returns them as JSON.
  * @param _req Incoming Express request.
  * @param res Express response used to return users.
- * @param _next Next middleware function (unused).
  * @returns Promise that resolves after sending the users response.
  */
-export const getUsers = async (
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
-  logger.info('Fetching all users')
+export const getUsers = async (req: Request, res: Response) => {
+  const {
+    query: { role },
+  } = getUsersSchema.parse({ query: req.query })
+  logger.info(`Fetching all users roleFilter=${role ?? 'none'}`)
 
-  const users = await prisma.user.findMany()
+  const users = await prisma.user.findMany({
+    where: role ? { role } : undefined,
+    orderBy: { username: 'asc' },
+  })
 
-  logger.info(`Fetched all users count=${users.length}`)
+  logger.info(
+    `Fetched all users count=${users.length} roleFilter=${role ?? 'none'}`
+  )
   return res.status(200).json(users)
 }
 
@@ -59,15 +67,10 @@ export const getUsers = async (
  * Retrieves a user profile by target user ID and includes whether requester follows them.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing the user profile payload.
  * @throws {HttpError} 404 if the target user does not exist.
  */
-export const getUserById = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getUserById = async (req: Request, res: Response) => {
   const authReq = req as OptionalAuthRequest
   const requesterUserId = authReq.auth?.userId
   const { id: targetUserId } = req.params as getUserRequest
@@ -85,15 +88,10 @@ export const getUserById = async (
  * Retrieves the authenticated user's profile details.
  * @param req Authenticated Express request.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing the authenticated user's profile.
  * @throws {HttpError} 404 if the authenticated user no longer exists.
  */
-export const getMyUserInfo = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getMyUserInfo = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
   logger.info(`Fetching current user profile userId=${userId}`)
 
@@ -124,14 +122,9 @@ export const getMyUserInfo = async (
  * Retrieves followers for a target user and annotates each result with requester follow state.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users who follow the target user.
  */
-export const getUserFollowers = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getUserFollowers = async (req: Request, res: Response) => {
   const requesterUserId = (req as OptionalAuthRequest).auth?.userId
   const { id: targetUserId } = req.params as getUserFollowersRequest
 
@@ -146,14 +139,9 @@ export const getUserFollowers = async (
  * Retrieves users followed by a target user and annotates each with requester follow state.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users followed by the target user.
  */
-export const getUserFollowing = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getUserFollowing = async (req: Request, res: Response) => {
   const requesterUserId = (req as OptionalAuthRequest).auth?.userId
   const { id: targetUserId } = req.params as getUserFollowingRequest
 
@@ -171,14 +159,9 @@ export const getUserFollowing = async (
  * Retrieves followers for the authenticated user and annotates follow state.
  * @param req Authenticated Express request.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users who follow the authenticated user.
  */
-export const getMyFollowers = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getMyFollowers = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
 
   const followers = await getFollowersForUser(userId, userId)
@@ -190,14 +173,9 @@ export const getMyFollowers = async (
  * Retrieves users followed by the authenticated user and annotates follow state.
  * @param req Authenticated Express request.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing users followed by the authenticated user.
  */
-export const getMyFollowing = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const getMyFollowing = async (req: AuthRequest, res: Response) => {
   const userId = req.auth.userId
 
   const followingUsers = await getFollowingForUser(userId, userId)
@@ -206,19 +184,71 @@ export const getMyFollowing = async (
 }
 
 /**
+ * Updates editable profile fields for the authenticated user.
+ * @param req Authenticated Express request with validated update payload.
+ * @param res Express response object.
+ * @returns A 200 response containing the updated user record.
+ * @throws {HttpError} 409 if the requested username is already in use.
+ */
+export const updateMyUserInfo = async (req: AuthRequest, res: Response) => {
+  const userId = req.auth.userId
+  const updateData = req.body as updateUserInfoRequest
+  logger.info(
+    `Updating current user profile userId=${userId} fields=${Object.keys(updateData).join(',') || 'none'}`
+  )
+
+  let updatedInfo
+  try {
+    updatedInfo = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    })
+  } catch (err: unknown) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === 'P2002') {
+        logger.warn(
+          `Failed to update current user profile userId=${userId} reason=username-conflict`
+        )
+        throw conflict('Username is already taken.')
+      }
+    }
+
+    throw err
+  }
+
+  logger.info(`Updated current user profile userId=${userId}`)
+
+  return res.status(200).json({ data: updatedInfo })
+}
+
+/**
+ * Deletes the authenticated user's account.
+ * @param req Authenticated Express request.
+ * @param res Express response object.
+ * @returns A 204 response with no body.
+ */
+export const deleteMyAccount = async (req: AuthRequest, res: Response) => {
+  const userId = req.auth.userId
+  logger.info(`Deleting current user account userId=${userId}`)
+
+  await prisma.user.delete({
+    where: { id: userId },
+  })
+
+  logger.info(`Deleted current user account userId=${userId}`)
+
+  return res.status(204).send()
+}
+
+/**
  * Follows a target user for the authenticated requester.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 200 response containing the follow record.
  * @throws {HttpError} 400 if the requester tries to follow themselves.
  * @throws {HttpError} 404 if the target user does not exist.
  */
-export const followUser = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const followUser = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as followUserRequest
   logger.info(
@@ -259,16 +289,11 @@ export const followUser = async (
  * Unfollows a target user for the authenticated requester.
  * @param req Authenticated Express request with validated route params.
  * @param res Express response object.
- * @param _next Next middleware function (unused).
  * @returns A 204 response with no body.
  * @throws {HttpError} 400 if the requester tries to unfollow themselves.
  * @throws {HttpError} 404 if the target user does not exist.
  */
-export const unfollowUser = async (
-  req: AuthRequest,
-  res: Response,
-  _next: NextFunction
-) => {
+export const unfollowUser = async (req: AuthRequest, res: Response) => {
   const requesterUserId = req.auth.userId
   const { id: targetUserId } = req.params as unfollowUserRequest
   logger.info(
@@ -297,6 +322,111 @@ export const unfollowUser = async (
 
   return res.status(204).send()
 }
+
+/**
+ * Deletes a target user account by ID.
+ * @param req Authenticated Express request with validated route params.
+ * @param res Express response object.
+ * @returns A 204 response with no body.
+ * @throws {HttpError} 400 if requester attempts to delete themselves.
+ * @throws {HttpError} 403 if target user is a SUPER_ADMIN.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as deleteUserRequest
+  logger.info(
+    `Deleting user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  if (requesterUserId === targetUserId) {
+    throw badRequest(
+      "This endpoint does not handle deleting a user's own account.",
+      undefined,
+      'Please use the account settings page to delete your account.'
+    )
+  }
+
+  // Get target user's current role information.
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true },
+  })
+
+  if (!targetUser) {
+    throw notFound('Invalid user ID.')
+  }
+
+  if (targetUser.role === RoleEnum.SUPER_ADMIN) {
+    throw forbidden('Super Admin accounts cannot be deleted.')
+  }
+
+  if (targetUser.role === RoleEnum.ADMIN && req.auth.role === RoleEnum.ADMIN) {
+    throw forbidden('Only Super Admins can delete Admin accounts.')
+  }
+
+  await prisma.user.delete({
+    where: { id: targetUserId },
+  })
+
+  logger.info(
+    `Deleted user requesterUserId=${requesterUserId} targetUserId=${targetUserId}`
+  )
+
+  return res.status(204).send()
+}
+
+/**
+ * Updates a target user's role.
+ * @param req Authenticated Express request with validated params and body.
+ * @param res Express response object.
+ * @returns A 200 response containing the updated user record.
+ * @throws {HttpError} 400 if assigning SUPER_ADMIN or updating own role.
+ * @throws {HttpError} 403 if target user is a SUPER_ADMIN.
+ * @throws {HttpError} 404 if the target user does not exist.
+ */
+export const updateRole = async (req: AuthRequest, res: Response) => {
+  const requesterUserId = req.auth.userId
+  const { id: targetUserId } = req.params as updateRoleRequestParams
+  const { role: newRole } = req.body as updateRoleRequest
+  logger.info(
+    `Updating role requesterUserId=${requesterUserId} targetUserId=${targetUserId} newRole=${newRole}`
+  )
+
+  if (newRole === RoleEnum.SUPER_ADMIN) {
+    throw badRequest('Users cannot be promoted to Super Admin.')
+  }
+
+  if (requesterUserId === targetUserId) {
+    throw badRequest('You cannot change your own role.')
+  }
+
+  // Get target user's current role information.
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true },
+  })
+
+  if (!targetUser) {
+    throw notFound('Invalid user ID.')
+  }
+
+  if (targetUser.role === RoleEnum.SUPER_ADMIN) {
+    throw forbidden('Super Admin role cannot be changed.')
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: targetUserId },
+    data: { role: newRole },
+  })
+
+  logger.info(
+    `Updated role requesterUserId=${requesterUserId} targetUserId=${targetUserId} newRole=${newRole}`
+  )
+
+  return res.status(200).json({ data: updatedUser })
+}
+
 /**
  * Fetches follower users for a target user and appends requester follow state in batch.
  * @param userId Target user ID.
