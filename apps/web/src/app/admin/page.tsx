@@ -1,10 +1,11 @@
 'use client'
 
-import { CircleCheckBig, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import AdminUserManagement from '@/app/admin/admin-user/page-contents'
+import AnalyticsPageContents from '@/app/admin/analytics/page-contents'
 import GeneralUserManagement from '@/app/admin/general-user/page-contents'
+<<<<<<< HEAD
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -59,6 +60,8 @@ const columns: Column<ReportedPoem>[] = [
     className: 'justify-start text-left text-sm',
   },
 ]
+=======
+>>>>>>> f735d77 (fix: separate analytics page from admin page)
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
@@ -92,7 +95,7 @@ export default function AdminPage() {
 
       {/* Main contents */}
       <div className="flex-1 overflow-y-auto p-10">
-        {activeTab === 'analytics' && <AnalyticsView />}
+        {activeTab === 'analytics' && <AnalyticsPageContents />}
         {activeTab === 'general' && <GeneralUserManagement />}
         {activeTab === 'admin' && <AdminUserManagement />}
       </div>
@@ -119,68 +122,5 @@ function SidebarItem({
     >
       {label}
     </button>
-  )
-}
-
-function AnalyticsView() {
-  return (
-    <div className="flex min-w-225 flex-col gap-10">
-      <section>
-        <CardHeader className="px-0 pt-0 pb-5">
-          <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
-        </CardHeader>
-
-        <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
-          <CardContent className="grid grid-cols-3 gap-8 p-0">
-            <StatCard title="Number of Poems" value="50" />
-            <StatCard title="Number of AI Poems" value="23" />
-            <StatCard title="Number of Handwritten Poems" value="27" />
-          </CardContent>
-        </ShadowCard>
-      </section>
-
-      <section>
-        <CardHeader className="px-0 pt-0 pb-5">
-          <CardTitle className="text-2xl font-bold">Reported Poems</CardTitle>
-        </CardHeader>
-
-        <ShadowCard className="bg-admin-panel rounded-4xl p-3">
-          <CardContent className="max-h-117.5 overflow-y-auto p-0">
-            <DataTable
-              columns={columns}
-              data={reportedPoems}
-              renderActions={(_row) => (
-                <div className="flex items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    className="cursor-pointer transition hover:opacity-70"
-                    aria-label="Delete report"
-                  >
-                    <Trash2 size={28} strokeWidth={2.25} />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="cursor-pointer transition hover:opacity-70"
-                    aria-label="Approve report"
-                  >
-                    <CircleCheckBig size={30} strokeWidth={2.25} />
-                  </button>
-                </div>
-              )}
-            />
-          </CardContent>
-        </ShadowCard>
-      </section>
-    </div>
-  )
-}
-
-function StatCard({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="flex min-h-[px] flex-col items-center justify-center rounded-4xl bg-white px-6 py-8 text-center shadow-md">
-      <div className="mb-5 text-xl font-semibold">{title}</div>
-      <div className="text-6xl leading-none font-bold">{value}</div>
-    </div>
   )
 }
