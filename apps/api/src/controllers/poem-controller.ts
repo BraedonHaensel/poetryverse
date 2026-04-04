@@ -245,6 +245,8 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     )
   }
 
+  // TODO: Add external plagiarism and AI detection check
+
   // Create the poem.
   const createdPoem = await prisma.poem.create({
     data: mapCreatePoemRequestToPrismaInput({
