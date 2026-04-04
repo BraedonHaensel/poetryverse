@@ -62,7 +62,9 @@ export default function MobilePageHeader({
             height={30}
           />
         )}
-        <h1 className="truncate">{title}</h1>
+        <h1 className="truncate" title={title}>
+          {title}
+        </h1>
       </div>
 
       {/* Right side */}

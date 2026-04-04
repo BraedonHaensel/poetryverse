@@ -43,7 +43,7 @@ function MainNavLink({
   disabled = false,
 }: MainNavLinkProps) {
   const baseClassName = cn(
-    'relative pb-1 font-medium text-black cursor-pointer',
+    'relative pb-1 font-medium cursor-pointer',
     isOnPage ? 'font-semibold' : 'opacity-90'
   )
   const content = (

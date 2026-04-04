@@ -10,6 +10,7 @@ import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { PoemFilterMode } from '@/components/poem-filters'
 import { Button } from '@/components/ui/button'
 import { api, displayApiError } from '@/lib/api'
+import { filterPoems, getUserPoems, PoemData } from '@/lib/poem-requests'
 import {
   FollowerData,
   FollowingData,
@@ -34,7 +35,7 @@ export type ProfileStat = {
 }
 
 type Props = {
-  viewingUserId: string | undefined
+  viewingUserId: string
   isMyPage: boolean
 }
 
@@ -52,6 +53,8 @@ export default function ProfilePageContents({
   const [connectionsFilterMode, setConnectionsFilterMode] =
     useState<ConnectionsFilterMode>('FOLLOWERS')
 
+  const [poems, setPoems] = useState<PoemData[]>()
+  const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [poemFilterMode, setPoemFilterMode] = useState<PoemFilterMode>('ALL')
 
   const [viewingUserData, setViewingUserData] = useState<UserData>()
@@ -71,21 +74,32 @@ export default function ProfilePageContents({
   }
 
   /** Refreshes the user's data. */
-  const refreshData = useCallback(() => {
+  const refreshUserData = useCallback(() => {
     getUserData(viewingUserId).then(setViewingUserData)
     getUserFollowers(viewingUserId).then(setFollowers)
     getUserFollowing(viewingUserId).then(setFollowing)
   }, [viewingUserId])
 
-  // Refresh the user's data on mount
+  // Fetch all data on mount and on viewing user ID changes
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setViewingUserData(undefined)
     reset()
-    refreshData()
-  }, [viewingUserId, refreshData])
+    refreshUserData()
+    getUserPoems(viewingUserId).then(setPoems)
+  }, [viewingUserId, refreshUserData])
 
-  // Display a loading indicator until the user data has loaded
-  if (viewingUserData === undefined) return <PageLoadingIndicator />
+  // Update the filtered poems to display
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilteredPoems(
+      poems === undefined ? [] : filterPoems(poems, poemFilterMode)
+    )
+  }, [poems, poemFilterMode])
+
+  // Display a loading indicator until the user data and poems have been loaded
+  if (viewingUserData === undefined || poems === undefined)
+    return <PageLoadingIndicator />
 
   /** Sends a follow request for the user connection */
   function sendFollow(userId: string | undefined) {
@@ -102,9 +116,8 @@ export default function ProfilePageContents({
         displayApiError(error, 'Failed to follow user')
       })
       .finally(() => {
-        // Refresh the list of followers/following users
-        getUserFollowers(viewingUserId).then(setFollowers)
-        getUserFollowing(viewingUserId).then(setFollowing)
+        // Refresh the user's data
+        refreshUserData()
       })
   }
 
@@ -123,9 +136,8 @@ export default function ProfilePageContents({
         displayApiError(error, 'Failed to unfollow user')
       })
       .finally(() => {
-        // Refresh the list of followers/following users
-        getUserFollowers(viewingUserId).then(setFollowers)
-        getUserFollowing(viewingUserId).then(setFollowing)
+        // Refresh the user's data
+        refreshUserData()
       })
   }
 
@@ -170,7 +182,7 @@ export default function ProfilePageContents({
           {!isMyPage && !isGuest && (
             <Button
               className={cn(
-                'w-35 cursor-pointer justify-start',
+                'w-fit cursor-pointer justify-start min-[420px]:w-35',
                 viewingUserData.isFollowingUser &&
                   'bg-off-white border border-black text-black hover:bg-gray-300'
               )}
@@ -181,7 +193,7 @@ export default function ProfilePageContents({
               }
             >
               {viewingUserData.isFollowingUser ? <UserMinus /> : <UserPlus />}
-              <span>
+              <span className="hidden min-[360px]:block">
                 {viewingUserData.isFollowingUser ? 'Unfollow' : 'Follow'}
               </span>
             </Button>
@@ -195,6 +207,7 @@ export default function ProfilePageContents({
             profileStats={profileStats}
             filterMode={poemFilterMode}
             setFilterMode={setPoemFilterMode}
+            filteredPoems={filteredPoems}
           />
         ) : (
           <ConnectionsTab
@@ -227,13 +240,14 @@ export default function ProfilePageContents({
         {/* Main contents */}
         <div className="flex-1 overflow-y-auto">
           <div className="flex min-h-full flex-col px-4 py-4 xl:px-10">
-            <div className="flex flex-col gap-4 divide-y-2 divide-gray-300">
+            <div className="flex flex-1 flex-col gap-4 divide-y-2 divide-gray-300">
               {pageTab === 'MY_POEMS' ? (
                 <PoemsTab
                   isMyPage={isMyPage}
                   profileStats={profileStats}
                   filterMode={poemFilterMode}
                   setFilterMode={setPoemFilterMode}
+                  filteredPoems={filteredPoems}
                 />
               ) : (
                 <ConnectionsTab

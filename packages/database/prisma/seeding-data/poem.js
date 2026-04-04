@@ -37,7 +37,7 @@ export const poemData = [
     authorId: userIds.superAdmin,
     title: 'Moonlight Reflection',
     typeId: poemTypeIds.couplet,
-    isPublic: true,
+    isPublic: false,
     isAIAssisted: false,
     aiLikelihoodScore: 0.31,
     body: 'Soft moonlight shines upon the sleeping earth.\nIn its gentle glow, lost souls find their worth.',
