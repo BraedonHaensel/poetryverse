@@ -8,6 +8,7 @@ import GeneralUserManagement from '@/app/admin/general-user/page-contents'
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAdminUser } from '@/context/admin-user-context'
 type ReportedPoem = {
   id: number
   title: string
@@ -62,6 +63,8 @@ const columns: Column<ReportedPoem>[] = [
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
 
+  const { role } = useAdminUser()
+
   return (
     <div className="flex min-h-0 w-fit min-w-full flex-1">
       {/* Sidebar */}
@@ -77,11 +80,13 @@ export default function AdminPage() {
             active={activeTab === 'general'}
             onClick={() => setActiveTab('general')}
           />
-          <SidebarItem
-            label="Admin User Management"
-            active={activeTab === 'admin'}
-            onClick={() => setActiveTab('admin')}
-          />
+          {role === 'SUPER_ADMIN' && (
+            <SidebarItem
+              label="Admin User Management"
+              active={activeTab === 'admin'}
+              onClick={() => setActiveTab('admin')}
+            />
+          )}
         </div>
       </aside>
 
