@@ -11,6 +11,37 @@ import { prisma } from './db'
 import { logger } from './logger'
 import { getErrorStatus } from './utils'
 
+// Prompt constants
+const PLAGIARISM_PROMPT = `You are assisting with plagiarism triage for a poetry platform.
+
+Your task is NOT to make a final accusation of plagiarism.
+Your task is to estimate whether the poem should be sent for human review.
+
+Evaluate the poem for:
+1. unusually specific or distinctive phrasing,
+2. repeated uncommon phrases that may indicate copying,
+3. suspicious similarity to known poetic language or published text,
+4. signs of paraphrased reuse,
+5. whether the poem appears original but generic.
+
+Important rules:
+- Return valid JSON only.
+- plagiarismLikelihood must be a number from 0.0 to 1.0.
+- confidence must be a number from 0.0 to 1.0.
+- Use "allow" only when there is low concern.
+- Use "review" when there is moderate to high concern or uncertainty.
+- Do not claim certainty unless there is strong evidence.
+- Prefer conservative triage, especially with shorter poems.
+- If grounded web results are available, include plausible sources in possibleSources.
+- If no plausible sources are found, leave possibleSources empty.
+
+The poem is provided with line numbers.
+
+Poem: `
+
+const AI_DETECTION_PROMPT = ``
+
+// Thresholds for AI and plagiarism detection.
 export const POEM_DETECTION_THRESHOLDS = {
   plagiarismSimilarity: 0.8,
   plagiarismGeminiLikelihood: 0.7,
@@ -102,33 +133,7 @@ export const triagePoemPlagiarismWithAI = async (
 ): Promise<PoemPlagiarismTriageResponse | null> => {
   const poemWithLineNumbers = addLineNumbersToPoem(poemBody)
 
-  const prompt = `You are assisting with plagiarism triage for a poetry platform.
-
-Your task is NOT to make a final accusation of plagiarism.
-Your task is to estimate whether the poem should be sent for human review.
-
-Evaluate the poem for:
-1. unusually specific or distinctive phrasing,
-2. repeated uncommon phrases that may indicate copying,
-3. suspicious similarity to known poetic language or published text,
-4. signs of paraphrased reuse,
-5. whether the poem appears original but generic.
-
-Important rules:
-- Return valid JSON only.
-- plagiarismLikelihood must be a number from 0.0 to 1.0.
-- confidence must be a number from 0.0 to 1.0.
-- Use "allow" only when there is low concern.
-- Use "review" when there is moderate to high concern or uncertainty.
-- Do not claim certainty unless there is strong evidence.
-- Prefer conservative triage, especially with shorter poems.
-- If grounded web results are available, include plausible sources in possibleSources.
-- If no plausible sources are found, leave possibleSources empty.
-
-The poem is provided with line numbers.
-
-Poem:
-${poemWithLineNumbers}`
+  const prompt = PLAGIARISM_PROMPT + poemWithLineNumbers
 
   try {
     return await generateGeminiJSONResponse(
@@ -226,6 +231,7 @@ export const runPoemCreationPipeline = async <
   PoemCreationPipelineResult<TCreatedPoem>
 > => {
   if (!isPublic) {
+    // Poem is private, don't send to AI for review.
     const createdPoem = await createPoem({
       approvalStatus: PoemApprovalStatus.UNCHECKED,
     })
@@ -240,6 +246,7 @@ export const runPoemCreationPipeline = async <
     }
   }
 
+  // Run internal plagiarism check.
   const plagiarismSimilarityMatch =
     await detectPoemPlagiarismSimilarity(poemBody)
   if (
@@ -256,6 +263,7 @@ export const runPoemCreationPipeline = async <
     }
   }
 
+  // Run external plagiarism check with Gemini.
   const plagiarismTriage = await triagePoemPlagiarismWithAI(poemBody)
   if (plagiarismTriage && shouldFlagPlagiarismTriage(plagiarismTriage)) {
     const createdPoem = await createPoem({
