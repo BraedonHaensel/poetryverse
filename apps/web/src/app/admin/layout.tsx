@@ -1,10 +1,19 @@
 import AdminNavbar from '@/components/admin-navbar'
+import { AdminUserProvider } from '@/context/admin-user-context'
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <AdminNavbar />
-      <main className="bg-off-white flex flex-1">{children}</main>
+    <div className="flex h-svh min-w-[320px] flex-col">
+      <AdminUserProvider>
+        <AdminNavbar />
+        <main className="flex flex-1 flex-col overflow-auto bg-white">
+          {children}
+        </main>
+      </AdminUserProvider>
     </div>
   )
 }

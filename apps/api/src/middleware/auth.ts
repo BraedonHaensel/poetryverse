@@ -4,11 +4,16 @@ import { getToken } from 'next-auth/jwt'
 
 import config from '../lib/config'
 import { prisma } from '../lib/db'
-import { HttpError, unauthorized } from '../lib/http-errors'
+import { unauthorized } from '../lib/http-errors'
 import { logger } from '../lib/logger'
 
-export type AuthRequest = Request & { auth: { userId: string } }
-export type OptionalAuthRequest = Request & { auth?: { userId: string } }
+interface AuthContext {
+  userId: string
+  role: RoleEnum
+}
+
+export type AuthRequest = Request & { auth: AuthContext }
+export type OptionalAuthRequest = Request & { auth?: AuthContext }
 
 /** Gets the userId from the token. */
 const getTokenUserId = async (req: Request) => {
@@ -39,14 +44,18 @@ const getRoleLevel = (role: RoleEnum) => {
   }
 }
 
-/** Helps validate the session by checking the user exists. */
-const userExists = async (userId: string) => {
+/** Gets role information for a user ID, or null if the user does not exist. */
+const getUserAuthContext = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true },
+    select: { id: true, role: true },
   })
 
-  return !!user
+  if (!user) {
+    return null
+  }
+
+  return { userId: user.id, role: user.role }
 }
 
 /**
@@ -69,11 +78,12 @@ export const requireAuth = async (
     }
 
     // Check that auth and database state are synced.
-    if (!(await userExists(userId))) {
+    const authContext = await getUserAuthContext(userId)
+    if (!authContext) {
       throw unauthorized()
     }
 
-    ;(req as AuthRequest).auth = { userId }
+    ;(req as AuthRequest).auth = authContext
     return next()
   } catch {
     throw unauthorized()
@@ -95,8 +105,11 @@ export const optionalAuth = async (
   try {
     const userId = await getTokenUserId(req)
 
-    if (userId && (await userExists(userId))) {
-      ;(req as OptionalAuthRequest).auth = { userId }
+    if (userId) {
+      const authContext = await getUserAuthContext(userId)
+      if (authContext) {
+        ;(req as OptionalAuthRequest).auth = authContext
+      }
     }
   } catch {
     // Ignore token parsing issues for guest-accessible routes.
@@ -106,28 +119,33 @@ export const optionalAuth = async (
 }
 
 /**
+ * Checks if the userRole is at least the required role level.
+ * @param userRole The user role to check.
+ * @param requiredRole The minimum role required.
+ * @returns True if the userRole is the requiredRole or higher, false otherwise.
+ */
+export const hasRole = (userRole: RoleEnum, requiredRole: RoleEnum): boolean => {
+  const userLevel = getRoleLevel(userRole)
+  const targetLevel = getRoleLevel(requiredRole)
+  return userLevel >= targetLevel
+}
+
+/**
  * Verifies that the authenticated user has at least the required role.
  * @param role Minimum role required for access.
  * @returns Express middleware that allows or rejects the request.
  */
 export const requireRole = (role: RoleEnum) => {
-  return async (req: Request, _res: Response, next: NextFunction) => {
-    const userId = (req as AuthRequest).auth.userId
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const auth = (req as AuthRequest).auth
+    const userId = auth?.userId
+    const requesterRole = auth?.role
 
-    if (!userId) {
+    if (!userId || !requesterRole) {
       throw unauthorized()
     }
 
-    const requestingUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
-    if (!requestingUser) {
-      throw new HttpError(500, 'User information not available.')
-    }
-
-    const requestingUserRoleLevel = getRoleLevel(requestingUser.role)
+    const requestingUserRoleLevel = getRoleLevel(requesterRole)
     const targetRoleLevel = getRoleLevel(role)
 
     if (requestingUserRoleLevel >= targetRoleLevel) {

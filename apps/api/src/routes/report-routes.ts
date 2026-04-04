@@ -1,9 +1,18 @@
 import { RoleEnum } from '@prisma/client'
 import { Router } from 'express'
 
-import { getReports } from '../controllers/report-controller'
+import {
+  getReportById,
+  getReports,
+  resolveReport,
+} from '../controllers/report-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { requireAuth, requireRole } from '../middleware/auth'
+import { validate } from '../middleware/validate'
+import {
+  getReportByIdRequestSchema,
+  resolveReportRequestSchema,
+} from '../schemas/report-schemas'
 
 const router = Router()
 
@@ -13,6 +22,24 @@ router.get(
   requireAuth,
   requireRole(RoleEnum.ADMIN),
   asyncHandler(getReports)
+)
+
+/** GET /api/reports/{id} */
+router.get(
+  '/:id',
+  requireAuth,
+  requireRole(RoleEnum.ADMIN),
+  validate(getReportByIdRequestSchema),
+  asyncHandler(getReportById)
+)
+
+/** PATCH /api/reports/{id} */
+router.patch(
+  '/:id',
+  requireAuth,
+  requireRole(RoleEnum.ADMIN),
+  validate(resolveReportRequestSchema),
+  asyncHandler(resolveReport)
 )
 
 export default router
