@@ -48,7 +48,7 @@ const rawPoemData = [
     authorId: userIds.superAdmin,
     title: 'Moonlight Reflection',
     typeId: poemTypeIds.couplet,
-    isPublic: true,
+    isPublic: false,
     isAIAssisted: false,
     aiLikelihoodScore: 0.31,
     plagiarismLikelihoodScore: 0.06,

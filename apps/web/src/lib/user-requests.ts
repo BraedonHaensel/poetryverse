@@ -36,7 +36,7 @@ export type UserData = {
 
 /**
  * Gets a user's data.
- * @param userId ID of the user to query.
+ * @param userId ID of the user to query, or undefined for self.
  * @returns The user's data.
  */
 export async function getUserData(
@@ -78,7 +78,7 @@ export type FollowingData = FollowerData
 
 /**
  * Gets a user's followers.
- * @param userId ID of the user to query.
+ * @param userId ID of the user to query, or undefined for self.
  * @returns The user's followers.
  */
 export async function getUserFollowers(
@@ -99,7 +99,7 @@ export async function getUserFollowers(
 
 /**
  * Gets a user's following users.
- * @param userId ID of the user to query.
+ * @param userId ID of the user to query, or undefined for self.
  * @returns The user's following users.
  */
 export async function getUserFollowing(
