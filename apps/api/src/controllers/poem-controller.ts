@@ -1,12 +1,22 @@
 import { Prisma, RoleEnum } from '@prisma/client'
+import damerauLevenshtein from 'damerau-levenshtein'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
 import { prisma } from '../lib/db'
-import { badRequest, HttpError, notFound, unauthorized } from '../lib/http-errors'
+import {
+  badRequest,
+  conflict,
+  HttpError,
+  notFound,
+  unauthorized,
+} from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
-import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
+import {
+  mapCreatePoemRequestToPrismaInput,
+  normalizePoemBody,
+} from '../mappers/poem-mapper'
 import {
   type AuthRequest,
   hasRole,
@@ -28,6 +38,8 @@ import {
   UpdatePoemParamRequest,
 } from '../schemas/poem-schemas'
 import { validateUserExists } from './user-controller'
+
+const PLAGIARISM_SIMILARITY_THRESHOLD = 0.8
 
 // Include statement for fetching poems from the database with Prisma.
 const poemIncludeStatement = {
@@ -51,10 +63,7 @@ const poemIncludeStatement = {
  * @returns A 200 response containing the list of poems.
  * @throws {HttpError} 404 if a user with the specified authorId does not exist.
  */
-export const getPoems = async (
-  req: Request,
-  res: Response,
-) => {
+export const getPoems = async (req: Request, res: Response) => {
   const authReq = req as OptionalAuthRequest
   const requesterUserId = authReq.auth?.userId
 
@@ -141,16 +150,20 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
   const { id: poemId } = req.params as UpdatePoemParamRequest
   const { isPublic } = req.body as UpdatePoemBodyRequest
 
-  const poemData = await validateAndReturnPoem(poemId)  
+  const poemData = await validateAndReturnPoem(poemId)
 
   if (poemData.authorId === requesterUserId) {
-    logger.info(`Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`)
+    logger.info(
+      `Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
+    )
     const updatedPoem = await prisma.poem.update({
       where: { id: poemId },
       data: { isPublic },
       include: poemIncludeStatement,
     })
-    logger.info(`Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`)
+    logger.info(
+      `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
+    )
     return res.status(200).json(updatedPoem)
   }
   throw unauthorized('You do not have permission to update this poem.')
@@ -205,7 +218,34 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     validateAndReturnPoemTags(poemData.tagIds),
   ])
 
-  // TODO: add AI-likelihood scoring & plagiarism check steps in here
+  // Check for plagiarism against existing poems.
+  const plagiarismResult = await detectPlagiarism(poemData.poem)
+  if (plagiarismResult) {
+    logger.info(
+      `Plagiarism check for userId=${req.auth.userId} bestMatchPoemId=${plagiarismResult.poemId} similarity=${plagiarismResult.similarity.toFixed(3)}`
+    )
+  }
+
+  if (
+    plagiarismResult &&
+    plagiarismResult.similarity >= PLAGIARISM_SIMILARITY_THRESHOLD
+  ) {
+    logger.warn(
+      `Blocked poem creation for userId=${req.auth.userId} due to plagiarism risk matchedPoemId=${plagiarismResult.poemId} similarity=${plagiarismResult.similarity.toFixed(3)}`
+    )
+    throw conflict(
+      'Poem failed plagiarism check.',
+      {
+        similarity: plagiarismResult.similarity,
+        threshold: PLAGIARISM_SIMILARITY_THRESHOLD,
+        matchedPoemId: plagiarismResult.poemId,
+        matchedPoemTitle: plagiarismResult.title,
+      },
+      'This poem appears too similar to an existing poem. Please revise and try again.'
+    )
+  }
+
+  // TODO: Add external plagiarism and AI detection check
 
   // Create the poem.
   const createdPoem = await prisma.poem.create({
@@ -508,6 +548,45 @@ const validateAndReturnPoem = async (poemId: string) => {
     throw notFound('Invalid poem ID')
   }
   return poem
+}
+
+/** Finds the most similar existing poem using Damerau-Levenshtein similarity. */
+const detectPlagiarism = async (poemBody: string) => {
+  const normalizedBody = normalizePoemBody(poemBody)
+
+  const existingPoems = await prisma.poem.findMany({
+    select: {
+      id: true,
+      title: true,
+      normalizedBody: true,
+    },
+  })
+
+  if (existingPoems.length === 0) {
+    return null
+  }
+
+  let bestMatch: {
+    poemId: string
+    title: string
+    similarity: number
+  } | null = null
+
+  for (const poem of existingPoems) {
+    const normalizedExistingBody = String(poem.normalizedBody ?? '')
+    const result = damerauLevenshtein(normalizedBody, normalizedExistingBody)
+    const similarity = result.similarity
+
+    if (!bestMatch || similarity > bestMatch.similarity) {
+      bestMatch = {
+        poemId: poem.id,
+        title: poem.title,
+        similarity,
+      }
+    }
+  }
+
+  return bestMatch
 }
 
 /** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
