@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -11,6 +11,7 @@ import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { api, displayApiError } from '@/lib/api'
 import { getUserData, UserData } from '@/lib/user-requests'
+import { sleep } from '@/lib/utils'
 
 import UserSettingsForms from './forms/user-settings-forms'
 
@@ -68,6 +69,21 @@ export default function UserSettings() {
       )
   }
 
+  /** Delete the user's account. */
+  async function onDeleteAccount() {
+    await api
+      .delete('/api/users/me')
+      .then(async () => {
+        console.log('Account deleted')
+        toast.success('Account deleted')
+
+        // Wait for the toast to appear, then sign out and redirect to the Login page
+        await sleep(500)
+        await signOut({ callbackUrl: '/' })
+      })
+      .catch((error) => displayApiError(error, 'Failed to delete account'))
+  }
+
   return (
     <>
       {/* Mobile layout */}
@@ -86,6 +102,7 @@ export default function UserSettings() {
                 userData={userData}
                 onProfilePictureSubmit={onProfilePictureSubmit}
                 onUsernameSubmit={onUsernameSubmit}
+                onDeleteAccount={onDeleteAccount}
               />
               {/* Mobile-only sign out button */}
               <SignOutButton className="mt-auto" />
@@ -113,6 +130,7 @@ export default function UserSettings() {
                   userData={userData}
                   onProfilePictureSubmit={onProfilePictureSubmit}
                   onUsernameSubmit={onUsernameSubmit}
+                  onDeleteAccount={onDeleteAccount}
                 />
               </CardContent>
             </>
