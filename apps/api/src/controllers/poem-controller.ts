@@ -1,4 +1,4 @@
-import { Prisma, RoleEnum } from '@prisma/client'
+import { Prisma, ReasonType, RoleEnum } from '@prisma/client'
 import damerauLevenshtein from 'damerau-levenshtein'
 import type { Request, Response } from 'express'
 
@@ -32,6 +32,8 @@ import {
   PoemAIResponseSchema,
   PoemInterpretRequest,
   PoemInterpretResponseSchema,
+  PoemPlagiarismTriageResponse,
+  PoemPlagiarismTriageResponseSchema,
   ReportPoemRequest,
   UnlikePoemRequest,
   UpdatePoemBodyRequest,
@@ -40,6 +42,9 @@ import {
 import { validateUserExists } from './user-controller'
 
 const PLAGIARISM_SIMILARITY_THRESHOLD = 0.8
+const GEMINI_PLAGIARISM_REPORT_THRESHOLD = 0.7
+const GEMINI_PLAGIARISM_REPORT_CONFIDENCE_THRESHOLD = 0.6
+const AUTO_REPORT_REASON_MAX_LENGTH = 200
 
 // Include statement for fetching poems from the database with Prisma.
 const poemIncludeStatement = {
@@ -245,7 +250,13 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     )
   }
 
-  // TODO: Add external plagiarism and AI detection check
+  const plagiarismTriage = await triagePlagiarismWithGemini(poemData.poem)
+
+  if (plagiarismTriage) {
+    logger.info(
+      `Gemini plagiarism triage for userId=${req.auth.userId} likelihood=${plagiarismTriage.plagiarismLikelihood.toFixed(3)} confidence=${plagiarismTriage.confidence.toFixed(3)} recommendation=${plagiarismTriage.reviewRecommendation}`
+    )
+  }
 
   // Create the poem.
   const createdPoem = await prisma.poem.create({
@@ -260,6 +271,44 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
   logger.info(
     `Created poem id=${createdPoem.id} userId=${req.auth.userId} typeId=${createdPoem.typeId} tagCount=${createdPoem.poemTags.length}`
   )
+
+  if (plagiarismTriage && shouldAutoCreatePlagiarismReport(plagiarismTriage)) {
+    const reportReason = plagiarismTriage.reason
+      .slice(0, AUTO_REPORT_REASON_MAX_LENGTH)
+      .trim()
+
+    const sourceSummary = plagiarismTriage.possibleSources
+      .slice(0, 3)
+      .map(
+        (source) =>
+          `${source.title} (${source.url}) similarity=${source.similarityEstimate.toFixed(2)}`
+      )
+      .join(' | ')
+
+    const adminNote = [
+      `Auto-generated from Gemini plagiarism triage.`,
+      `likelihood=${plagiarismTriage.plagiarismLikelihood.toFixed(3)} confidence=${plagiarismTriage.confidence.toFixed(3)} recommendation=${plagiarismTriage.reviewRecommendation}`,
+      plagiarismTriage.notesForAdmin,
+      sourceSummary ? `possibleSources=${sourceSummary}` : undefined,
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    const createdReport = await prisma.report.create({
+      data: {
+        reporterUserId: null,
+        poemId: createdPoem.id,
+        reasonType: ReasonType.PLAGIARISM,
+        reason:
+          reportReason || 'Potential plagiarism flagged by automated triage.',
+        adminNote,
+      },
+    })
+
+    logger.warn(
+      `Auto-created plagiarism reportId=${createdReport.id} for poemId=${createdPoem.id} likelihood=${plagiarismTriage.plagiarismLikelihood.toFixed(3)}`
+    )
+  }
 
   // Return the created poem
   return res.status(201).json({ data: createdPoem })
@@ -587,6 +636,69 @@ const detectPlagiarism = async (poemBody: string) => {
   }
 
   return bestMatch
+}
+
+const addLineNumbersToPoem = (poemBody: string) =>
+  poemBody
+    .split('\n')
+    .map((line, index) => `${index + 1}: ${line}`)
+    .join('\n')
+
+const shouldAutoCreatePlagiarismReport = (
+  triage: PoemPlagiarismTriageResponse
+) =>
+  triage.plagiarismLikelihood >= GEMINI_PLAGIARISM_REPORT_THRESHOLD &&
+  triage.confidence >= GEMINI_PLAGIARISM_REPORT_CONFIDENCE_THRESHOLD
+
+const triagePlagiarismWithGemini = async (poemBody: string) => {
+  const poemWithLineNumbers = addLineNumbersToPoem(poemBody)
+
+  const prompt = `You are assisting with plagiarism triage for a poetry platform.
+
+Your task is NOT to make a final accusation of plagiarism.
+Your task is to estimate whether the poem should be sent for human review.
+
+Evaluate the poem for:
+1. unusually specific or distinctive phrasing,
+2. repeated uncommon phrases that may indicate copying,
+3. suspicious similarity to known poetic language or published text,
+4. signs of paraphrased reuse,
+5. whether the poem appears original but generic.
+
+Important rules:
+- Return valid JSON only.
+- plagiarismLikelihood must be a number from 0.0 to 1.0.
+- confidence must be a number from 0.0 to 1.0.
+- Use "allow" only when there is low concern.
+- Use "review" when there is moderate concern or uncertainty.
+- Use "high_priority_review" when there are strong signs of copied language or likely matching sources.
+- Do not claim certainty unless there is strong evidence.
+- Prefer conservative triage: when unsure, recommend review rather than accusation.
+- If grounded web results are available, include plausible sources in possibleSources.
+- If no plausible sources are found, leave possibleSources empty.
+
+The poem is provided with line numbers.
+
+Poem:
+${poemWithLineNumbers}`
+
+  try {
+    return await generateGeminiJSONResponse(
+      prompt,
+      PoemPlagiarismTriageResponseSchema
+    )
+  } catch (err: unknown) {
+    const status = getErrorStatus(err)
+    if (status === 429) {
+      logger.warn('Gemini plagiarism triage rate limited; skipping triage.')
+      return null
+    }
+
+    logger.warn(
+      `Gemini plagiarism triage failed; skipping triage. ${String(err)}`
+    )
+    return null
+  }
 }
 
 /** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/

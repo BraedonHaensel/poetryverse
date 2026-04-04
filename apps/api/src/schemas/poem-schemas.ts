@@ -27,8 +27,8 @@ export const GetPoemByIdRequestSchema = z.object({
 
 /** Validates `PATCH /api/poems/:id` route params. */
 export const UpdatePoemParamSchema = z.object({
-    params: z.object({
-      id: z.cuid('Poem ID must be a valid CUID.'),
+  params: z.object({
+    id: z.cuid('Poem ID must be a valid CUID.'),
   }),
 })
 
@@ -98,6 +98,43 @@ export const PoemInterpretResponseSchema = z.object({
     .describe('Interpretation provided from interpret call'),
 })
 
+/** Validates structured AI plagiarism triage responses. */
+export const PoemPlagiarismTriageResponseSchema = z.object({
+  plagiarismLikelihood: z
+    .number()
+    .min(0)
+    .max(1)
+    .describe(
+      'A score from 0.0 to 1.0 estimating likelihood of substantial external reuse.'
+    ),
+  confidence: z
+    .number()
+    .min(0)
+    .max(1)
+    .describe(
+      'A score from 0.0 to 1.0 for confidence in the plagiarism estimate.'
+    ),
+  reviewRecommendation: z.enum(['allow', 'review', 'high_priority_review']),
+  reason: z.string(),
+  suspiciousPassages: z.array(
+    z.object({
+      text: z.string(),
+      startLine: z.number().int(),
+      endLine: z.number().int(),
+      whySuspicious: z.string(),
+    })
+  ),
+  possibleSources: z.array(
+    z.object({
+      title: z.string(),
+      url: z.string(),
+      matchedText: z.string(),
+      similarityEstimate: z.number().min(0).max(1),
+    })
+  ),
+  notesForAdmin: z.string(),
+})
+
 /** Validates `PUT /api/poems/like` request bodies. */
 export const LikePoemRequestSchema = z.object({
   body: z.object({
@@ -137,6 +174,11 @@ export type PoemInterpretResponse = z.infer<typeof PoemInterpretResponseSchema>
 /** Type returned by `PoemAIResponseSchema`. */
 export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
 
+/** Type returned by `PoemPlagiarismTriageResponseSchema`. */
+export type PoemPlagiarismTriageResponse = z.infer<
+  typeof PoemPlagiarismTriageResponseSchema
+>
+
 /** Request body type for `PoemAIRequestSchema`. */
 export type PoemAIRequest = z.infer<typeof PoemAIRequestSchema>['body']
 
@@ -144,10 +186,14 @@ export type PoemAIRequest = z.infer<typeof PoemAIRequestSchema>['body']
 export type GetPoemsRequest = z.infer<typeof GetPoemsRequestSchema>
 
 /** Route params type for `GetPoemByIdRequestSchema`. */
-export type GetPoemByIdRequest = z.infer<typeof GetPoemByIdRequestSchema>['params']
+export type GetPoemByIdRequest = z.infer<
+  typeof GetPoemByIdRequestSchema
+>['params']
 
 /** Route params type for `UpdatePoemParamSchema`. */
-export type UpdatePoemParamRequest = z.infer<typeof UpdatePoemParamSchema>['params']
+export type UpdatePoemParamRequest = z.infer<
+  typeof UpdatePoemParamSchema
+>['params']
 
 /** Request body type for `UpdatePoemBodySchema`. */
 export type UpdatePoemBodyRequest = z.infer<typeof UpdatePoemBodySchema>['body']
