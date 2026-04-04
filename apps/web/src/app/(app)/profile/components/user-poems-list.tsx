@@ -12,6 +12,9 @@ type Props = {
   isMyPage: boolean
   filterMode: PoemFilterMode
   filteredPoems: PoemData[]
+  setPublic: (poemid: string) => Promise<void>
+  setPrivate: (poemId: string) => Promise<void>
+  deletePoem: (poemId: string) => Promise<void>
 }
 
 /**
@@ -26,6 +29,9 @@ export default function UserPoemsList({
   isMyPage,
   filterMode,
   filteredPoems,
+  setPublic,
+  setPrivate,
+  deletePoem,
 }: Props) {
   if (filteredPoems.length === 0) {
     // No poems to display
@@ -71,6 +77,39 @@ export default function UserPoemsList({
         <ShadowCard key={poem.id}>
           <CardHeader>{poem.title}</CardHeader>
           <CardContent className="whitespace-pre-wrap">{poem.body}</CardContent>
+          {!!isMyPage ? (
+            <>
+              {poem.isPublic ? (
+                <button
+                  className="cursor-pointer hover:opacity-70"
+                  onClick={async () => {
+                    await setPrivate(poem.id)
+                  }}
+                >
+                  Set private (placeholder button)
+                </button>
+              ) : (
+                <button
+                  className="cursor-pointer hover:opacity-70"
+                  onClick={async () => {
+                    await setPublic(poem.id)
+                  }}
+                >
+                  Set public (placeholder button)
+                </button>
+              )}
+              <button
+                className="cursor-pointer hover:opacity-70"
+                onClick={async () => {
+                  await deletePoem(poem.id)
+                }}
+              >
+                Delete (placeholder button)
+              </button>
+            </>
+          ) : (
+            <p>TODO: Translate, Interpret, Report *same as home page*</p>
+          )}
         </ShadowCard>
       ))}
     </div>

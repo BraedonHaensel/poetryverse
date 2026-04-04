@@ -4,6 +4,7 @@ import { UserMinus, UserPlus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
@@ -100,6 +101,61 @@ export default function ProfilePageContents({
   // Display a loading indicator until the user data and poems have been loaded
   if (viewingUserData === undefined || poems === undefined)
     return <PageLoadingIndicator />
+
+  /** Sets the visibility of a poem to public. */
+  async function setPublic(poemId: string) {
+    api
+      .patch(`/api/poems/${poemId}`, { isPublic: true })
+      .then(() => {
+        setPoems((prev) => {
+          if (prev === undefined) return undefined
+          return prev.map((poem) =>
+            poem.id === poemId ? { ...poem, isPublic: true } : poem
+          )
+        })
+        console.log('Poem visibility updated to public:', poemId)
+        toast.success('Poem visibility updated')
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to update visibility')
+      })
+  }
+
+  /** Sets the visibility of a poem to private. */
+  async function setPrivate(poemId: string) {
+    api
+      .patch(`/api/poems/${poemId}`, { isPublic: false })
+      .then(() => {
+        setPoems((prev) => {
+          if (prev === undefined) return undefined
+          return prev.map((poem) =>
+            poem.id === poemId ? { ...poem, isPublic: false } : poem
+          )
+        })
+        console.log('Poem visibility updated to private:', poemId)
+        toast.success('Poem visibility updated')
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to update visibility')
+      })
+  }
+
+  /** Deletes a user's poem */
+  async function deletePoem(poemId: string) {
+    api
+      .delete(`/api/poems/${poemId}`)
+      .then(() => {
+        setPoems((prev) => {
+          if (prev === undefined) return undefined
+          return prev.filter((poem) => poem.id !== poemId)
+        })
+        console.log('Poem deleted:', poemId)
+        toast.success('Poem deleted')
+      })
+      .catch((error) => {
+        displayApiError(error, 'Failed to delete poem')
+      })
+  }
 
   /** Sends a follow request for the user connection */
   function sendFollow(userId: string | undefined) {
@@ -208,6 +264,9 @@ export default function ProfilePageContents({
             filterMode={poemFilterMode}
             setFilterMode={setPoemFilterMode}
             filteredPoems={filteredPoems}
+            setPublic={setPublic}
+            setPrivate={setPrivate}
+            deletePoem={deletePoem}
           />
         ) : (
           <ConnectionsTab
@@ -248,6 +307,9 @@ export default function ProfilePageContents({
                   filterMode={poemFilterMode}
                   setFilterMode={setPoemFilterMode}
                   filteredPoems={filteredPoems}
+                  setPublic={setPublic}
+                  setPrivate={setPrivate}
+                  deletePoem={deletePoem}
                 />
               ) : (
                 <ConnectionsTab
