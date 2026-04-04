@@ -70,6 +70,7 @@ export const getPoems = async (
       const poems = await prisma.poem.findMany({
         where: { authorId },
         include: poemIncludeStatement,
+        orderBy: { createdAt: 'desc' },
       })
       logger.info(
         `Fetched all poems with authorId=${authorId}, count=${poems.length}`
@@ -84,6 +85,7 @@ export const getPoems = async (
           isPublic: true,
         },
         include: poemIncludeStatement,
+        orderBy: { createdAt: 'desc' },
       })
       logger.info(
         `Fetched all public poems with authorId=${authorId}, count=${poems.length}`
