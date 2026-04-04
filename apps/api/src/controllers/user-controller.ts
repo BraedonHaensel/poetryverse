@@ -1,9 +1,13 @@
 import { Prisma, RoleEnum } from '@prisma/client'
+import { randomUUID } from 'crypto'
 import type { Request, Response } from 'express'
+import fs from 'fs/promises'
+import path from 'path'
 
 import { prisma } from '../lib/db'
 import { badRequest, conflict, forbidden, notFound } from '../lib/http-errors'
 import { logger } from '../lib/logger'
+import { getImageExtension, getUploadDirectoryPath } from '../lib/utils'
 import type { AuthRequest, OptionalAuthRequest } from '../middleware/auth'
 import {
   deleteUserRequest,
@@ -17,6 +21,8 @@ import {
   updateRoleRequestParams,
   updateUserInfoRequest,
 } from '../schemas/user-schemas'
+
+const IMAGES_PATH_PREFIX = '/images'
 
 // Standardized prisma select statement for getting a user.
 const SELECT_USER_STATEMENT = {
@@ -425,6 +431,64 @@ export const updateRole = async (req: AuthRequest, res: Response) => {
   )
 
   return res.status(200).json({ data: updatedUser })
+}
+
+/**
+ * Updates the authenticated user's profile picture.
+ * @param req Authenticated Express request with multipart `image` file already parsed/validated by middleware.
+ * @param res Express response object.
+ * @returns A 200 response containing the persisted public image URL.
+ * @throws {HttpError} 404 if the authenticated user no longer exists.
+ */
+export const updateMyProfilePicture = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  const userId = req.auth.userId
+  const file = (req as Request & { file: Express.Multer.File }).file
+
+  const existingUser = await getAndValidateUser(userId)
+
+  const extension = getImageExtension(file.mimetype)
+  const fileName = `${userId}-${randomUUID()}.${extension}`
+  const uploadDirectoryPath = getUploadDirectoryPath()
+  const imageFilePath = path.join(uploadDirectoryPath, fileName)
+
+  // Make upload directory if it doesn't exist and upload new profile picture.
+  await fs.mkdir(uploadDirectoryPath, { recursive: true })
+  await fs.writeFile(imageFilePath, file.buffer)
+
+  // Update DB with new image url.
+  const imageUrl = `${IMAGES_PATH_PREFIX}/${fileName}`
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      image: imageUrl,
+    },
+  })
+
+  // Cleanup old profile picture if it exists.
+  const oldImageUrl = existingUser.image
+  if (oldImageUrl?.startsWith(IMAGES_PATH_PREFIX)) {
+    const oldImageFileName = path.basename(oldImageUrl)
+    const oldImageFilePath = path.join(uploadDirectoryPath, oldImageFileName)
+
+    if (oldImageFilePath !== imageFilePath) {
+      await fs.unlink(oldImageFilePath).catch(() => {
+        logger.warn(
+          `Could not delete previous profile image userId=${userId} imagePath=${oldImageFilePath}`
+        )
+      })
+    }
+  }
+
+  logger.info(`Updated profile image userId=${userId} imageUrl=${imageUrl}`)
+  return res.status(200).json({
+    data: {
+      image: imageUrl,
+    },
+  })
 }
 
 /**
