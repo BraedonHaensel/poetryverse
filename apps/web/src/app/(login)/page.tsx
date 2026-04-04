@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { ShadowCard } from '@/components/shadow-card'
 import { Separator } from '@/components/ui/separator'
 import { getAuthSession } from '@/lib/nextauth'
+import { cn } from '@/lib/utils'
 
 import { FeaturesCarousel, FeaturesList } from './components/feature-highlights'
 import GoogleSignInButton from './components/google-sign-in-button'
@@ -21,9 +22,14 @@ export default async function Login() {
   const isSettingUsername = session?.user !== undefined
 
   return (
-    <div className="flex flex-1 flex-col gap-8">
+    <>
       {/* Mobile layout */}
-      <div className="flex w-full flex-1 flex-col items-center gap-4 px-10 py-15 md:hidden">
+      <div
+        className={cn(
+          'flex w-full flex-col items-center gap-8 px-10 py-15 md:hidden',
+          isSettingUsername ? 'my-auto' : 'flex-1'
+        )}
+      >
         <div className="flex w-full flex-1 flex-col items-center justify-end gap-8">
           <Image
             src="/feather-logo.svg"
@@ -57,11 +63,9 @@ export default async function Login() {
         </div>
 
         {isSettingUsername ? (
-          <div className="w-full flex-1">
-            <UsernameForm />
-          </div>
+          <UsernameForm className="w-full" />
         ) : (
-          <FeaturesCarousel className="flex-1" />
+          <FeaturesCarousel />
         )}
       </div>
 
@@ -87,9 +91,9 @@ export default async function Login() {
             <FeaturesList />
           </div>
 
-          <div className="relative w-full flex-1">
+          <div className="relative hidden flex-1 min-[935px]:block">
             <Image
-              className="object-contain object-left"
+              className="object-contain"
               src="/poem-writing-hand.svg"
               alt="Hand writing poem"
               loading="eager"
@@ -99,7 +103,7 @@ export default async function Login() {
         </div>
 
         {/* Right column on desktop */}
-        <ShadowCard className="my-auto flex w-full flex-1 flex-col items-center justify-end gap-8 px-10 py-20">
+        <ShadowCard className="my-auto flex w-full flex-col items-center justify-end gap-8 px-10 py-10 min-[870px]:py-20">
           <Image
             src="/feather-logo.svg"
             alt="PoetryVerse logo"
@@ -132,6 +136,6 @@ export default async function Login() {
           )}
         </ShadowCard>
       </div>
-    </div>
+    </>
   )
 }

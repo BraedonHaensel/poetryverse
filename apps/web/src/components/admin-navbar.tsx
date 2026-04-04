@@ -1,6 +1,6 @@
 'use client'
 
-import { Feather } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
@@ -10,11 +10,16 @@ export default function AdminNavbar() {
   const { role } = useAdminUser()
 
   return (
-    <header className="w-full border-b border-black/10 bg-white">
+    <header className="w-full border-b-2 border-black/10 bg-white">
       <div className="mx-auto flex h-16 items-center justify-between px-8">
-        <Link href="/" className="flex items-center gap-4">
-          <Feather size={22} strokeWidth={2} className="text-black" />
-          <span className="pb-1.5 text-2xl font-bold">PoetryVerse</span>
+        <Link href="/" className="flex items-center gap-4" aria-label="Home">
+          <Image
+            src="/feather-logo.svg"
+            alt="PoetryVerse logo"
+            width={30}
+            height={30}
+          />
+          <span className="text-2xl font-extrabold">PoetryVerse</span>
         </Link>
 
         <div className="flex items-center gap-6">
