@@ -9,16 +9,16 @@ import { Button } from '@/components/ui/button'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 
+type Props = {
+  onDeleteAccount: () => Promise<void>
+}
+
 /**
  * Advanced settings form.
  */
-export function AdvancedSettingsForm() {
+export function AdvancedSettingsForm({ onDeleteAccount }: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isDeleteConfrimOpen, setIsDeleteConfirmOpen] = useState<boolean>(false)
-
-  function deleteAccount() {
-    console.log("TODO Delete the user's account and refresh the page.")
-  }
 
   return (
     <>
@@ -27,7 +27,7 @@ export function AdvancedSettingsForm() {
         title="Are you sure you want to delete your account?"
         description="This action cannot be undone."
         onClose={() => setIsDeleteConfirmOpen(false)}
-        onAction={deleteAccount}
+        onAction={onDeleteAccount}
         variant="delete"
       />
       <ShadowCard className="gap-4 p-3">

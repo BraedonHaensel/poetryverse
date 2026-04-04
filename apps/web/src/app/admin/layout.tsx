@@ -1,4 +1,5 @@
 import AdminNavbar from '@/components/admin-navbar'
+import { AdminUserProvider } from '@/context/admin-user-context'
 
 export default function AdminLayout({
   children,
@@ -7,10 +8,12 @@ export default function AdminLayout({
 }) {
   return (
     <div className="flex h-svh min-w-[320px] flex-col">
-      <AdminNavbar />
-      <main className="flex flex-1 flex-col overflow-auto bg-white">
-        {children}
-      </main>
+      <AdminUserProvider>
+        <AdminNavbar />
+        <main className="flex flex-1 flex-col overflow-auto bg-white">
+          {children}
+        </main>
+      </AdminUserProvider>
     </div>
   )
 }

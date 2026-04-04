@@ -15,6 +15,10 @@ COPY packages/database packages/database
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
+# Internal API URL used by Next.js server-side rewrites in Docker
+ARG NEXT_INTERNAL_API_URL
+ENV NEXT_INTERNAL_API_URL=$NEXT_INTERNAL_API_URL
+
 # Generate Prisma client and then build web
 RUN npm run db:generate --workspace=packages/database
 RUN npm run build --workspace=apps/web

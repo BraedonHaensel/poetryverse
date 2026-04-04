@@ -27,17 +27,20 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { api } from '@/lib/api'
 import { ProfilePictureSchema } from '@/schemas/user-settings-schemas'
 
 type Props = {
   imageUrl: string
+  onProfilePictureSubmit: (imageFile: File) => Promise<void>
 }
 
 /**
  * Profile picture form.
  */
-export function ProfilePictureForm({ imageUrl }: Props) {
+export function ProfilePictureForm({
+  imageUrl,
+  onProfilePictureSubmit,
+}: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('')
 
@@ -51,16 +54,7 @@ export function ProfilePictureForm({ imageUrl }: Props) {
 
   // Handle submitting the profile picture change
   async function onSubmit(data: ProfilePictureSchema) {
-    // Use a FormData to handle uploading the profile picture image file
-    const formData = new FormData()
-    formData.append('image', data.imageFile)
-
-    // TODO sent to backend
-    const _ = await api.patch('/TODO', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    await onProfilePictureSubmit(data.imageFile)
     setIsOpen(false)
   }
 
@@ -89,7 +83,7 @@ export function ProfilePictureForm({ imageUrl }: Props) {
         </div>
         <DialogTrigger className="mx-auto w-fit">
           <Image
-            className="rounded-full border-2 hover:cursor-pointer hover:opacity-70"
+            className="aspect-square rounded-full border-2 object-cover hover:cursor-pointer hover:opacity-70"
             src={imageUrl}
             loading="eager"
             alt="Profile picture"
@@ -119,7 +113,7 @@ export function ProfilePictureForm({ imageUrl }: Props) {
                       }}
                     >
                       <Image
-                        className="rounded-full border-2 hover:cursor-pointer hover:opacity-70"
+                        className="aspect-square rounded-full border-2 object-cover hover:cursor-pointer hover:opacity-70"
                         src={
                           imagePreviewUrl ? imagePreviewUrl : '/upload-icon.svg'
                         }

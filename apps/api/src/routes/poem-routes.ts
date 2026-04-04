@@ -2,25 +2,31 @@ import { Router } from 'express'
 
 import {
   createPoem,
+  deletePoem,
   generateAIPoem,
   getDailyPoem,
+  getPoemById,
   getPoems,
   interpretPoem,
   likePoem,
   reportPoem,
   unlikePoem,
+  updatePoem,
 } from '../controllers/poem-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 import {
   CreatePoemRequestSchema,
+  DeletePoemSchema,
+  GetPoemByIdRequestSchema,
   GetPoemsRequestSchema,
   LikePoemRequestSchema,
   PoemAIRequestSchema,
   PoemInterpretRequestSchema,
   ReportPoemRequestSchema,
   UnlikePoemRequestSchema,
+  UpdatePoemParamSchema,
 } from '../schemas/poem-schemas'
 
 const router = Router()
@@ -36,6 +42,15 @@ router.get(
   validate(GetPoemsRequestSchema), 
   asyncHandler(getPoems)
 )
+
+/** GET /api/poems/{id} */
+router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
+
+/** PATCH /api/poems/{id} */
+router.patch('/:id', requireAuth, validate(UpdatePoemParamSchema), asyncHandler(updatePoem))
+
+/** DELETE /api/poems/{id} */
+router.delete('/:id', requireAuth, validate(DeletePoemSchema), asyncHandler(deletePoem))
 
 /** POST /api/poems */
 router.post(
