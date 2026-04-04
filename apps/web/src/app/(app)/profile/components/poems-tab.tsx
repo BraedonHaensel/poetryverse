@@ -12,9 +12,9 @@ type Props = {
   filterMode: PoemFilterMode
   setFilterMode: (filterMode: PoemFilterMode) => void
   filteredPoems: PoemData[]
-  setPublic: (poemid: string) => Promise<void>
-  setPrivate: (poemId: string) => Promise<void>
-  deletePoem: (poemId: string) => Promise<void>
+  onSetPublic: (poemid: string) => void
+  onSetPrivate: (poemId: string) => void
+  onDeletePoem: (poemId: string) => void
 }
 
 /**
@@ -24,7 +24,10 @@ type Props = {
  * @param profileStats Poem, followers, and following users stats.
  * @param filterMode The current poem filter mode.
  * @param setFilterMode Callback to set the poem filter mode.
- * @param poems The filtered list of poems to display.
+ * @param filteredPoems The filtered list of poems to display.
+ * @param onSetPublic Callback to set a poem's visibility to public.
+ * @param onSetPrivate Callback to set a poem's visibility to private.
+ * @param onDeletePoem Callback to delete a poem.
  */
 export default function PoemsTab({
   isMyPage,
@@ -33,9 +36,9 @@ export default function PoemsTab({
   filterMode,
   setFilterMode,
   filteredPoems,
-  setPublic,
-  setPrivate,
-  deletePoem,
+  onSetPublic,
+  onSetPrivate,
+  onDeletePoem,
 }: Props) {
   return (
     <>
@@ -77,9 +80,9 @@ export default function PoemsTab({
         isGuest={isGuest}
         filterMode={filterMode}
         filteredPoems={filteredPoems}
-        setPublic={setPublic}
-        setPrivate={setPrivate}
-        deletePoem={deletePoem}
+        onSetPublic={onSetPublic}
+        onSetPrivate={onSetPrivate}
+        onDeletePoem={onDeletePoem}
       />
     </>
   )

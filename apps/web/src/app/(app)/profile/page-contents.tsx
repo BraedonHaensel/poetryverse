@@ -103,7 +103,7 @@ export default function ProfilePageContents({
     return <PageLoadingIndicator />
 
   /** Sets the visibility of a poem to public. */
-  async function setPublic(poemId: string) {
+  function setPublic(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: true })
       .then(() => {
@@ -122,7 +122,7 @@ export default function ProfilePageContents({
   }
 
   /** Sets the visibility of a poem to private. */
-  async function setPrivate(poemId: string) {
+  function setPrivate(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: false })
       .then(() => {
@@ -141,7 +141,7 @@ export default function ProfilePageContents({
   }
 
   /** Deletes a user's poem */
-  async function deletePoem(poemId: string) {
+  function deletePoem(poemId: string) {
     api
       .delete(`/api/poems/${poemId}`)
       .then(() => {
@@ -265,9 +265,9 @@ export default function ProfilePageContents({
             filterMode={poemFilterMode}
             setFilterMode={setPoemFilterMode}
             filteredPoems={filteredPoems}
-            setPublic={setPublic}
-            setPrivate={setPrivate}
-            deletePoem={deletePoem}
+            onSetPublic={setPublic}
+            onSetPrivate={setPrivate}
+            onDeletePoem={deletePoem}
           />
         ) : (
           <ConnectionsTab
@@ -309,9 +309,9 @@ export default function ProfilePageContents({
                   filterMode={poemFilterMode}
                   setFilterMode={setPoemFilterMode}
                   filteredPoems={filteredPoems}
-                  setPublic={setPublic}
-                  setPrivate={setPrivate}
-                  deletePoem={deletePoem}
+                  onSetPublic={setPublic}
+                  onSetPrivate={setPrivate}
+                  onDeletePoem={deletePoem}
                 />
               ) : (
                 <ConnectionsTab
