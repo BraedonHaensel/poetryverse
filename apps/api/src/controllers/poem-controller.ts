@@ -103,6 +103,9 @@ export const getPoems = async (req: Request, res: Response) => {
   }
 }
 
+//TODO:
+// Test the getpoemsfeed works and is randomized
+
 /**
  * Retrieves public poems with from the database, excluding the requester's poems.
  * @param _req Incoming Express request.
@@ -631,7 +634,7 @@ export const getDailyPoem = async (req: Request, res: Response) => {
  * @returns List of public poems, optionally excluding the specified user's poems.
  */
 const getPublicPoems = async (excludeUserId?: string) => {
-  const constructedWhere: any = { isPublic: true }
+  const constructedWhere: Prisma.PoemWhereInput = { isPublic: true }
   if (excludeUserId) {
     constructedWhere.authorId = { not: excludeUserId }
   }
