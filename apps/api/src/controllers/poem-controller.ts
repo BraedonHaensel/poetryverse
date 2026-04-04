@@ -3,7 +3,12 @@ import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
 import { prisma } from '../lib/db'
-import { badRequest, HttpError, notFound, unauthorized } from '../lib/http-errors'
+import {
+  badRequest,
+  HttpError,
+  notFound,
+  unauthorized,
+} from '../lib/http-errors'
 import { logger } from '../lib/logger'
 import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
@@ -51,10 +56,7 @@ const poemIncludeStatement = {
  * @returns A 200 response containing the list of poems.
  * @throws {HttpError} 404 if a user with the specified authorId does not exist.
  */
-export const getPoems = async (
-  req: Request,
-  res: Response,
-) => {
+export const getPoems = async (req: Request, res: Response) => {
   const authReq = req as OptionalAuthRequest
   const requesterUserId = authReq.auth?.userId
 
@@ -95,13 +97,27 @@ export const getPoems = async (
   } else {
     // If authorId is not provided, return all public poems
     logger.info('Fetching all public poems')
-    const poems = await prisma.poem.findMany({
-      where: { isPublic: true },
-      include: poemIncludeStatement,
-    })
+    const poems = await getPublicPoems()
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
   }
+}
+
+/**
+ * Retrieves public poems with from the database, excluding the requester's poems.
+ * @param _req Incoming Express request.
+ * @param res Express response used to return poems.
+ * @returns A 200 response containing the list of poems.
+ */
+export const getPoemsFeed = async (req: Request, res: Response) => {
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
+
+  logger.info(`Fetching poems feed for userId=${requesterUserId ?? 'guest'}`)
+  const poems = await getPublicPoems(requesterUserId)
+  const shuffledPoems = poems.sort(() => Math.random() - 0.5)
+  logger.info(`Fetched poems feed count=${shuffledPoems.length}`)
+  return res.status(200).json(shuffledPoems)
 }
 
 /**
@@ -141,16 +157,20 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
   const { id: poemId } = req.params as UpdatePoemParamRequest
   const { isPublic } = req.body as UpdatePoemBodyRequest
 
-  const poemData = await validateAndReturnPoem(poemId)  
+  const poemData = await validateAndReturnPoem(poemId)
 
   if (poemData.authorId === requesterUserId) {
-    logger.info(`Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`)
+    logger.info(
+      `Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
+    )
     const updatedPoem = await prisma.poem.update({
       where: { id: poemId },
       data: { isPublic },
       include: poemIncludeStatement,
     })
-    logger.info(`Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`)
+    logger.info(
+      `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
+    )
     return res.status(200).json(updatedPoem)
   }
   throw unauthorized('You do not have permission to update this poem.')
@@ -603,4 +623,20 @@ export const getDailyPoem = async (req: Request, res: Response) => {
   logger.info(`Poem of the day: ${poem.id}`)
 
   return res.status(200).json({ data: poem })
+}
+
+/**
+ * Helper function to get public poems, with optional exclusion of a user's own poems.
+ * @param excludeUserId Optional user ID to exclude poems from.
+ * @returns List of public poems, optionally excluding the specified user's poems.
+ */
+const getPublicPoems = async (excludeUserId?: string) => {
+  const constructedWhere: any = { isPublic: true }
+  if (excludeUserId) {
+    constructedWhere.authorId = { not: excludeUserId }
+  }
+  return await prisma.poem.findMany({
+    where: constructedWhere,
+    include: poemIncludeStatement,
+  })
 }
