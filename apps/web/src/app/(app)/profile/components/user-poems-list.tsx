@@ -1,6 +1,7 @@
 import CreateDropdown from '@/components/create-nav-dropdown'
 import CreateSheet from '@/components/create-nav-sheet'
 import { LargeButton } from '@/components/large-button'
+import OtherUserPoemMenu from '@/components/other-user-poem-menu'
 import { PoemFilterMode } from '@/components/poem-filters'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader } from '@/components/ui/card'
@@ -10,6 +11,7 @@ import { cn } from '@/lib/utils'
 type Props = {
   className?: string
   isMyPage: boolean
+  isGuest: boolean
   filterMode: PoemFilterMode
   filteredPoems: PoemData[]
   setPublic: (poemid: string) => Promise<void>
@@ -21,12 +23,14 @@ type Props = {
  * Displays a list of a user's poems.
  * @param className Optional additional className values to apply.
  * @param isMyPage Whether the user is viewing their own page.
+ * @param isGuest Whether the current user is a guest.
  * @param filterMode The current poem filter mode.
  * @param poems The filtered list of poems to display.
  */
 export default function UserPoemsList({
   className,
   isMyPage,
+  isGuest,
   filterMode,
   filteredPoems,
   setPublic,
@@ -108,7 +112,8 @@ export default function UserPoemsList({
               </button>
             </>
           ) : (
-            <p>TODO: Translate, Interpret, Report *same as home page*</p>
+            // Display the poem menu to registered users
+            !isGuest && <OtherUserPoemMenu poem={poem} />
           )}
         </ShadowCard>
       ))}

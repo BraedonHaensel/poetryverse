@@ -7,6 +7,7 @@ import UserPoemsList from './user-poems-list'
 
 type Props = {
   isMyPage: boolean
+  isGuest: boolean
   profileStats: ProfileStat[]
   filterMode: PoemFilterMode
   setFilterMode: (filterMode: PoemFilterMode) => void
@@ -19,6 +20,7 @@ type Props = {
 /**
  * Poems tab contents.
  * @param isMyPage Whether the user is viewing their own page.
+ * @param isGuest Whether the current user is a guest.
  * @param profileStats Poem, followers, and following users stats.
  * @param filterMode The current poem filter mode.
  * @param setFilterMode Callback to set the poem filter mode.
@@ -26,6 +28,7 @@ type Props = {
  */
 export default function PoemsTab({
   isMyPage,
+  isGuest,
   profileStats,
   filterMode,
   setFilterMode,
@@ -71,6 +74,7 @@ export default function PoemsTab({
       <UserPoemsList
         className="m-2 mt-0 md:m-0 md:mx-0 md:gap-4 xl:grid-cols-2"
         isMyPage={isMyPage}
+        isGuest={isGuest}
         filterMode={filterMode}
         filteredPoems={filteredPoems}
         setPublic={setPublic}

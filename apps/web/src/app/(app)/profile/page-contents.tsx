@@ -260,6 +260,7 @@ export default function ProfilePageContents({
         {pageTab === 'MY_POEMS' ? (
           <PoemsTab
             isMyPage={isMyPage}
+            isGuest={isGuest}
             profileStats={profileStats}
             filterMode={poemFilterMode}
             setFilterMode={setPoemFilterMode}
@@ -303,6 +304,7 @@ export default function ProfilePageContents({
               {pageTab === 'MY_POEMS' ? (
                 <PoemsTab
                   isMyPage={isMyPage}
+                  isGuest={isGuest}
                   profileStats={profileStats}
                   filterMode={poemFilterMode}
                   setFilterMode={setPoemFilterMode}
