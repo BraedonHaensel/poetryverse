@@ -44,45 +44,12 @@ router.get(
   asyncHandler(getPoems)
 )
 
-/** GET /api/poems/{id} */
-router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
-
-/** PATCH /api/poems/{id} */
-router.patch('/:id', requireAuth, validate(UpdatePoemParamSchema), asyncHandler(updatePoem))
-
-/** DELETE /api/poems/{id} */
-router.delete('/:id', requireAuth, validate(DeletePoemSchema), asyncHandler(deletePoem))
-
 /** POST /api/poems */
 router.post(
   '/',
   requireAuth,
   validate(CreatePoemRequestSchema),
   asyncHandler(createPoem)
-)
-
-/** GET /api/poems/{id} */
-router.get(
-  '/:id',
-  optionalAuth,
-  validate(GetPoemByIdRequestSchema),
-  asyncHandler(getPoemById)
-)
-
-/** PATCH /api/poems/{id} */
-router.patch(
-  '/:id',
-  requireAuth,
-  validate(UpdatePoemParamSchema),
-  asyncHandler(updatePoem)
-)
-
-/** DELETE /api/poems/{id} */
-router.delete(
-  '/:id',
-  requireAuth,
-  validate(DeletePoemSchema),
-  asyncHandler(deletePoem)
 )
 
 /** GET /api/poems/feed */
@@ -129,6 +96,31 @@ router.post(
   requireAuth,
   validate(ReportPoemRequestSchema),
   asyncHandler(reportPoem)
+)
+
+// Note: Express routes are matched in order, so these should be after more specific routes like /feed and /generate
+/** GET /api/poems/{id} */
+router.get(
+  '/:id',
+  optionalAuth,
+  validate(GetPoemByIdRequestSchema),
+  asyncHandler(getPoemById)
+)
+
+/** PATCH /api/poems/{id} */
+router.patch(
+  '/:id',
+  requireAuth,
+  validate(UpdatePoemParamSchema),
+  asyncHandler(updatePoem)
+)
+
+/** DELETE /api/poems/{id} */
+router.delete(
+  '/:id',
+  requireAuth,
+  validate(DeletePoemSchema),
+  asyncHandler(deletePoem)
 )
 
 export default router

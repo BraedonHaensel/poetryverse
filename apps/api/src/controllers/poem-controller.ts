@@ -103,9 +103,6 @@ export const getPoems = async (req: Request, res: Response) => {
   }
 }
 
-//TODO:
-// Test the getpoemsfeed works and is randomized
-
 /**
  * Retrieves public poems with from the database, excluding the requester's poems.
  * @param _req Incoming Express request.
