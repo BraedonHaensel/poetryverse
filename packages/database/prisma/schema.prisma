@@ -97,8 +97,9 @@ enum ReportStatus {
 
 enum PoemApprovalStatus {
   PENDING
-  APPROVED
+  UNCHECKED
   ADMIN_REVIEW
+  APPROVED
 }
 
 // Main poem content authored by a user, including metadata and relations.

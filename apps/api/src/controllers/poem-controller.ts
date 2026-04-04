@@ -1,5 +1,4 @@
-import { Prisma, ReasonType, RoleEnum } from '@prisma/client'
-import damerauLevenshtein from 'damerau-levenshtein'
+import { Prisma, RoleEnum } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
@@ -12,16 +11,18 @@ import {
   unauthorized,
 } from '../lib/http-errors'
 import { logger } from '../lib/logger'
+import { runPoemCreationPipeline } from '../lib/poem-detection-service'
 import { getErrorStatus } from '../lib/utils'
-import {
-  mapCreatePoemRequestToPrismaInput,
-  normalizePoemBody,
-} from '../mappers/poem-mapper'
+import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import {
   type AuthRequest,
   hasRole,
   type OptionalAuthRequest,
 } from '../middleware/auth'
+import {
+  PoemAIResponseSchema,
+  PoemInterpretResponseSchema,
+} from '../schemas/gemini-response-schemas'
 import {
   CreatePoemRequest,
   DeletePoemRequest,
@@ -29,22 +30,13 @@ import {
   GetPoemsRequest,
   LikePoemRequest,
   PoemAIRequest,
-  PoemAIResponseSchema,
   PoemInterpretRequest,
-  PoemInterpretResponseSchema,
-  PoemPlagiarismTriageResponse,
-  PoemPlagiarismTriageResponseSchema,
   ReportPoemRequest,
   UnlikePoemRequest,
   UpdatePoemBodyRequest,
   UpdatePoemParamRequest,
 } from '../schemas/poem-schemas'
 import { validateUserExists } from './user-controller'
-
-const PLAGIARISM_SIMILARITY_THRESHOLD = 0.8
-const GEMINI_PLAGIARISM_REPORT_THRESHOLD = 0.7
-const GEMINI_PLAGIARISM_REPORT_CONFIDENCE_THRESHOLD = 0.6
-const AUTO_REPORT_REASON_MAX_LENGTH = 200
 
 // Include statement for fetching poems from the database with Prisma.
 const poemIncludeStatement = {
@@ -59,7 +51,7 @@ const poemIncludeStatement = {
       },
     },
   },
-}
+} satisfies Prisma.PoemInclude
 
 /**
  * Retrieves poems with from the database and returns them as JSON.
@@ -223,34 +215,57 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     validateAndReturnPoemTags(poemData.tagIds),
   ])
 
-  // Check for plagiarism against existing poems.
-  const plagiarismResult = await detectPlagiarism(poemData.poem)
-  if (plagiarismResult) {
-    logger.info(
-      `Plagiarism check for userId=${req.auth.userId} bestMatchPoemId=${plagiarismResult.poemId} similarity=${plagiarismResult.similarity.toFixed(3)}`
-    )
-  }
+  const pipelineResult = await runPoemCreationPipeline({
+    poemBody: poemData.poem,
+    isPublic: poemData.publicVisibility,
+    createPoem: ({
+      approvalStatus,
+      plagiarismLikelihoodScore,
+      aiLikelihoodScore,
+    }) =>
+      prisma.poem.create({
+        data: mapCreatePoemRequestToPrismaInput({
+          authorId: req.auth.userId,
+          data: poemData,
+          tagIds: existingTags.map((tag) => tag.id),
+          approvalStatus,
+          plagiarismLikelihoodScore,
+          aiLikelihoodScore,
+        }),
+        include: poemIncludeStatement,
+      }),
+  })
 
-  if (
-    plagiarismResult &&
-    plagiarismResult.similarity >= PLAGIARISM_SIMILARITY_THRESHOLD
-  ) {
+  if (pipelineResult.outcome === 'blocked_internal_plagiarism') {
+    const { match, threshold } = pipelineResult.similarity
     logger.warn(
-      `Blocked poem creation for userId=${req.auth.userId} due to plagiarism risk matchedPoemId=${plagiarismResult.poemId} similarity=${plagiarismResult.similarity.toFixed(3)}`
+      `Blocked poem creation for userId=${req.auth.userId} due to plagiarism risk matchedPoemId=${match.poemId} similarity=${match.similarity.toFixed(3)}`
     )
+
     throw conflict(
       'Poem failed plagiarism check.',
       {
-        similarity: plagiarismResult.similarity,
-        threshold: PLAGIARISM_SIMILARITY_THRESHOLD,
-        matchedPoemId: plagiarismResult.poemId,
-        matchedPoemTitle: plagiarismResult.title,
+        similarity: match.similarity,
+        threshold,
+        matchedPoemId: match.poemId,
+        matchedPoemTitle: match.title,
       },
       'This poem appears too similar to an existing poem. Please revise and try again.'
     )
   }
 
-  const plagiarismTriage = await triagePlagiarismWithGemini(poemData.poem)
+  const {
+    createdPoem,
+    plagiarismSimilarityMatch,
+    plagiarismTriage,
+    createdReport,
+  } = pipelineResult
+
+  if (plagiarismSimilarityMatch) {
+    logger.info(
+      `Plagiarism check for userId=${req.auth.userId} bestMatchPoemId=${plagiarismSimilarityMatch.poemId} similarity=${plagiarismSimilarityMatch.similarity.toFixed(3)}`
+    )
+  }
 
   if (plagiarismTriage) {
     logger.info(
@@ -258,55 +273,13 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     )
   }
 
-  // Create the poem.
-  const createdPoem = await prisma.poem.create({
-    data: mapCreatePoemRequestToPrismaInput({
-      authorId: req.auth.userId,
-      data: poemData,
-      tagIds: existingTags.map((tag) => tag.id),
-    }),
-    include: poemIncludeStatement,
-  })
-
   logger.info(
-    `Created poem id=${createdPoem.id} userId=${req.auth.userId} typeId=${createdPoem.typeId} tagCount=${createdPoem.poemTags.length}`
+    `Created poem id=${createdPoem.id} userId=${req.auth.userId} typeId=${createdPoem.typeId} status=${createdPoem.approvalStatus}`
   )
 
-  if (plagiarismTriage && shouldAutoCreatePlagiarismReport(plagiarismTriage)) {
-    const reportReason = plagiarismTriage.reason
-      .slice(0, AUTO_REPORT_REASON_MAX_LENGTH)
-      .trim()
-
-    const sourceSummary = plagiarismTriage.possibleSources
-      .slice(0, 3)
-      .map(
-        (source) =>
-          `${source.title} (${source.url}) similarity=${source.similarityEstimate.toFixed(2)}`
-      )
-      .join(' | ')
-
-    const adminNote = [
-      `Auto-generated from Gemini plagiarism triage.`,
-      `likelihood=${plagiarismTriage.plagiarismLikelihood.toFixed(3)} confidence=${plagiarismTriage.confidence.toFixed(3)} recommendation=${plagiarismTriage.reviewRecommendation}`,
-      plagiarismTriage.notesForAdmin,
-      sourceSummary ? `possibleSources=${sourceSummary}` : undefined,
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    const createdReport = await prisma.report.create({
-      data: {
-        reporterUserId: null,
-        poemId: createdPoem.id,
-        reasonType: ReasonType.PLAGIARISM,
-        reason:
-          reportReason || 'Potential plagiarism flagged by automated triage.',
-        adminNote,
-      },
-    })
-
+  if (createdReport) {
     logger.warn(
-      `Auto-created plagiarism reportId=${createdReport.id} for poemId=${createdPoem.id} likelihood=${plagiarismTriage.plagiarismLikelihood.toFixed(3)}`
+      `Auto-created reportId=${createdReport.id} reasonType=${createdReport.reasonType} for poemId=${createdPoem.id}`
     )
   }
 
@@ -597,107 +570,6 @@ const validateAndReturnPoem = async (poemId: string) => {
     throw notFound('Invalid poem ID')
   }
   return poem
-}
-
-/** Finds the most similar existing poem using Damerau-Levenshtein similarity. */
-const detectPlagiarism = async (poemBody: string) => {
-  const normalizedBody = normalizePoemBody(poemBody)
-
-  const existingPoems = await prisma.poem.findMany({
-    select: {
-      id: true,
-      title: true,
-      normalizedBody: true,
-    },
-  })
-
-  if (existingPoems.length === 0) {
-    return null
-  }
-
-  let bestMatch: {
-    poemId: string
-    title: string
-    similarity: number
-  } | null = null
-
-  for (const poem of existingPoems) {
-    const normalizedExistingBody = String(poem.normalizedBody ?? '')
-    const result = damerauLevenshtein(normalizedBody, normalizedExistingBody)
-    const similarity = result.similarity
-
-    if (!bestMatch || similarity > bestMatch.similarity) {
-      bestMatch = {
-        poemId: poem.id,
-        title: poem.title,
-        similarity,
-      }
-    }
-  }
-
-  return bestMatch
-}
-
-const addLineNumbersToPoem = (poemBody: string) =>
-  poemBody
-    .split('\n')
-    .map((line, index) => `${index + 1}: ${line}`)
-    .join('\n')
-
-const shouldAutoCreatePlagiarismReport = (
-  triage: PoemPlagiarismTriageResponse
-) =>
-  triage.plagiarismLikelihood >= GEMINI_PLAGIARISM_REPORT_THRESHOLD &&
-  triage.confidence >= GEMINI_PLAGIARISM_REPORT_CONFIDENCE_THRESHOLD
-
-const triagePlagiarismWithGemini = async (poemBody: string) => {
-  const poemWithLineNumbers = addLineNumbersToPoem(poemBody)
-
-  const prompt = `You are assisting with plagiarism triage for a poetry platform.
-
-Your task is NOT to make a final accusation of plagiarism.
-Your task is to estimate whether the poem should be sent for human review.
-
-Evaluate the poem for:
-1. unusually specific or distinctive phrasing,
-2. repeated uncommon phrases that may indicate copying,
-3. suspicious similarity to known poetic language or published text,
-4. signs of paraphrased reuse,
-5. whether the poem appears original but generic.
-
-Important rules:
-- Return valid JSON only.
-- plagiarismLikelihood must be a number from 0.0 to 1.0.
-- confidence must be a number from 0.0 to 1.0.
-- Use "allow" only when there is low concern.
-- Use "review" when there is moderate to high concern or uncertainty.
-- Do not claim certainty unless there is strong evidence.
-- Prefer conservative triage: when unsure, recommend review rather than accusation.
-- If grounded web results are available, include plausible sources in possibleSources.
-- If no plausible sources are found, leave possibleSources empty.
-
-The poem is provided with line numbers.
-
-Poem:
-${poemWithLineNumbers}`
-
-  try {
-    return await generateGeminiJSONResponse(
-      prompt,
-      PoemPlagiarismTriageResponseSchema
-    )
-  } catch (err: unknown) {
-    const status = getErrorStatus(err)
-    if (status === 429) {
-      logger.warn('Gemini plagiarism triage rate limited; skipping triage.')
-      return null
-    }
-
-    logger.warn(
-      `Gemini plagiarism triage failed; skipping triage. ${String(err)}`
-    )
-    return null
-  }
 }
 
 /** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
