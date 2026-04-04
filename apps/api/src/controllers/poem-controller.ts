@@ -26,7 +26,6 @@ import {
 import { validateUserExists } from './user-controller'
 
 const PLAGIARISM_SIMILARITY_THRESHOLD = 0.8
-const PLAGIARISM_MIN_BODY_LENGTH = 0
 
 // Include statement for fetching poems from the database with Prisma.
 const poemIncludeStatement = {
@@ -449,10 +448,6 @@ const validateAndReturnPoem = async (poemId: string) => {
 /** Finds the most similar existing poem using Damerau-Levenshtein similarity. */
 const detectPlagiarism = async (poemBody: string) => {
   const normalizedBody = normalizePoemBody(poemBody)
-
-  if (normalizedBody.length < PLAGIARISM_MIN_BODY_LENGTH) {
-    return null
-  }
 
   const existingPoems = await prisma.poem.findMany({
     select: {

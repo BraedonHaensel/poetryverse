@@ -105,7 +105,7 @@ model Poem {
   isAIAssisted      Boolean    @default(false) // True if AI was used to help create poem.
   aiLikelihoodScore Float? // Optional score from moderation/AI detection workflow.
   body              String
-  normalizedBody    String // Normmalized poem body string for internal plagiarism checking.
+  normalizedBody    String // Normalized poem body string for internal plagiarism checking.
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
