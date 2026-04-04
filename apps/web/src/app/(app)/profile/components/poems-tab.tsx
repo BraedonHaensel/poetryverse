@@ -11,6 +11,9 @@ type Props = {
   filterMode: PoemFilterMode
   setFilterMode: (filterMode: PoemFilterMode) => void
   filteredPoems: PoemData[]
+  setPublic: (poemid: string) => Promise<void>
+  setPrivate: (poemId: string) => Promise<void>
+  deletePoem: (poemId: string) => Promise<void>
 }
 
 /**
@@ -27,6 +30,9 @@ export default function PoemsTab({
   filterMode,
   setFilterMode,
   filteredPoems,
+  setPublic,
+  setPrivate,
+  deletePoem,
 }: Props) {
   return (
     <>
@@ -67,6 +73,9 @@ export default function PoemsTab({
         isMyPage={isMyPage}
         filterMode={filterMode}
         filteredPoems={filteredPoems}
+        setPublic={setPublic}
+        setPrivate={setPrivate}
+        deletePoem={deletePoem}
       />
     </>
   )
