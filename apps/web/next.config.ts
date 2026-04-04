@@ -24,9 +24,20 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      // Proxy to get profile images from the api.
       {
         source: '/images/:path*',
         destination: `${internalApiUrl.origin}/images/:path*`,
+      },
+      // Keep NextAuth routes on the Next.js app.
+      {
+        source: '/api/auth/:path*',
+        destination: '/api/auth/:path*',
+      },
+      // Proxy all other API routes to the backend service.
+      {
+        source: '/api/:path*',
+        destination: `${internalApiUrl.origin}/api/:path*`,
       },
     ]
   },
