@@ -114,7 +114,7 @@ export const PoemPlagiarismTriageResponseSchema = z.object({
     .describe(
       'A score from 0.0 to 1.0 for confidence in the plagiarism estimate.'
     ),
-  reviewRecommendation: z.enum(['allow', 'review', 'high_priority_review']),
+  reviewRecommendation: z.enum(['allow', 'review']),
   reason: z.string(),
   suspiciousPassages: z.array(
     z.object({

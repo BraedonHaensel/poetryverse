@@ -670,8 +670,7 @@ Important rules:
 - plagiarismLikelihood must be a number from 0.0 to 1.0.
 - confidence must be a number from 0.0 to 1.0.
 - Use "allow" only when there is low concern.
-- Use "review" when there is moderate concern or uncertainty.
-- Use "high_priority_review" when there are strong signs of copied language or likely matching sources.
+- Use "review" when there is moderate to high concern or uncertainty.
 - Do not claim certainty unless there is strong evidence.
 - Prefer conservative triage: when unsure, recommend review rather than accusation.
 - If grounded web results are available, include plausible sources in possibleSources.

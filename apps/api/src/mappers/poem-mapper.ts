@@ -1,3 +1,5 @@
+import { PoemApprovalStatus } from '@prisma/client'
+
 import { CreatePoemRequest } from '../schemas/poem-schemas'
 
 /** Normalizes poem text. */
@@ -25,6 +27,7 @@ export const mapCreatePoemRequestToPrismaInput = ({
   typeId: data.typeId,
   isPublic: data.publicVisibility,
   isAIAssisted: data.createdWithAI,
+  approvalStatus: PoemApprovalStatus.APPROVED,
   body: data.poem,
   normalizedBody: normalizePoemBody(data.poem),
   poemTags: {
