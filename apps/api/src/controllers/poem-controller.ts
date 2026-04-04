@@ -104,13 +104,27 @@ export const getPoems = async (req: Request, res: Response) => {
   } else {
     // If authorId is not provided, return all public poems
     logger.info('Fetching all public poems')
-    const poems = await prisma.poem.findMany({
-      where: { isPublic: true },
-      include: poemIncludeStatement,
-    })
+    const poems = await getPublicPoems()
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
   }
+}
+
+/**
+ * Retrieves public poems with from the database, excluding the requester's poems.
+ * @param _req Incoming Express request.
+ * @param res Express response used to return poems.
+ * @returns A 200 response containing the list of poems.
+ */
+export const getPoemsFeed = async (req: Request, res: Response) => {
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
+
+  logger.info(`Fetching poems feed for userId=${requesterUserId ?? 'guest'}`)
+  const poems = await getPublicPoems(requesterUserId)
+  const shuffledPoems = poems.sort(() => Math.random() - 0.5)
+  logger.info(`Fetched poems feed count=${shuffledPoems.length}`)
+  return res.status(200).json(shuffledPoems)
 }
 
 /**
@@ -682,4 +696,20 @@ export const getDailyPoem = async (req: Request, res: Response) => {
   logger.info(`Poem of the day: ${poem.id}`)
 
   return res.status(200).json({ data: poem })
+}
+
+/**
+ * Helper function to get public poems, with optional exclusion of a user's own poems.
+ * @param excludeUserId Optional user ID to exclude poems from.
+ * @returns List of public poems, optionally excluding the specified user's poems.
+ */
+const getPublicPoems = async (excludeUserId?: string) => {
+  const constructedWhere: Prisma.PoemWhereInput = { isPublic: true }
+  if (excludeUserId) {
+    constructedWhere.authorId = { not: excludeUserId }
+  }
+  return await prisma.poem.findMany({
+    where: constructedWhere,
+    include: poemIncludeStatement,
+  })
 }
