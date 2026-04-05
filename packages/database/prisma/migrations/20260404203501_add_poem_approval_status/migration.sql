@@ -5,7 +5,7 @@
 
 */
 -- CreateEnum
-CREATE TYPE "PoemApprovalStatus" AS ENUM ('PENDING', 'APPROVED', 'ADMIN_REVIEW');
+CREATE TYPE "PoemApprovalStatus" AS ENUM ('PENDING', 'UNCHECKED', 'APPROVED', 'ADMIN_REVIEW');
 
 -- AlterTable
 ALTER TABLE "Poem" ADD COLUMN     "approvalStatus" "PoemApprovalStatus" NOT NULL,
