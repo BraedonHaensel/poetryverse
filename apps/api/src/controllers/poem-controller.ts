@@ -182,9 +182,16 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
   logger.info(
     `Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
   )
+  const existingPoemStatus = existingPoem.approvalStatus
   const updatedPoem = await prisma.poem.update({
     where: { id: poemId },
-    data: { isPublic },
+    data: {
+      isPublic,
+      approvalStatus:
+        isPublic && existingPoemStatus === PoemApprovalStatus.UNCHECKED
+          ? PoemApprovalStatus.PENDING
+          : existingPoemStatus,
+    },
     include: POEM_INCLUDE_STATEMENT,
   })
   logger.info(
