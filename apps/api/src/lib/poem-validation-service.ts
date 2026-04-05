@@ -68,10 +68,10 @@ Poem: `
 // Thresholds for AI and plagiarism detection.
 export const POEM_DETECTION_THRESHOLDS = {
   internalPlagiarism: 0.8,
-  plagiarismGeminiLikelihood: 0.7,
-  plagiarismGeminiConfidence: 0.6,
-  aiGeminiLikelihood: 0.7,
-  aiGeminiConfidence: 0.6,
+  plagiarismGeminiLikelihood: 0.8,
+  plagiarismGeminiConfidence: 0.7,
+  aiGeminiLikelihood: 0.8,
+  aiGeminiConfidence: 0.7,
 } as const
 
 export interface PoemPlagiarismSimilarityMatch {
@@ -80,11 +80,19 @@ export interface PoemPlagiarismSimilarityMatch {
   similarity: number
 }
 
-/** Finds the most similar existing poem using Damerau-Levenshtein similarity. */
+/**
+ * Finds the most similar existing poem in the database using Damerau-Levenshtein similarity.
+ * @param poemBody Raw poem body submitted by a user.
+ * @returns The best similarity match if at least one poem exists; otherwise `null`.
+ */
 export const detectInternalPlagiarism = async (
   poemBody: string
 ): Promise<PoemPlagiarismSimilarityMatch | null> => {
+  const startedAt = Date.now()
   const normalizedBody = normalizePoemBody(poemBody)
+  logger.info(
+    `Running internal plagiarism scan normalizedBodyLength=${normalizedBody.length}`
+  )
 
   const existingPoems = await prisma.poem.findMany({
     select: {
@@ -110,67 +118,102 @@ export const detectInternalPlagiarism = async (
     }
   }
 
+  if (bestMatch) {
+    logger.info(
+      `Internal plagiarism scan complete existingPoemCount=${existingPoems.length} bestMatchPoemId=${bestMatch.poemId} similarity=${bestMatch.similarity.toFixed(3)} durationMs=${Date.now() - startedAt}`
+    )
+  } else {
+    logger.info(
+      `Internal plagiarism scan complete existingPoemCount=0 durationMs=${Date.now() - startedAt}`
+    )
+  }
+
   return bestMatch
 }
 
+/** Adds line numbers to each line in the provided poem body for model prompting. */
 const addLineNumbersToPoem = (poemBody: string) =>
   poemBody
     .split('\n')
     .map((line, index) => `${index + 1}: ${line}`)
     .join('\n')
 
-/** Uses Gemini to estimate whether a poem should be flagged for plagiarism review. */
-export const triagePoemPlagiarismWithAI = async (
+/**
+ * Uses Gemini to estimate whether a poem should be routed for plagiarism-focused admin review.
+ * @param poemBody Raw poem body to triage.
+ * @returns A structured triage response, or `null` when triage is skipped due to rate limit/errors.
+ */
+const triagePoemPlagiarismWithAI = async (
   poemBody: string
 ): Promise<PoemPlagiarismTriageResponse | null> => {
+  const startedAt = Date.now()
   const poemWithLineNumbers = addLineNumbersToPoem(poemBody)
+  logger.info(`Starting Gemini plagiarism triage poemLength=${poemBody.length}`)
 
   const prompt = PLAGIARISM_PROMPT + poemWithLineNumbers
 
   try {
-    return await generateGeminiJSONResponse(
+    const triage = await generateGeminiJSONResponse(
       prompt,
       PoemPlagiarismTriageResponseSchema
     )
+    logger.info(
+      `Gemini plagiarism triage complete likelihood=${triage.plagiarismLikelihood.toFixed(3)} confidence=${triage.confidence.toFixed(3)} suspiciousPassagesCount=${triage.suspiciousPassages.length} durationMs=${Date.now() - startedAt}`
+    )
+    return triage
   } catch (err: unknown) {
     const status = getErrorStatus(err)
     if (status === 429) {
-      logger.warn('Gemini plagiarism triage rate limited; skipping triage.')
+      logger.warn(
+        `Gemini plagiarism triage rate limited; skipping triage. durationMs=${Date.now() - startedAt}`
+      )
       return null
     }
 
     logger.warn(
-      `Gemini plagiarism triage failed; skipping triage. ${String(err)}`
+      `Gemini plagiarism triage failed; skipping triage. durationMs=${Date.now() - startedAt} error=${String(err)}`
     )
     return null
   }
 }
 
+/** Uses Gemini to estimate whether a poem appears likely AI-authored. */
 const detectPoemAIAuthorshipWithGemini = async (
   poemBody: string
 ): Promise<PoemAIDetectionResponse | null> => {
+  const startedAt = Date.now()
   const poemWithLineNumbers = addLineNumbersToPoem(poemBody)
+  logger.info(
+    `Starting Gemini AI-authorship triage poemLength=${poemBody.length}`
+  )
   const prompt = AI_DETECTION_PROMPT + poemWithLineNumbers
 
   try {
-    return await generateGeminiJSONResponse(
+    const detection = await generateGeminiJSONResponse(
       prompt,
       PoemAIDetectionResponseSchema
     )
+    logger.info(
+      `Gemini AI-authorship triage complete likelihood=${detection.aiLikelihood.toFixed(3)} confidence=${detection.confidence.toFixed(3)} suspiciousPassagesCount=${detection.suspiciousPassages.length} durationMs=${Date.now() - startedAt}`
+    )
+    return detection
   } catch (err: unknown) {
     const status = getErrorStatus(err)
     if (status === 429) {
-      logger.warn('Gemini AI-authorship triage rate limited; skipping triage.')
+      logger.warn(
+        `Gemini AI-authorship triage rate limited; skipping triage. durationMs=${Date.now() - startedAt}`
+      )
       return null
     }
 
     logger.warn(
-      `Gemini AI-authorship triage failed; skipping triage. ${String(err)}`
+      `Gemini AI-authorship triage failed; skipping triage. durationMs=${Date.now() - startedAt} error=${String(err)}`
     )
     return null
   }
 }
 
+/** Builds a moderator-facing reason string for plagiarism auto-reports. */
 const buildPlagiarismAutoReportReason = (
   triage: PoemPlagiarismTriageResponse
 ) => {
@@ -209,6 +252,7 @@ const buildPlagiarismAutoReportReason = (
     : 'Potential plagiarism flagged by automated triage.'
 }
 
+/** Builds a moderator-facing reason string for AI-authorship auto-reports. */
 const buildAIAutoReportReason = (detection: PoemAIDetectionResponse) => {
   const suspiciousPassagesSummary = detection.suspiciousPassages
     .slice(0, 3)
@@ -236,6 +280,7 @@ const buildAIAutoReportReason = (detection: PoemAIDetectionResponse) => {
     : 'Potential AI-generated content flagged by automated triage.'
 }
 
+/** Persists an automated moderation report for a poem. */
 const createAutoReport = async ({
   poemId,
   reasonType,
@@ -245,7 +290,8 @@ const createAutoReport = async ({
   reasonType: ReasonType
   reason: string
 }) => {
-  return prisma.report.create({
+  logger.info(`Creating auto-report poemId=${poemId} reasonType=${reasonType}`)
+  const createdReport = await prisma.report.create({
     data: {
       reporterUserId: null,
       poemId,
@@ -253,24 +299,46 @@ const createAutoReport = async ({
       reason,
     },
   })
+
+  logger.info(
+    `Created auto-report reportId=${createdReport.id} poemId=${poemId} reasonType=${reasonType}`
+  )
+
+  return createdReport
 }
 
+/** Returns whether plagiarism triage exceeds configured review thresholds. */
 const shouldFlagPlagiarismTriage = (triage: PoemPlagiarismTriageResponse) =>
   triage.plagiarismLikelihood >=
     POEM_DETECTION_THRESHOLDS.plagiarismGeminiLikelihood &&
   triage.confidence >= POEM_DETECTION_THRESHOLDS.plagiarismGeminiConfidence
 
+/** Returns whether AI-authorship triage exceeds configured review thresholds. */
 const shouldFlagAIDetection = (triage: PoemAIDetectionResponse) =>
   triage.aiLikelihood >= POEM_DETECTION_THRESHOLDS.aiGeminiLikelihood &&
   triage.confidence >= POEM_DETECTION_THRESHOLDS.aiGeminiConfidence
 
+/**
+ * Runs the full moderation validation pipeline for a poem and updates its approval status.
+ * @param poem The poem row to validate.
+ * @returns Resolves when validation and persistence complete, or immediately when skipped.
+ * @throws {Error} Propagates database/model errors from report creation or poem updates.
+ */
 export const runPoemValidationPipeline = async (poem: Poem) => {
+  const startedAt = Date.now()
+  logger.info(
+    `Starting poem validation pipeline poemId=${poem.id} isPublic=${poem.isPublic} approvalStatus=${poem.approvalStatus} isAIAssisted=${poem.isAIAssisted}`
+  )
+
   const isPendingOrUnchecked =
     poem.approvalStatus === PoemApprovalStatus.PENDING ||
     poem.approvalStatus === PoemApprovalStatus.UNCHECKED
 
   if (!poem.isPublic || !isPendingOrUnchecked) {
     // Don't run the validation pipeline if the poem is private or has already been finalized.
+    logger.info(
+      `Skipping poem validation pipeline poemId=${poem.id} reason=${!poem.isPublic ? 'not_public' : 'already_finalized'}`
+    )
     return poem
   }
 
@@ -279,11 +347,16 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
   // Run external plagiarism check with Gemini.
   const plagiarismTriage = await triagePoemPlagiarismWithAI(poem.body)
   if (plagiarismTriage && shouldFlagPlagiarismTriage(plagiarismTriage)) {
+    logger.info(
+      `Poem flagged for plagiarism auto-report poemId=${poem.id} likelihood=${plagiarismTriage.plagiarismLikelihood.toFixed(3)} confidence=${plagiarismTriage.confidence.toFixed(3)}`
+    )
     createdReport = await createAutoReport({
       poemId: poem.id,
       reasonType: ReasonType.PLAGIARISM,
       reason: buildPlagiarismAutoReportReason(plagiarismTriage),
     })
+  } else {
+    logger.info(`Poem passed plagiarism triage poemId=${poem.id}`)
   }
 
   // Run AI detection check if the poem hasn't been marked as AI assisted already.
@@ -295,25 +368,34 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
     shouldFlagAIDetection(aiDetection) &&
     !createdReport // Only create another report if a plagiarism one wasnt already created.
   ) {
+    logger.info(
+      `Poem flagged for AI auto-report poemId=${poem.id} likelihood=${aiDetection.aiLikelihood.toFixed(3)} confidence=${aiDetection.confidence.toFixed(3)}`
+    )
     createdReport = await createAutoReport({
       poemId: poem.id,
       reasonType: ReasonType.AI,
       reason: buildAIAutoReportReason(aiDetection),
     })
+  } else if (aiDetection) {
+    logger.info(`Poem passed AI-authorship triage poemId=${poem.id}`)
   }
 
   // Update the poem with the new approval status and likelihood scoring.
-  const updatedPoem = await prisma.poem.update({
+  const finalApprovalStatus = createdReport
+    ? PoemApprovalStatus.ADMIN_REVIEW
+    : PoemApprovalStatus.APPROVED
+
+  await prisma.poem.update({
     where: { id: poem.id },
     data: {
-      approvalStatus: createdReport
-        ? PoemApprovalStatus.ADMIN_REVIEW
-        : PoemApprovalStatus.APPROVED,
+      approvalStatus: finalApprovalStatus,
       aiLikelihoodScore: aiDetection?.aiLikelihood,
       plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood,
     },
     include: POEM_INCLUDE_STATEMENT,
   })
 
-  return updatedPoem
+  logger.info(
+    `Completed poem validation pipeline poemId=${poem.id} finalApprovalStatus=${finalApprovalStatus} reportId=${createdReport?.id ?? 'none'} aiLikelihood=${aiDetection?.aiLikelihood?.toFixed(3) ?? 'n/a'} plagiarismLikelihood=${plagiarismTriage?.plagiarismLikelihood?.toFixed(3) ?? 'n/a'} durationMs=${Date.now() - startedAt}`
+  )
 }
