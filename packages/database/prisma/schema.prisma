@@ -96,7 +96,7 @@ enum ReportStatus {
 }
 
 enum PoemApprovalStatus {
-  PENDING
+  PENDING // TODO: maybe remove this
   UNCHECKED
   ADMIN_REVIEW
   APPROVED
@@ -112,7 +112,7 @@ model Poem {
   isAIAssisted              Boolean    @default(false) // True if AI was used to help create poem.
   aiLikelihoodScore         Float? // Optional score from moderation/AI detection workflow.
   plagiarismLikelihoodScore Float?
-  approvalStatus            PoemApprovalStatus
+  approvalStatus            PoemApprovalStatus @default(UNCHECKED)
   body                      String
   normalizedBody            String // Normalized poem body string for internal plagiarism checking.
   createdAt                 DateTime   @default(now())

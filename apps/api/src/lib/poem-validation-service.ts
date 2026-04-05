@@ -29,9 +29,6 @@ Important rules:
 - Return valid JSON only.
 - plagiarismLikelihood must be a number from 0.0 to 1.0.
 - confidence must be a number from 0.0 to 1.0.
-- Use "allow" only when there is low concern.
-- Use "review" when there is moderate to high concern or uncertainty.
-- Do not claim certainty unless there is strong evidence.
 - Prefer conservative triage, especially with shorter poems.
 - If grounded web results are available, include plausible sources in possibleSources.
 - If no plausible sources are found, leave possibleSources empty.
@@ -58,36 +55,6 @@ export interface PoemPlagiarismSimilarityMatch {
   title: string
   similarity: number
 }
-
-// interface RunPoemCreationPipelineInput<TCreatedPoem extends { id: string }> {
-//   poemBody: string
-//   isPublic: boolean
-//   createPoem: (moderation: {
-//     approvalStatus: PoemApprovalStatus
-//     plagiarismLikelihoodScore?: number | null
-//     aiLikelihoodScore?: number | null
-//   }) => Promise<TCreatedPoem>
-// }
-
-// type PoemCreationPipelineResult<TCreatedPoem extends { id: string }> =
-//   | {
-//       outcome: 'blocked_internal_plagiarism'
-//       similarity: {
-//         match: PoemPlagiarismSimilarityMatch
-//         threshold: number
-//       }
-//     }
-//   | {
-//       outcome: 'created'
-//       createdPoem: TCreatedPoem
-//       approvalStatus: PoemApprovalStatus
-//       plagiarismSimilarityMatch: PoemPlagiarismSimilarityMatch | null
-//       plagiarismTriage: PoemPlagiarismTriageResponse | null
-//       createdReport: {
-//         id: number
-//         reasonType: ReasonType
-//       } | null
-//     }
 
 /** Finds the most similar existing poem using Damerau-Levenshtein similarity. */
 export const detectInternalPlagiarism = async (
@@ -172,6 +139,14 @@ const shouldFlagPlagiarismTriage = (triage: PoemPlagiarismTriageResponse) =>
 const buildPlagiarismAutoReportReason = (
   triage: PoemPlagiarismTriageResponse
 ) => {
+  const suspiciousPassagesSummary = triage.suspiciousPassages
+    .slice(0, 3)
+    .map(
+      (passage) =>
+        `lines ${passage.startLine}-${passage.endLine}: "${passage.text}" (${passage.whySuspicious})`
+    )
+    .join(' | ')
+
   const sourceSummary = triage.possibleSources
     .slice(0, 3)
     .map(
@@ -180,10 +155,17 @@ const buildPlagiarismAutoReportReason = (
     )
     .join(' | ')
 
+  const reasonSummary = triage.reason
+    .slice(0, AUTO_REPORT_REASON_MAX_LENGTH)
+    .trim()
+
   const reason = [
     `Auto-generated from Gemini plagiarism triage.`,
     `likelihood=${triage.plagiarismLikelihood.toFixed(3)} confidence=${triage.confidence.toFixed(3)}`,
-    triage.reason.slice(0, AUTO_REPORT_REASON_MAX_LENGTH).trim(),
+    suspiciousPassagesSummary
+      ? `suspiciousPassages=${suspiciousPassagesSummary}`
+      : undefined,
+    reasonSummary ? `reason=${reasonSummary}` : undefined,
     sourceSummary ? `possibleSources=${sourceSummary}` : undefined,
   ]
     .filter(Boolean)
