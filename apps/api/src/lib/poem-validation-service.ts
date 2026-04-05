@@ -35,6 +35,7 @@ Important rules:
 - If grounded web results are available, include plausible sources in possibleSources.
 - If no plausible sources are found, leave possibleSources empty.
 - suspiciousPassages may be empty if there are no clear signals.
+- The reason should be concise, and at most 200 characters long.
 
 The poem is provided with line numbers.
 
@@ -58,6 +59,7 @@ Important rules:
 - confidence must be a number from 0.0 to 1.0.
 - Prefer conservative triage, especially with shorter poems.
 - suspiciousPassages may be empty if there are no clear signals.
+- The reason should be concise, and at most 200 characters long.
 
 The poem is provided with line numbers.
 
@@ -71,8 +73,6 @@ export const POEM_DETECTION_THRESHOLDS = {
   aiGeminiLikelihood: 0.7,
   aiGeminiConfidence: 0.6,
 } as const
-
-const AUTO_REPORT_REASON_MAX_LENGTH = 200
 
 export interface PoemPlagiarismSimilarityMatch {
   poemId: string
@@ -190,9 +190,7 @@ const buildPlagiarismAutoReportReason = (
     )
     .join(' | ')
 
-  const reasonSummary = triage.reason
-    .slice(0, AUTO_REPORT_REASON_MAX_LENGTH)
-    .trim()
+  const reasonSummary = triage.reason.trim()
 
   const reason = [
     `Auto-generated from Gemini plagiarism triage.`,
@@ -220,9 +218,7 @@ const buildAIAutoReportReason = (detection: PoemAIDetectionResponse) => {
     )
     .join(' | ')
 
-  const reasonSummary = detection.reason
-    .slice(0, AUTO_REPORT_REASON_MAX_LENGTH)
-    .trim()
+  const reasonSummary = detection.reason.trim()
 
   const reason = [
     `Auto-generated from Gemini AI-authorship triage.`,
