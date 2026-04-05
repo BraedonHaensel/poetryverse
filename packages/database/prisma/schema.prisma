@@ -96,7 +96,7 @@ enum ReportStatus {
 }
 
 enum PoemApprovalStatus {
-  PENDING // TODO: maybe remove this
+  PENDING
   UNCHECKED
   ADMIN_REVIEW
   APPROVED
