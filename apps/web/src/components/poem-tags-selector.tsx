@@ -16,8 +16,10 @@ import {
   useComboboxAnchor,
 } from '@/components/ui/combobox'
 import { PoemTag } from '@/lib/poem-requests'
+import { cn } from '@/lib/utils'
 
 type Props = {
+  className?: string
   poemTags: PoemTag[]
   selectedTagIds: string[]
   onChange: (selection: string[]) => void
@@ -26,12 +28,14 @@ type Props = {
 
 /**
  * Poem tags multi-select.
+ * @param className Optional additional className values to apply.
  * @param poemTags The list of all poem tag objects.
  * @param selectedTagIds The list of currently selected tag IDs.
  * @param onChange Callback for handling selection changes.
  * @param isInvalid Whether the validation styles should be displayed.
  */
 export function PoemTagsSelector({
+  className = '',
   poemTags,
   selectedTagIds,
   onChange,
@@ -61,9 +65,11 @@ export function PoemTagsSelector({
       <ComboboxChips
         ref={anchor}
         // Override the default padding to fit the clear button
-        className={`bg-off-white relative border-2 py-2! pr-8! pl-3! ${
-          isInvalid ? 'border-destructive! ring-destructive/20!' : ''
-        }`}
+        className={cn(
+          'bg-off-white relative border-2 py-2! pr-8! pl-3!',
+          isInvalid && 'border-destructive! ring-destructive/20!',
+          className
+        )}
       >
         <ComboboxValue>
           {selectedTagIds.map((tagId) => (

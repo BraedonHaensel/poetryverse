@@ -55,7 +55,7 @@ export async function getUserPoems(userId: string): Promise<PoemData[]> {
  */
 export async function getFeedPoems(): Promise<PoemData[]> {
   return api
-    .get('/api/poems')
+    .get('/api/poems/feed')
     .then((response) => {
       const data = response.data
       console.log('Feed poems:', data)

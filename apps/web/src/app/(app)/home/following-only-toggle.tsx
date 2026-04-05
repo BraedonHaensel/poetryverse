@@ -17,7 +17,7 @@ export function FollowingOnlyToggle({
   return (
     <Button
       className={cn(
-        'cursor-pointer border-2 border-black/50 text-lg font-bold w-full',
+        'w-full cursor-pointer border-2 border-black/50 text-lg font-bold',
         className
       )}
       variant={isFollowingOnly ? 'default' : 'outline'}
@@ -27,4 +27,3 @@ export function FollowingOnlyToggle({
     </Button>
   )
 }
- 
