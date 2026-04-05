@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Star } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import MobilePageHeader from '@/components/mobile-page-header'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -80,88 +81,193 @@ export default function PoemOfTheDay() {
 
   if (isLoading) {
     return (
-      <ShadowCard className="mx-auto w-full max-w-2xl">
-        <CardContent className="flex h-96 items-center justify-center">
-          <p className="text-muted-foreground">Loading poem of the day...</p>
-        </CardContent>
-      </ShadowCard>
+      <>
+        <div className="flex flex-1 flex-col gap-4 md:hidden">
+          <MobilePageHeader title="PoetryVerse" showLogo={true} />
+          <div className="flex flex-col gap-2 px-2 pb-2">
+            <ShadowCard>
+              <CardContent className="flex h-96 items-center justify-center">
+                <p className="text-muted-foreground">
+                  Loading poem of the day...
+                </p>
+              </CardContent>
+            </ShadowCard>
+          </div>
+        </div>
+
+        <div className="hidden md:flex">
+          <ShadowCard className="mx-auto w-full max-w-2xl">
+            <CardContent className="flex h-96 items-center justify-center">
+              <p className="text-muted-foreground">
+                Loading poem of the day...
+              </p>
+            </CardContent>
+          </ShadowCard>
+        </div>
+      </>
     )
   }
 
   if (!poem) {
     return (
-      <ShadowCard className="mx-auto w-full max-w-2xl">
-        <CardContent className="flex h-96 items-center justify-center">
-          <p className="text-muted-foreground">
-            No poem available at the moment
-          </p>
-        </CardContent>
-      </ShadowCard>
+      <>
+        <div className="flex flex-1 flex-col gap-4 md:hidden">
+          <MobilePageHeader title="PoetryVerse" showLogo={true} />
+          <div className="flex flex-col gap-2 px-2 pb-2">
+            <ShadowCard>
+              <CardContent className="flex h-96 items-center justify-center">
+                <p className="text-muted-foreground">
+                  No poem available at the moment
+                </p>
+              </CardContent>
+            </ShadowCard>
+          </div>
+        </div>
+
+        <div className="hidden md:flex">
+          <ShadowCard className="mx-auto w-full max-w-2xl">
+            <CardContent className="flex h-96 items-center justify-center">
+              <p className="text-muted-foreground">
+                No poem available at the moment
+              </p>
+            </CardContent>
+          </ShadowCard>
+        </div>
+      </>
     )
   }
 
   return (
-    <ShadowCard className="mx-auto w-full max-w-2xl">
-      <CardHeader className="pb-0">
-        <div className="space-y-2 pb-2 border-b">
-          <div>
-            <div className="mb-1 inline-block rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
-              TODAY&#39;S FEATURED POEM
-            </div>
-            <CardTitle className="text-xl font-bold md:text-2xl">
-              {poem.title}
-            </CardTitle>
-          </div>
+    <>
+      {/* Mobile layout */}
+      <div className="flex flex-1 flex-col gap-4 md:hidden">
+        <MobilePageHeader title="PoetryVerse" showLogo={true} />
 
-          {/* Author info with category */}
-          <p className="text-xs font-medium text-muted-foreground md:text-sm">
-            {poem.authorUsername}
-            {poem.category && ` · ${poem.category}`}
-          </p>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-3 py-0">
-        {/* Poem lines */}
-        <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
-          <div className="space-y-0.5">
-            {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
-              <p
-                key={index}
-                className="leading-snug text-sm text-foreground md:text-base"
-              >
-                {line}
+        <div className="flex flex-col gap-2 px-2 pb-2">
+          <ShadowCard>
+            <CardHeader className="pb-2">
+              <div className="mb-1 inline-block rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
+                TODAY&#39;S FEATURED POEM
+              </div>
+              <CardTitle className="text-xl font-bold">{poem.title}</CardTitle>
+              <p className="text-xs font-medium text-muted-foreground">
+                {poem.authorUsername}
+                {poem.category && ` · ${poem.category}`}
               </p>
-            ))}
-            {poem.lines.length > LINES_TO_SHOW && (
-              <button
-                onClick={() => setFullPoemOpen(true)}
-                className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
-              >
-                ... Read more
-              </button>
-            )}
-          </div>
-        </div>
+            </CardHeader>
 
-        {/* Poem metadata and rating */}
-        <div className="flex items-center justify-between border-t pt-2">
-          {poem.rating !== undefined && (
-            <button
-              onClick={() => setIsLiked(!isLiked)}
-              className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <Star
-                size={28}
-                className="text-black"
-                fill={isLiked ? '#fbbf24' : 'none'}
-              />
-              <span className="text-lg font-semibold">{poem.rating}</span>
-            </button>
-          )}
-          <p className="text-xs text-muted-foreground">{poem.linecount} lines</p>
+            <CardContent className="flex flex-col gap-2">
+              <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
+                <div className="space-y-0.5">
+                  {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
+                    <p
+                      key={index}
+                      className="leading-snug text-sm text-foreground"
+                    >
+                      {line}
+                    </p>
+                  ))}
+                  {poem.lines.length > LINES_TO_SHOW && (
+                    <button
+                      onClick={() => setFullPoemOpen(true)}
+                      className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
+                    >
+                      ... Read more
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between border-t pt-2">
+                {poem.rating !== undefined && (
+                  <button
+                    onClick={() => setIsLiked(!isLiked)}
+                    className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <Star
+                      size={20}
+                      className="text-black"
+                      fill={isLiked ? '#fbbf24' : 'none'}
+                    />
+                    <span className="text-sm font-semibold">{poem.rating}</span>
+                  </button>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {poem.linecount} lines
+                </p>
+              </div>
+            </CardContent>
+          </ShadowCard>
         </div>
-      </CardContent>
+      </div>
+
+      {/* Desktop layout */}
+      <div className="hidden md:flex">
+        <ShadowCard className="mx-auto w-full max-w-2xl">
+          <CardHeader className="pb-0">
+            <div className="space-y-2 pb-2 border-b">
+              <div>
+                <div className="mb-1 inline-block rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
+                  TODAY&#39;S FEATURED POEM
+                </div>
+                <CardTitle className="text-xl font-bold md:text-2xl">
+                  {poem.title}
+                </CardTitle>
+              </div>
+
+              {/* Author info with category */}
+              <p className="text-xs font-medium text-muted-foreground md:text-sm">
+                {poem.authorUsername}
+                {poem.category && ` · ${poem.category}`}
+              </p>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-3 py-0">
+            {/* Poem lines */}
+            <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
+              <div className="space-y-0.5">
+                {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
+                  <p
+                    key={index}
+                    className="leading-snug text-sm text-foreground md:text-base"
+                  >
+                    {line}
+                  </p>
+                ))}
+                {poem.lines.length > LINES_TO_SHOW && (
+                  <button
+                    onClick={() => setFullPoemOpen(true)}
+                    className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
+                  >
+                    ... Read more
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Poem metadata and rating */}
+            <div className="flex items-center justify-between border-t pt-2">
+              {poem.rating !== undefined && (
+                <button
+                  onClick={() => setIsLiked(!isLiked)}
+                  className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <Star
+                    size={28}
+                    className="text-black"
+                    fill={isLiked ? '#fbbf24' : 'none'}
+                  />
+                  <span className="text-lg font-semibold">{poem.rating}</span>
+                </button>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {poem.linecount} lines
+              </p>
+            </div>
+          </CardContent>
+        </ShadowCard>
+      </div>
 
       {/* Full poem modal */}
       <Dialog open={fullPoemOpen} onOpenChange={setFullPoemOpen}>
@@ -203,6 +309,6 @@ export default function PoemOfTheDay() {
           </div>
         </DialogContent>
       </Dialog>
-    </ShadowCard>
+    </>
   )
 }
