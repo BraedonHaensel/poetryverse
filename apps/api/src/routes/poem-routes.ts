@@ -7,6 +7,7 @@ import {
   getDailyPoem,
   getPoemById,
   getPoems,
+  getPoemsFeed,
   interpretPoem,
   likePoem,
   reportPoem,
@@ -32,25 +33,16 @@ import {
 const router = Router()
 
 /** GET /api/poems
- * 
+ *
  * Query params:
  * - authorId (optional): string - filter returned poems by authorId
  */
 router.get(
-  '/', 
-  optionalAuth, 
-  validate(GetPoemsRequestSchema), 
+  '/',
+  optionalAuth,
+  validate(GetPoemsRequestSchema),
   asyncHandler(getPoems)
 )
-
-/** GET /api/poems/{id} */
-router.get('/:id', optionalAuth, validate(GetPoemByIdRequestSchema), asyncHandler(getPoemById))
-
-/** PATCH /api/poems/{id} */
-router.patch('/:id', requireAuth, validate(UpdatePoemParamSchema), asyncHandler(updatePoem))
-
-/** DELETE /api/poems/{id} */
-router.delete('/:id', requireAuth, validate(DeletePoemSchema), asyncHandler(deletePoem))
 
 /** POST /api/poems */
 router.post(
@@ -59,6 +51,9 @@ router.post(
   validate(CreatePoemRequestSchema),
   asyncHandler(createPoem)
 )
+
+/** GET /api/poems/feed */
+router.get('/feed', optionalAuth, asyncHandler(getPoemsFeed))
 
 /** POST /api/poems/generate */
 router.post(
@@ -101,6 +96,31 @@ router.post(
   requireAuth,
   validate(ReportPoemRequestSchema),
   asyncHandler(reportPoem)
+)
+
+// Note: Express routes are matched in order, so these should be after more specific routes like /feed and /generate
+/** GET /api/poems/{id} */
+router.get(
+  '/:id',
+  optionalAuth,
+  validate(GetPoemByIdRequestSchema),
+  asyncHandler(getPoemById)
+)
+
+/** PATCH /api/poems/{id} */
+router.patch(
+  '/:id',
+  requireAuth,
+  validate(UpdatePoemParamSchema),
+  asyncHandler(updatePoem)
+)
+
+/** DELETE /api/poems/{id} */
+router.delete(
+  '/:id',
+  requireAuth,
+  validate(DeletePoemSchema),
+  asyncHandler(deletePoem)
 )
 
 export default router

@@ -1,6 +1,8 @@
 import CreateDropdown from '@/components/create-nav-dropdown'
 import CreateSheet from '@/components/create-nav-sheet'
 import { LargeButton } from '@/components/large-button'
+import MyPoemMenu from '@/components/my-poem-menu'
+import OtherUserPoemMenu from '@/components/other-user-poem-menu'
 import { PoemFilterMode } from '@/components/poem-filters'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader } from '@/components/ui/card'
@@ -10,28 +12,34 @@ import { cn } from '@/lib/utils'
 type Props = {
   className?: string
   isMyPage: boolean
+  isGuest: boolean
   filterMode: PoemFilterMode
   filteredPoems: PoemData[]
-  setPublic: (poemid: string) => Promise<void>
-  setPrivate: (poemId: string) => Promise<void>
-  deletePoem: (poemId: string) => Promise<void>
+  onSetPublic: (poemid: string) => void
+  onSetPrivate: (poemId: string) => void
+  onDeletePoem: (poemId: string) => void
 }
 
 /**
  * Displays a list of a user's poems.
  * @param className Optional additional className values to apply.
  * @param isMyPage Whether the user is viewing their own page.
+ * @param isGuest Whether the current user is a guest.
  * @param filterMode The current poem filter mode.
- * @param poems The filtered list of poems to display.
+ * @param filteredPoems The filtered list of poems to display.
+ * @param onSetPublic Callback to set a poem's visibility to public.
+ * @param onSetPrivate Callback to set a poem's visibility to private.
+ * @param onDeletePoem Callback to delete a poem.
  */
 export default function UserPoemsList({
   className,
   isMyPage,
+  isGuest,
   filterMode,
   filteredPoems,
-  setPublic,
-  setPrivate,
-  deletePoem,
+  onSetPublic,
+  onSetPrivate,
+  onDeletePoem,
 }: Props) {
   if (filteredPoems.length === 0) {
     // No poems to display
@@ -72,43 +80,20 @@ export default function UserPoemsList({
   return (
     <div className={cn('grid gap-2 md:gap-4 xl:grid-cols-2', className)}>
       {/* TODO Display proper poem cards */}
-      {/* TODO Display poem visibility and delete controls menu */}
       {filteredPoems.map((poem) => (
         <ShadowCard key={poem.id}>
           <CardHeader>{poem.title}</CardHeader>
           <CardContent className="whitespace-pre-wrap">{poem.body}</CardContent>
-          {!!isMyPage ? (
-            <>
-              {poem.isPublic ? (
-                <button
-                  className="cursor-pointer hover:opacity-70"
-                  onClick={async () => {
-                    await setPrivate(poem.id)
-                  }}
-                >
-                  Set private (placeholder button)
-                </button>
-              ) : (
-                <button
-                  className="cursor-pointer hover:opacity-70"
-                  onClick={async () => {
-                    await setPublic(poem.id)
-                  }}
-                >
-                  Set public (placeholder button)
-                </button>
-              )}
-              <button
-                className="cursor-pointer hover:opacity-70"
-                onClick={async () => {
-                  await deletePoem(poem.id)
-                }}
-              >
-                Delete (placeholder button)
-              </button>
-            </>
+          {isMyPage ? (
+            <MyPoemMenu
+              poem={poem}
+              onSetPublic={onSetPublic}
+              onSetPrivate={onSetPrivate}
+              onDeletePoem={onDeletePoem}
+            />
           ) : (
-            <p>TODO: Translate, Interpret, Report *same as home page*</p>
+            // Display the poem menu to registered users
+            !isGuest && <OtherUserPoemMenu poem={poem} />
           )}
         </ShadowCard>
       ))}

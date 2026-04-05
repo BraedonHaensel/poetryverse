@@ -7,32 +7,38 @@ import UserPoemsList from './user-poems-list'
 
 type Props = {
   isMyPage: boolean
+  isGuest: boolean
   profileStats: ProfileStat[]
   filterMode: PoemFilterMode
   setFilterMode: (filterMode: PoemFilterMode) => void
   filteredPoems: PoemData[]
-  setPublic: (poemid: string) => Promise<void>
-  setPrivate: (poemId: string) => Promise<void>
-  deletePoem: (poemId: string) => Promise<void>
+  onSetPublic: (poemid: string) => void
+  onSetPrivate: (poemId: string) => void
+  onDeletePoem: (poemId: string) => void
 }
 
 /**
  * Poems tab contents.
  * @param isMyPage Whether the user is viewing their own page.
+ * @param isGuest Whether the current user is a guest.
  * @param profileStats Poem, followers, and following users stats.
  * @param filterMode The current poem filter mode.
  * @param setFilterMode Callback to set the poem filter mode.
- * @param poems The filtered list of poems to display.
+ * @param filteredPoems The filtered list of poems to display.
+ * @param onSetPublic Callback to set a poem's visibility to public.
+ * @param onSetPrivate Callback to set a poem's visibility to private.
+ * @param onDeletePoem Callback to delete a poem.
  */
 export default function PoemsTab({
   isMyPage,
+  isGuest,
   profileStats,
   filterMode,
   setFilterMode,
   filteredPoems,
-  setPublic,
-  setPrivate,
-  deletePoem,
+  onSetPublic,
+  onSetPrivate,
+  onDeletePoem,
 }: Props) {
   return (
     <>
@@ -71,11 +77,12 @@ export default function PoemsTab({
       <UserPoemsList
         className="m-2 mt-0 md:m-0 md:mx-0 md:gap-4 xl:grid-cols-2"
         isMyPage={isMyPage}
+        isGuest={isGuest}
         filterMode={filterMode}
         filteredPoems={filteredPoems}
-        setPublic={setPublic}
-        setPrivate={setPrivate}
-        deletePoem={deletePoem}
+        onSetPublic={onSetPublic}
+        onSetPrivate={onSetPrivate}
+        onDeletePoem={onDeletePoem}
       />
     </>
   )
