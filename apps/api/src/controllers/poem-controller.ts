@@ -191,8 +191,14 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
     `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
   )
 
-  const validatedPoem = await runPoemValidationPipeline(updatedPoem)
-  return res.status(200).json(validatedPoem)
+  // Validate public poems in the background after returning a pending response.
+  void runPoemValidationPipeline(updatedPoem).catch((err: unknown) => {
+    logger.error(
+      `Background poem validation failed for poemId=${updatedPoem.id} userId=${req.auth.userId}: ${String(err)}`
+    )
+  })
+
+  return res.status(200).json(updatedPoem)
 }
 
 /**
