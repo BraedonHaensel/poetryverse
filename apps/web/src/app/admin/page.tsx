@@ -5,63 +5,7 @@ import { useState } from 'react'
 import AdminUserManagement from '@/app/admin/admin-user/page-contents'
 import AnalyticsPageContents from '@/app/admin/analytics/page-contents'
 import GeneralUserManagement from '@/app/admin/general-user/page-contents'
-<<<<<<< HEAD
-import { Column, DataTable } from '@/components/admin-table/data-table'
-import { ShadowCard } from '@/components/shadow-card'
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAdminUser } from '@/context/admin-user-context'
-type ReportedPoem = {
-  id: number
-  title: string
-  reportType: string
-  poem: string
-  reason: string
-}
-
-const reportedPoems: ReportedPoem[] = [
-  {
-    id: 12,
-    title: 'My Haiku',
-    reportType: 'AI Usage',
-    poem: 'AI writing poetry is made a lot easier when you use AI.',
-    reason: 'Clearly written using AI with repeated phrasing.',
-  },
-  {
-    id: 24,
-    title: 'When I Was One',
-    reportType: 'Inappropriate Content',
-    poem: 'No man is an island, entire of itself...',
-    reason: 'Contains inappropriate and sensitive content.',
-  },
-  {
-    id: 45,
-    title: 'Simple Haiku',
-    reportType: 'AI Usage',
-    poem: 'This is a haiku demonstrating a sample poem creation.',
-    reason:
-      'Low effort poem, clearly written by AI. Admins please take this low quality content off of the platform.',
-  },
-]
-
-const columns: Column<ReportedPoem>[] = [
-  { key: 'id', label: 'ID' },
-  { key: 'title', label: 'Title' },
-  { key: 'reportType', label: 'Report Type' },
-
-  // use row later for deletion
-  {
-    key: 'poem',
-    label: 'Poem',
-    className: 'justify-start text-left text-sm',
-  },
-  {
-    key: 'reason',
-    label: 'Reason',
-    className: 'justify-start text-left text-sm',
-  },
-]
-=======
->>>>>>> f735d77 (fix: separate analytics page from admin page)
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
