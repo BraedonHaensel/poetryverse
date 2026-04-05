@@ -5,20 +5,18 @@ import { Star } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
+import { PoemTagsSelector } from '@/components/poem-tags-selector'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { PoemTagsSelector } from '@/components/poem-tags-selector'
-import { api, displayApiError } from '@/lib/api'
+import { displayApiError } from '@/lib/api'
 import {
-  type PoemData,
-  type PoemTag,
-  type PoemType,
   filterPoems,
   getFeedPoems,
   getPoemTags,
-  getPoemTypes,
+  type PoemData,
+  type PoemTag,
 } from '@/lib/poem-requests'
 
 import { FollowingOnlyToggle } from './following-only-toggle'
@@ -107,33 +105,26 @@ export default function HomePage() {
 
   const [poems, setPoems] = useState<PoemData[]>(DUMMY_POEMS)
   const [allTags, setAllTags] = useState<PoemTag[]>([])
-  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setIsLoading(true)
         if (USE_DUMMY_DATA) {
           await new Promise((resolve) => setTimeout(resolve, 500))
           setPoems(DUMMY_POEMS)
         } else {
-          const [fetchedPoems, fetchedTags, fetchedTypes] = await Promise.all([
+          const [fetchedPoems, fetchedTags] = await Promise.all([
             getFeedPoems(),
             getPoemTags(),
-            getPoemTypes(),
           ])
           setPoems(fetchedPoems)
           setAllTags(fetchedTags)
-          setPoemTypes(fetchedTypes)
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
           displayApiError(error, 'Failed to load home feed')
         }
         setPoems(DUMMY_POEMS)
-      } finally {
-        setIsLoading(false)
       }
     }
 
