@@ -265,8 +265,12 @@ const shouldFlagAIDetection = (triage: PoemAIDetectionResponse) =>
   triage.confidence >= POEM_DETECTION_THRESHOLDS.aiGeminiConfidence
 
 export const runPoemValidationPipeline = async (poem: Poem) => {
-  if (!poem.isPublic || poem.approvalStatus !== PoemApprovalStatus.UNCHECKED) {
-    // Don't run the validation pipeline if the poem is private, has already been checked.
+  const isPendingOrUnchecked =
+    poem.approvalStatus === PoemApprovalStatus.PENDING ||
+    poem.approvalStatus === PoemApprovalStatus.UNCHECKED
+
+  if (!poem.isPublic || !isPendingOrUnchecked) {
+    // Don't run the validation pipeline if the poem is private or has already been finalized.
     return poem
   }
 

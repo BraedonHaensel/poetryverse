@@ -1,4 +1,4 @@
-import { Prisma, RoleEnum } from '@prisma/client'
+import { PoemApprovalStatus, Prisma, RoleEnum } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
@@ -57,6 +57,11 @@ export const POEM_INCLUDE_STATEMENT = {
   },
 } satisfies Prisma.PoemInclude
 
+const PUBLIC_APPROVED_POEM_FILTER = {
+  isPublic: true,
+  approvalStatus: PoemApprovalStatus.APPROVED,
+} as const
+
 /**
  * Retrieves poems with from the database and returns them as JSON.
  * @param _req Incoming Express request.
@@ -92,7 +97,7 @@ export const getPoems = async (req: Request, res: Response) => {
       const poems = await prisma.poem.findMany({
         where: {
           authorId,
-          isPublic: true,
+          ...PUBLIC_APPROVED_POEM_FILTER,
         },
         include: POEM_INCLUDE_STATEMENT,
         orderBy: { createdAt: 'desc' },
@@ -141,7 +146,10 @@ export const getPoemById = async (req: Request, res: Response) => {
   const { id: poemId } = req.params as GetPoemByIdRequest
 
   const poemData = await validateAndReturnPoem(poemId)
-  if (poemData.isPublic || poemData.authorId === requesterUserId) {
+  const canAccessPublicPoem =
+    poemData.isPublic && poemData.approvalStatus === PoemApprovalStatus.APPROVED
+
+  if (canAccessPublicPoem || poemData.authorId === requesterUserId) {
     logger.info(`Fetched poem by id=${poemId} for userId=${requesterUserId}`)
     return res.status(200).json(poemData)
   } else {
@@ -236,7 +244,8 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     validateAndReturnPoemTags(poemData.tagIds),
   ])
 
-  // Run internal plagiarism check.
+  const isPublicPoem = poemData.publicVisibility
+
   const internalPlagiarismResult = await detectInternalPlagiarism(poemData.poem)
 
   if (internalPlagiarismResult) {
@@ -264,20 +273,29 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
   }
 
   // Internal plagiarism check passed, create the poem.
+  const initialApprovalStatus = isPublicPoem
+    ? PoemApprovalStatus.PENDING
+    : PoemApprovalStatus.UNCHECKED
+
   const createdPoem = await prisma.poem.create({
     data: mapCreatePoemRequestToPrismaInput({
       authorId: req.auth.userId,
       data: poemData,
       tagIds: existingTags.map((tag) => tag.id),
+      approvalStatus: initialApprovalStatus,
     }),
     include: POEM_INCLUDE_STATEMENT,
   })
 
-  // Validate the poem against the validation pipeline.
-  const validatedPoem = await runPoemValidationPipeline(createdPoem)
+  // Validate public poems in the background after returning a pending response.
+  void runPoemValidationPipeline(createdPoem).catch((err: unknown) => {
+    logger.error(
+      `Background poem validation failed for poemId=${createdPoem.id} userId=${req.auth.userId}: ${String(err)}`
+    )
+  })
 
   // Return the created poem.
-  return res.status(201).json({ data: validatedPoem })
+  return res.status(201).json({ data: createdPoem })
 }
 
 /**
@@ -580,7 +598,7 @@ async function getPoemOfDay() {
         gte: lastDayTimestamp,
       },
       poem: {
-        isPublic: true,
+        ...PUBLIC_APPROVED_POEM_FILTER,
       },
     },
     _count: {
@@ -598,7 +616,7 @@ async function getPoemOfDay() {
     const poem = await prisma.poem.findFirst({
       where: {
         id: topLikedPoem[0].poemId,
-        isPublic: true,
+        ...PUBLIC_APPROVED_POEM_FILTER,
       },
       include: {
         author: true,
@@ -615,7 +633,7 @@ async function getPoemOfDay() {
 
   // If each poem does not have a like. Then fetch a random poem from the poems database
   const count = await prisma.poem.count({
-    where: { isPublic: true },
+    where: PUBLIC_APPROVED_POEM_FILTER,
   })
   if (count === 0) {
     return null
@@ -625,7 +643,7 @@ async function getPoemOfDay() {
   const randPoem = await prisma.poem.findFirst({
     skip: randIndex,
     take: 1,
-    where: { isPublic: true },
+    where: PUBLIC_APPROVED_POEM_FILTER,
     include: {
       author: true,
       likes: true,
@@ -666,7 +684,9 @@ export const getDailyPoem = async (req: Request, res: Response) => {
  * @returns List of public poems, optionally excluding the specified user's poems.
  */
 const getPublicPoems = async (excludeUserId?: string) => {
-  const constructedWhere: Prisma.PoemWhereInput = { isPublic: true }
+  const constructedWhere: Prisma.PoemWhereInput = {
+    ...PUBLIC_APPROVED_POEM_FILTER,
+  }
   if (excludeUserId) {
     constructedWhere.authorId = { not: excludeUserId }
   }
