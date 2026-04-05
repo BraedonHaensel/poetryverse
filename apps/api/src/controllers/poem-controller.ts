@@ -59,6 +59,11 @@ const poemIncludeStatement = {
       username: true,
     },
   },
+  _count: {
+    select: {
+      likes: true,
+    },
+  },
 }
 
 /**
