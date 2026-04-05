@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleCheckBig, Trash2 } from 'lucide-react'
+import { ArrowUpCircle, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { Column, DataTable } from '@/components/admin-table/data-table'
@@ -99,7 +99,7 @@ export default function GeneralUserManagement() {
                   onClick={() => handlePromote(user.id)}
                   aria-label="Promote user"
                 >
-                  <CircleCheckBig size={30} strokeWidth={2.25} />
+                  <ArrowUpCircle size={30} strokeWidth={2.25} />
                 </button>
               </div>
             )}
