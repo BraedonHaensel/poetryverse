@@ -1,4 +1,4 @@
-import { PoemApprovalStatus, ReasonType } from '@prisma/client'
+import { Poem, PoemApprovalStatus, ReasonType } from '@prisma/client'
 import damerauLevenshtein from 'damerau-levenshtein'
 
 import { normalizePoemBody } from '../mappers/poem-mapper'
@@ -39,11 +39,11 @@ The poem is provided with line numbers.
 
 Poem: `
 
-const AI_DETECTION_PROMPT = ``
+const _AI_DETECTION_PROMPT = ``
 
 // Thresholds for AI and plagiarism detection.
 export const POEM_DETECTION_THRESHOLDS = {
-  plagiarismSimilarity: 0.8,
+  internalPlagiarism: 0.8,
   plagiarismGeminiLikelihood: 0.7,
   plagiarismGeminiConfidence: 0.6,
   aiGeminiLikelihood: 0.7,
@@ -58,38 +58,38 @@ export interface PoemPlagiarismSimilarityMatch {
   similarity: number
 }
 
-interface RunPoemCreationPipelineInput<TCreatedPoem extends { id: string }> {
-  poemBody: string
-  isPublic: boolean
-  createPoem: (moderation: {
-    approvalStatus: PoemApprovalStatus
-    plagiarismLikelihoodScore?: number | null
-    aiLikelihoodScore?: number | null
-  }) => Promise<TCreatedPoem>
-}
+// interface RunPoemCreationPipelineInput<TCreatedPoem extends { id: string }> {
+//   poemBody: string
+//   isPublic: boolean
+//   createPoem: (moderation: {
+//     approvalStatus: PoemApprovalStatus
+//     plagiarismLikelihoodScore?: number | null
+//     aiLikelihoodScore?: number | null
+//   }) => Promise<TCreatedPoem>
+// }
 
-type PoemCreationPipelineResult<TCreatedPoem extends { id: string }> =
-  | {
-      outcome: 'blocked_internal_plagiarism'
-      similarity: {
-        match: PoemPlagiarismSimilarityMatch
-        threshold: number
-      }
-    }
-  | {
-      outcome: 'created'
-      createdPoem: TCreatedPoem
-      approvalStatus: PoemApprovalStatus
-      plagiarismSimilarityMatch: PoemPlagiarismSimilarityMatch | null
-      plagiarismTriage: PoemPlagiarismTriageResponse | null
-      createdReport: {
-        id: number
-        reasonType: ReasonType
-      } | null
-    }
+// type PoemCreationPipelineResult<TCreatedPoem extends { id: string }> =
+//   | {
+//       outcome: 'blocked_internal_plagiarism'
+//       similarity: {
+//         match: PoemPlagiarismSimilarityMatch
+//         threshold: number
+//       }
+//     }
+//   | {
+//       outcome: 'created'
+//       createdPoem: TCreatedPoem
+//       approvalStatus: PoemApprovalStatus
+//       plagiarismSimilarityMatch: PoemPlagiarismSimilarityMatch | null
+//       plagiarismTriage: PoemPlagiarismTriageResponse | null
+//       createdReport: {
+//         id: number
+//         reasonType: ReasonType
+//       } | null
+//     }
 
 /** Finds the most similar existing poem using Damerau-Levenshtein similarity. */
-export const detectPoemPlagiarismSimilarity = async (
+export const detectInternalPlagiarism = async (
   poemBody: string
 ): Promise<PoemPlagiarismSimilarityMatch | null> => {
   const normalizedBody = normalizePoemBody(poemBody)
@@ -221,117 +221,45 @@ const createAutoReport = async ({
  *   - Gemini AI threshold (TODO) => create ADMIN_REVIEW + AI report
  *   - otherwise => create APPROVED
  */
-export const runPoemCreationPipeline = async <
-  TCreatedPoem extends { id: string },
->({
-  poemBody,
-  isPublic,
-  createPoem,
-}: RunPoemCreationPipelineInput<TCreatedPoem>): Promise<
-  PoemCreationPipelineResult<TCreatedPoem>
-> => {
-  if (!isPublic) {
-    // Poem is private, don't send to AI for review.
-    const createdPoem = await createPoem({
-      approvalStatus: PoemApprovalStatus.UNCHECKED,
-    })
-
-    return {
-      outcome: 'created',
-      createdPoem,
-      approvalStatus: PoemApprovalStatus.UNCHECKED,
-      plagiarismSimilarityMatch: null,
-      plagiarismTriage: null,
-      createdReport: null,
-    }
-  }
-
-  // Run internal plagiarism check.
-  const plagiarismSimilarityMatch =
-    await detectPoemPlagiarismSimilarity(poemBody)
-  if (
-    plagiarismSimilarityMatch &&
-    plagiarismSimilarityMatch.similarity >=
-      POEM_DETECTION_THRESHOLDS.plagiarismSimilarity
-  ) {
-    return {
-      outcome: 'blocked_internal_plagiarism',
-      similarity: {
-        match: plagiarismSimilarityMatch,
-        threshold: POEM_DETECTION_THRESHOLDS.plagiarismSimilarity,
-      },
-    }
-  }
+export const runPoemValidationPipeline = async (poem: Poem) => {
+  let createdReport = null
 
   // Run external plagiarism check with Gemini.
-  const plagiarismTriage = await triagePoemPlagiarismWithAI(poemBody)
+  const plagiarismTriage = await triagePoemPlagiarismWithAI(poem.body)
   if (plagiarismTriage && shouldFlagPlagiarismTriage(plagiarismTriage)) {
-    const createdPoem = await createPoem({
-      approvalStatus: PoemApprovalStatus.ADMIN_REVIEW,
-      plagiarismLikelihoodScore: plagiarismTriage.plagiarismLikelihood,
-    })
-
-    const createdReport = await createAutoReport({
-      poemId: createdPoem.id,
+    createdReport = await createAutoReport({
+      poemId: poem.id,
       reasonType: ReasonType.PLAGIARISM,
       reason: buildPlagiarismAutoReportReason(plagiarismTriage),
     })
-
-    return {
-      outcome: 'created',
-      createdPoem,
-      approvalStatus: PoemApprovalStatus.ADMIN_REVIEW,
-      plagiarismSimilarityMatch,
-      plagiarismTriage,
-      createdReport: {
-        id: createdReport.id,
-        reasonType: ReasonType.PLAGIARISM,
-      },
-    }
   }
 
-  const aiDetection = detectPoemAIAuthorshipWithGemini(poemBody)
+  // Run AI detection check.
+  const aiDetection = detectPoemAIAuthorshipWithGemini(poem.body)
   if (
     aiDetection &&
     aiDetection.aiLikelihood >= POEM_DETECTION_THRESHOLDS.aiGeminiLikelihood &&
-    aiDetection.confidence >= POEM_DETECTION_THRESHOLDS.aiGeminiConfidence
+    aiDetection.confidence >= POEM_DETECTION_THRESHOLDS.aiGeminiConfidence &&
+    !createdReport // Only create another report if a plagiarism one wasnt already created.
   ) {
-    const createdPoem = await createPoem({
-      approvalStatus: PoemApprovalStatus.ADMIN_REVIEW,
-      plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood ?? null,
-      aiLikelihoodScore: aiDetection.aiLikelihood,
-    })
-
-    const createdReport = await createAutoReport({
-      poemId: createdPoem.id,
+    createdReport = await createAutoReport({
+      poemId: poem.id,
       reasonType: ReasonType.AI,
       reason: aiDetection.reason,
     })
-
-    return {
-      outcome: 'created',
-      createdPoem,
-      approvalStatus: PoemApprovalStatus.ADMIN_REVIEW,
-      plagiarismSimilarityMatch,
-      plagiarismTriage,
-      createdReport: {
-        id: createdReport.id,
-        reasonType: ReasonType.AI,
-      },
-    }
   }
 
-  const createdPoem = await createPoem({
-    approvalStatus: PoemApprovalStatus.APPROVED,
-    plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood ?? null,
+  // Update the poem with the new approval status and likelihood scoring.
+  const updatedPoem = await prisma.poem.update({
+    where: { id: poem.id },
+    data: {
+      approvalStatus: createdReport
+        ? PoemApprovalStatus.ADMIN_REVIEW
+        : PoemApprovalStatus.APPROVED,
+      aiLikelihoodScore: aiDetection?.aiLikelihood,
+      plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood,
+    },
   })
 
-  return {
-    outcome: 'created',
-    createdPoem,
-    approvalStatus: PoemApprovalStatus.APPROVED,
-    plagiarismSimilarityMatch,
-    plagiarismTriage,
-    createdReport: null,
-  }
+  return updatedPoem
 }

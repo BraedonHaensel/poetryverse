@@ -11,7 +11,11 @@ import {
   unauthorized,
 } from '../lib/http-errors'
 import { logger } from '../lib/logger'
-import { runPoemCreationPipeline } from '../lib/poem-detection-service'
+import {
+  detectInternalPlagiarism,
+  POEM_DETECTION_THRESHOLDS,
+  runPoemValidationPipeline,
+} from '../lib/poem-validation-service'
 import { getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import {
@@ -215,76 +219,48 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     validateAndReturnPoemTags(poemData.tagIds),
   ])
 
-  const pipelineResult = await runPoemCreationPipeline({
-    poemBody: poemData.poem,
-    isPublic: poemData.publicVisibility,
-    createPoem: ({
-      approvalStatus,
-      plagiarismLikelihoodScore,
-      aiLikelihoodScore,
-    }) =>
-      prisma.poem.create({
-        data: mapCreatePoemRequestToPrismaInput({
-          authorId: req.auth.userId,
-          data: poemData,
-          tagIds: existingTags.map((tag) => tag.id),
-          approvalStatus,
-          plagiarismLikelihoodScore,
-          aiLikelihoodScore,
-        }),
-        include: poemIncludeStatement,
-      }),
+  // Run internal plagiarism check.
+  const internalPlagiarismResult = await detectInternalPlagiarism(poemData.poem)
+
+  if (internalPlagiarismResult) {
+    logger.info(
+      `Internal plagiarism check for userId=${req.auth.userId} bestMatchPoemId=${internalPlagiarismResult.poemId} similarity=${internalPlagiarismResult.similarity.toFixed(3)}`
+    )
+    if (
+      internalPlagiarismResult.similarity >=
+      POEM_DETECTION_THRESHOLDS.internalPlagiarism
+    ) {
+      logger.warn(
+        `Blocked poem creation for userId=${req.auth.userId} due to plagiarism risk matchedPoemId=${internalPlagiarismResult.poemId} similarity=${internalPlagiarismResult.similarity.toFixed(3)}`
+      )
+      throw conflict(
+        'Poem failed plagiarism check.',
+        {
+          similarity: internalPlagiarismResult.similarity,
+          threshold: POEM_DETECTION_THRESHOLDS.internalPlagiarism,
+          matchedPoemId: internalPlagiarismResult.poemId,
+          matchedPoemTitle: internalPlagiarismResult.title,
+        },
+        'This poem appears too similar to an existing poem. Please revise and try again.'
+      )
+    }
+  }
+
+  // Internal plagiarism check passed, create the poem.
+  const createdPoem = await prisma.poem.create({
+    data: mapCreatePoemRequestToPrismaInput({
+      authorId: req.auth.userId,
+      data: poemData,
+      tagIds: existingTags.map((tag) => tag.id),
+    }),
+    include: poemIncludeStatement,
   })
 
-  if (pipelineResult.outcome === 'blocked_internal_plagiarism') {
-    const { match, threshold } = pipelineResult.similarity
-    logger.warn(
-      `Blocked poem creation for userId=${req.auth.userId} due to plagiarism risk matchedPoemId=${match.poemId} similarity=${match.similarity.toFixed(3)}`
-    )
+  // Validate the poem against the validation pipeline.
+  const validatedPoem = await runPoemValidationPipeline(createdPoem)
 
-    throw conflict(
-      'Poem failed plagiarism check.',
-      {
-        similarity: match.similarity,
-        threshold,
-        matchedPoemId: match.poemId,
-        matchedPoemTitle: match.title,
-      },
-      'This poem appears too similar to an existing poem. Please revise and try again.'
-    )
-  }
-
-  const {
-    createdPoem,
-    plagiarismSimilarityMatch,
-    plagiarismTriage,
-    createdReport,
-  } = pipelineResult
-
-  if (plagiarismSimilarityMatch) {
-    logger.info(
-      `Plagiarism check for userId=${req.auth.userId} bestMatchPoemId=${plagiarismSimilarityMatch.poemId} similarity=${plagiarismSimilarityMatch.similarity.toFixed(3)}`
-    )
-  }
-
-  if (plagiarismTriage) {
-    logger.info(
-      `Gemini plagiarism triage for userId=${req.auth.userId} likelihood=${plagiarismTriage.plagiarismLikelihood.toFixed(3)} confidence=${plagiarismTriage.confidence.toFixed(3)} recommendation=${plagiarismTriage.reviewRecommendation}`
-    )
-  }
-
-  logger.info(
-    `Created poem id=${createdPoem.id} userId=${req.auth.userId} typeId=${createdPoem.typeId} status=${createdPoem.approvalStatus}`
-  )
-
-  if (createdReport) {
-    logger.warn(
-      `Auto-created reportId=${createdReport.id} reasonType=${createdReport.reasonType} for poemId=${createdPoem.id}`
-    )
-  }
-
-  // Return the created poem
-  return res.status(201).json({ data: createdPoem })
+  // Return the created poem.
+  return res.status(201).json({ data: validatedPoem })
 }
 
 /**

@@ -33,7 +33,7 @@ export const mapCreatePoemRequestToPrismaInput = ({
   typeId: data.typeId,
   isPublic: data.publicVisibility,
   isAIAssisted: data.createdWithAI,
-  approvalStatus: approvalStatus ?? PoemApprovalStatus.APPROVED,
+  approvalStatus: approvalStatus ?? PoemApprovalStatus.UNCHECKED,
   plagiarismLikelihoodScore: plagiarismLikelihoodScore ?? null,
   aiLikelihoodScore: aiLikelihoodScore ?? null,
   body: data.poem,
