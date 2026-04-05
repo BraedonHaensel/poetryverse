@@ -1,5 +1,6 @@
 import { ArrowLeftFromLine } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 import { cn } from '@/lib/utils'
 
@@ -55,12 +56,14 @@ export default function MobilePageHeader({
         )}
 
         {showLogo && (
-          <Image
-            src="/feather-logo.svg"
-            alt="PoetryVerse logo"
-            width={30}
-            height={30}
-          />
+          <Link href="/home" className="shrink-0 transition-opacity hover:opacity-70">
+            <Image
+              src="/feather-logo.svg"
+              alt="PoetryVerse logo"
+              width={30}
+              height={30}
+            />
+          </Link>
         )}
         <h1 className="truncate" title={title}>
           {title}
