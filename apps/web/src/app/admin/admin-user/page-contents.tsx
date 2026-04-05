@@ -77,33 +77,39 @@ export default function GeneralUserManagement() {
               placeholder="Search users by username..."
             />
           </div>
-
-          <DataTable
-            columns={columns}
-            data={filteredUsers}
-            gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
-            renderActions={(user) => (
-              <div className="flex items-center justify-center gap-5">
-                <button
-                  type="button"
-                  className="cursor-pointer transition hover:opacity-70"
-                  onClick={() => handleDelete(user.id)}
-                  aria-label="Delete user"
-                >
-                  <Trash2 size={28} strokeWidth={2.25} />
-                </button>
-
-                <button
-                  type="button"
-                  className="cursor-pointer transition hover:opacity-70"
-                  onClick={() => handlePromote(user.id)}
-                  aria-label="Promote user"
-                >
-                  <ArrowDownCircle size={30} strokeWidth={2.25} />
-                </button>
-              </div>
-            )}
-          />
+          {filteredUsers.length === 0 && search.trim() ? (
+            <div className="rounded-xl bg-white px-6 py-10 text-center">
+              <p className="text-muted-foreground">
+                No users found matching &quot;{search}&quot;
+              </p>
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={filteredUsers}
+              gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
+              renderActions={(user) => (
+                <div className="flex items-center justify-center gap-5">
+                  <button
+                    type="button"
+                    className="cursor-pointer transition hover:opacity-70"
+                    onClick={() => handleDelete(user.id)}
+                    aria-label="Delete user"
+                  >
+                    <Trash2 size={28} strokeWidth={2.25} />
+                  </button>
+                  <button
+                    type="button"
+                    className="cursor-pointer transition hover:opacity-70"
+                    onClick={() => handlePromote(user.id)}
+                    aria-label="Promote user"
+                  >
+                    <ArrowDownCircle size={30} strokeWidth={2.25} />
+                  </button>
+                </div>
+              )}
+            />
+          )}
         </CardContent>
       </ShadowCard>
     </div>
