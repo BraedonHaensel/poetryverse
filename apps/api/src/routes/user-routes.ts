@@ -13,11 +13,13 @@ import {
   getUserFollowing,
   getUsers,
   unfollowUser,
+  updateMyProfilePicture,
   updateMyUserInfo,
   updateRole,
 } from '../controllers/user-controller'
 import { asyncHandler } from '../lib/async-handler'
 import { optionalAuth, requireAuth, requireRole } from '../middleware/auth'
+import { uploadProfileImage } from '../middleware/upload-image'
 import { validate } from '../middleware/validate'
 import {
   deleteUserSchema,
@@ -75,6 +77,7 @@ router.get(
   asyncHandler(getUserById)
 )
 
+/** PUT api/users/me/following/:id */
 router.put(
   '/me/following/:id',
   requireAuth,
@@ -82,6 +85,7 @@ router.put(
   asyncHandler(followUser)
 )
 
+/** DELETE api/users/me/following/:id */
 router.delete(
   '/me/following/:id',
   requireAuth,
@@ -116,6 +120,14 @@ router.patch(
   requireRole(RoleEnum.SUPER_ADMIN),
   validate(updateUserRoleRequestSchema),
   asyncHandler(updateRole)
+)
+
+/** PATCH /api/users/me/image */
+router.patch(
+  '/me/image',
+  requireAuth,
+  uploadProfileImage,
+  asyncHandler(updateMyProfilePicture)
 )
 
 export default router

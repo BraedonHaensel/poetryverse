@@ -8,18 +8,21 @@ import { Sheet } from 'react-modal-sheet'
 import { Separator } from './ui/separator'
 
 type Props = {
+  className?: string
   children: React.ReactNode
 }
 
 /**
  * Bottom slider for the Create link in the mobile navigation bar.
  */
-export default function CreateSheet({ children }: Props) {
+export default function CreateSheet({ className, children }: Props) {
   const [isOpen, setOpen] = useState(false)
 
   return (
     <>
-      <div onClick={() => setOpen(true)}>{children}</div>
+      <div className={className} onClick={() => setOpen(true)}>
+        {children}
+      </div>
 
       <Sheet detent="content" isOpen={isOpen} onClose={() => setOpen(false)}>
         <Sheet.Container onClick={() => setOpen(false)}>

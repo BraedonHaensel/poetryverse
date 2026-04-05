@@ -1,15 +1,19 @@
 import PoemFilters, { PoemFilterMode } from '@/components/poem-filters'
-import { ShadowCard } from '@/components/shadow-card'
-import { CardContent, CardHeader } from '@/components/ui/card'
+import { PoemData } from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 
 import { ProfileStat } from '../page-contents'
+import UserPoemsList from './user-poems-list'
 
 type Props = {
   isMyPage: boolean
   profileStats: ProfileStat[]
   filterMode: PoemFilterMode
   setFilterMode: (filterMode: PoemFilterMode) => void
+  filteredPoems: PoemData[]
+  setPublic: (poemid: string) => Promise<void>
+  setPrivate: (poemId: string) => Promise<void>
+  deletePoem: (poemId: string) => Promise<void>
 }
 
 /**
@@ -18,12 +22,17 @@ type Props = {
  * @param profileStats Poem, followers, and following users stats.
  * @param filterMode The current poem filter mode.
  * @param setFilterMode Callback to set the poem filter mode.
+ * @param poems The filtered list of poems to display.
  */
 export default function PoemsTab({
   isMyPage,
   profileStats,
   filterMode,
   setFilterMode,
+  filteredPoems,
+  setPublic,
+  setPrivate,
+  deletePoem,
 }: Props) {
   return (
     <>
@@ -59,27 +68,15 @@ export default function PoemsTab({
         setFilterMode={setFilterMode}
       />
 
-      {/* Mobile poems list */}
-      <div className="flex flex-col gap-2 p-2 md:hidden">
-        {/* TODO Replace with real poems */}
-        {Array.from({ length: 10 }).map((_, i) => (
-          <ShadowCard key={i}>
-            <CardHeader>Placeholder Title {i}</CardHeader>
-            <CardContent>Placeholder Content {i}</CardContent>
-          </ShadowCard>
-        ))}
-      </div>
-
-      {/* Desktop poems list */}
-      <div className="hidden gap-4 md:grid xl:grid-cols-2">
-        {/* TODO Replace with real poems */}
-        {Array.from({ length: 10 }).map((_, i) => (
-          <ShadowCard key={i}>
-            <CardHeader>Placeholder Title {i}</CardHeader>
-            <CardContent>Placeholder Content {i}</CardContent>
-          </ShadowCard>
-        ))}
-      </div>
+      <UserPoemsList
+        className="m-2 mt-0 md:m-0 md:mx-0 md:gap-4 xl:grid-cols-2"
+        isMyPage={isMyPage}
+        filterMode={filterMode}
+        filteredPoems={filteredPoems}
+        setPublic={setPublic}
+        setPrivate={setPrivate}
+        deletePoem={deletePoem}
+      />
     </>
   )
 }

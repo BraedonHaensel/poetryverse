@@ -17,11 +17,18 @@ export type OptionalAuthRequest = Request & { auth?: AuthContext }
 
 /** Gets the userId from the token. */
 const getTokenUserId = async (req: Request) => {
-  const token = await getToken({
-    req: req,
-    secret: config.NEXT_AUTH_SECRET, // must match NextAuth secret
-    secureCookie: config.nodeEnv === 'production',
-  })
+  // Attempt both secure and non-secure cookie naming conventions.
+  const token =
+    (await getToken({
+      req: req,
+      secret: config.NEXT_AUTH_SECRET, // must match NextAuth secret
+      secureCookie: true,
+    })) ??
+    (await getToken({
+      req: req,
+      secret: config.NEXT_AUTH_SECRET, // must match NextAuth secret
+      secureCookie: false,
+    }))
 
   if (!token || typeof token.id !== 'string') {
     return null
@@ -116,6 +123,21 @@ export const optionalAuth = async (
   }
 
   return next()
+}
+
+/**
+ * Checks if the userRole is at least the required role level.
+ * @param userRole The user role to check.
+ * @param requiredRole The minimum role required.
+ * @returns True if the userRole is the requiredRole or higher, false otherwise.
+ */
+export const hasRole = (
+  userRole: RoleEnum,
+  requiredRole: RoleEnum
+): boolean => {
+  const userLevel = getRoleLevel(userRole)
+  const targetLevel = getRoleLevel(requiredRole)
+  return userLevel >= targetLevel
 }
 
 /**

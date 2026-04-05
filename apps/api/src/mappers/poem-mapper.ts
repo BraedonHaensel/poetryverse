@@ -1,5 +1,13 @@
 import { CreatePoemRequest } from '../schemas/poem-schemas'
 
+/** Normalizes poem text. */
+export const normalizePoemBody = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/\s+/g, ' ') // Replace whitespace characters
+    .replace(/[^a-z0-9\s]/g, '') // Replace special characters
+    .trim()
+
 interface CreatePoemMapperInput {
   authorId: string
   data: CreatePoemRequest
@@ -18,6 +26,7 @@ export const mapCreatePoemRequestToPrismaInput = ({
   isPublic: data.publicVisibility,
   isAIAssisted: data.createdWithAI,
   body: data.poem,
+  normalizedBody: normalizePoemBody(data.poem),
   poemTags: {
     create: tagIds.map((tagId) => ({
       tag: { connect: { id: tagId } },

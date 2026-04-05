@@ -5,9 +5,12 @@ import { useState } from 'react'
 import AdminUserManagement from '@/app/admin/admin-user/page-contents'
 import AnalyticsPageContents from '@/app/admin/analytics/page-contents'
 import GeneralUserManagement from '@/app/admin/general-user/page-contents'
+import { useAdminUser } from '@/context/admin-user-context'
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('analytics')
+
+  const { role } = useAdminUser()
 
   return (
     <div className="flex min-h-0 w-fit min-w-full flex-1">
@@ -24,11 +27,13 @@ export default function AdminPage() {
             active={activeTab === 'general'}
             onClick={() => setActiveTab('general')}
           />
-          <SidebarItem
-            label="Admin User Management"
-            active={activeTab === 'admin'}
-            onClick={() => setActiveTab('admin')}
-          />
+          {role === 'SUPER_ADMIN' && (
+            <SidebarItem
+              label="Admin User Management"
+              active={activeTab === 'admin'}
+              onClick={() => setActiveTab('admin')}
+            />
+          )}
         </div>
       </aside>
 

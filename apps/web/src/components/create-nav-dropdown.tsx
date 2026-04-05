@@ -14,19 +14,22 @@ import {
 } from './ui/dropdown-menu'
 
 type Props = {
+  className?: string
   children: React.ReactNode
 }
 
 /**
  * Dropdown for the Create link in the desktop navigation bar.
  */
-export default function CreateDropdown({ children }: Props) {
+export default function CreateDropdown({ className, children }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div onClick={() => setIsOpen(!isOpen)}>{children}</div>
+        <div className={className} onClick={() => setIsOpen(!isOpen)}>
+          {children}
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuPortal>
