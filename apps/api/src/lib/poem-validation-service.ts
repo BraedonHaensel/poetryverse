@@ -4,6 +4,8 @@ import damerauLevenshtein from 'damerau-levenshtein'
 import { POEM_INCLUDE_STATEMENT } from '../controllers/poem-controller'
 import { normalizePoemBody } from '../mappers/poem-mapper'
 import {
+  type PoemAIDetectionResponse,
+  PoemAIDetectionResponseSchema,
   type PoemPlagiarismTriageResponse,
   PoemPlagiarismTriageResponseSchema,
 } from '../schemas/gemini-response-schemas'
@@ -32,12 +34,34 @@ Important rules:
 - Prefer conservative triage, especially with shorter poems.
 - If grounded web results are available, include plausible sources in possibleSources.
 - If no plausible sources are found, leave possibleSources empty.
+- suspiciousPassages may be empty if there are no clear signals.
 
 The poem is provided with line numbers.
 
 Poem: `
 
-const _AI_DETECTION_PROMPT = ``
+const AI_DETECTION_PROMPT = `You are assisting with AI-authorship triage for a poetry platform.
+
+Your task is NOT to make a final accusation.
+Your task is to estimate whether the poem should be sent for human review as potentially AI-generated.
+
+Evaluate the poem for:
+1. repetitive or templated phrasing,
+2. unusually uniform tone and cadence,
+3. generic abstraction with low concrete specificity,
+4. signs of machine-like coherence across lines,
+5. whether the poem appears human-authored despite polished style.
+
+Important rules:
+- Return valid JSON only.
+- aiLikelihood must be a number from 0.0 to 1.0.
+- confidence must be a number from 0.0 to 1.0.
+- Prefer conservative triage, especially with shorter poems.
+- suspiciousPassages may be empty if there are no clear signals.
+
+The poem is provided with line numbers.
+
+Poem: `
 
 // Thresholds for AI and plagiarism detection.
 export const POEM_DETECTION_THRESHOLDS = {
@@ -122,19 +146,30 @@ export const triagePoemPlagiarismWithAI = async (
   }
 }
 
-// TODO: Implement Gemini-based AI-authorship detection.
-const detectPoemAIAuthorshipWithGemini = (_poemBody: string) => {
-  return null as null | {
-    aiLikelihood: number
-    confidence: number
-    reason: string
+const detectPoemAIAuthorshipWithGemini = async (
+  poemBody: string
+): Promise<PoemAIDetectionResponse | null> => {
+  const poemWithLineNumbers = addLineNumbersToPoem(poemBody)
+  const prompt = AI_DETECTION_PROMPT + poemWithLineNumbers
+
+  try {
+    return await generateGeminiJSONResponse(
+      prompt,
+      PoemAIDetectionResponseSchema
+    )
+  } catch (err: unknown) {
+    const status = getErrorStatus(err)
+    if (status === 429) {
+      logger.warn('Gemini AI-authorship triage rate limited; skipping triage.')
+      return null
+    }
+
+    logger.warn(
+      `Gemini AI-authorship triage failed; skipping triage. ${String(err)}`
+    )
+    return null
   }
 }
-
-const shouldFlagPlagiarismTriage = (triage: PoemPlagiarismTriageResponse) =>
-  triage.plagiarismLikelihood >=
-    POEM_DETECTION_THRESHOLDS.plagiarismGeminiLikelihood &&
-  triage.confidence >= POEM_DETECTION_THRESHOLDS.plagiarismGeminiConfidence
 
 const buildPlagiarismAutoReportReason = (
   triage: PoemPlagiarismTriageResponse
@@ -143,7 +178,7 @@ const buildPlagiarismAutoReportReason = (
     .slice(0, 3)
     .map(
       (passage) =>
-        `lines ${passage.startLine}-${passage.endLine}: "${passage.text}" (${passage.whySuspicious})`
+        `lines ${passage.startLine}-${passage.endLine}: ${passage.whySuspicious}`
     )
     .join(' | ')
 
@@ -176,6 +211,35 @@ const buildPlagiarismAutoReportReason = (
     : 'Potential plagiarism flagged by automated triage.'
 }
 
+const buildAIAutoReportReason = (detection: PoemAIDetectionResponse) => {
+  const suspiciousPassagesSummary = detection.suspiciousPassages
+    .slice(0, 3)
+    .map(
+      (passage) =>
+        `lines ${passage.startLine}-${passage.endLine}: ${passage.whyLikelyAI}`
+    )
+    .join(' | ')
+
+  const reasonSummary = detection.reason
+    .slice(0, AUTO_REPORT_REASON_MAX_LENGTH)
+    .trim()
+
+  const reason = [
+    `Auto-generated from Gemini AI-authorship triage.`,
+    `likelihood=${detection.aiLikelihood.toFixed(3)} confidence=${detection.confidence.toFixed(3)}`,
+    suspiciousPassagesSummary
+      ? `suspiciousPassages=${suspiciousPassagesSummary}`
+      : undefined,
+    reasonSummary ? `reason=${reasonSummary}` : undefined,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+  return reason.length > 0
+    ? reason
+    : 'Potential AI-generated content flagged by automated triage.'
+}
+
 const createAutoReport = async ({
   poemId,
   reasonType,
@@ -195,15 +259,15 @@ const createAutoReport = async ({
   })
 }
 
-/**
- * Simple creation pipeline:
- * - private poem => create UNCHECKED
- * - public poem => run checks
- *   - internal plagiarism fail => block
- *   - Gemini plagiarism threshold => create ADMIN_REVIEW + plagiarism report
- *   - Gemini AI threshold (TODO) => create ADMIN_REVIEW + AI report
- *   - otherwise => create APPROVED
- */
+const shouldFlagPlagiarismTriage = (triage: PoemPlagiarismTriageResponse) =>
+  triage.plagiarismLikelihood >=
+    POEM_DETECTION_THRESHOLDS.plagiarismGeminiLikelihood &&
+  triage.confidence >= POEM_DETECTION_THRESHOLDS.plagiarismGeminiConfidence
+
+const shouldFlagAIDetection = (triage: PoemAIDetectionResponse) =>
+  triage.aiLikelihood >= POEM_DETECTION_THRESHOLDS.aiGeminiLikelihood &&
+  triage.confidence >= POEM_DETECTION_THRESHOLDS.aiGeminiConfidence
+
 export const runPoemValidationPipeline = async (poem: Poem) => {
   if (!poem.isPublic || poem.approvalStatus !== PoemApprovalStatus.UNCHECKED) {
     // Don't run the validation pipeline if the poem is private or has already been checked.
@@ -223,17 +287,16 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
   }
 
   // Run AI detection check.
-  const aiDetection = detectPoemAIAuthorshipWithGemini(poem.body)
+  const aiDetection = await detectPoemAIAuthorshipWithGemini(poem.body)
   if (
     aiDetection &&
-    aiDetection.aiLikelihood >= POEM_DETECTION_THRESHOLDS.aiGeminiLikelihood &&
-    aiDetection.confidence >= POEM_DETECTION_THRESHOLDS.aiGeminiConfidence &&
+    shouldFlagAIDetection(aiDetection) &&
     !createdReport // Only create another report if a plagiarism one wasnt already created.
   ) {
     createdReport = await createAutoReport({
       poemId: poem.id,
       reasonType: ReasonType.AI,
-      reason: aiDetection.reason,
+      reason: buildAIAutoReportReason(aiDetection),
     })
   }
 

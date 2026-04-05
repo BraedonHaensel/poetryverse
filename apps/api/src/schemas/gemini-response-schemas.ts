@@ -48,6 +48,31 @@ export const PoemPlagiarismTriageResponseSchema = z.object({
   ),
 })
 
+/** Validates structured AI-authorship detection responses. */
+export const PoemAIDetectionResponseSchema = z.object({
+  aiLikelihood: z
+    .number()
+    .min(0)
+    .max(1)
+    .describe(
+      'A score from 0.0 to 1.0 estimating likelihood of AI authorship.'
+    ),
+  confidence: z
+    .number()
+    .min(0)
+    .max(1)
+    .describe('A score from 0.0 to 1.0 for confidence in the AI estimate.'),
+  reason: z.string(),
+  suspiciousPassages: z.array(
+    z.object({
+      text: z.string(),
+      startLine: z.number().int(),
+      endLine: z.number().int(),
+      whyLikelyAI: z.string(),
+    })
+  ),
+})
+
 /** Type returned by `PoemAIResponseSchema`. */
 export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
 
@@ -57,4 +82,9 @@ export type PoemInterpretResponse = z.infer<typeof PoemInterpretResponseSchema>
 /** Type returned by `PoemPlagiarismTriageResponseSchema`. */
 export type PoemPlagiarismTriageResponse = z.infer<
   typeof PoemPlagiarismTriageResponseSchema
+>
+
+/** Type returned by `PoemAIDetectionResponseSchema`. */
+export type PoemAIDetectionResponse = z.infer<
+  typeof PoemAIDetectionResponseSchema
 >
