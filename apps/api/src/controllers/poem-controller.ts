@@ -54,6 +54,11 @@ const poemIncludeStatement = {
       },
     },
   },
+  author: {
+    select: {
+      username: true,
+    },
+  },
 }
 
 /**
