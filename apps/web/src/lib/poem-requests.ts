@@ -50,6 +50,24 @@ export async function getUserPoems(userId: string): Promise<PoemData[]> {
 }
 
 /**
+ * Gets the feed poems (all public poems).
+ * @returns List of poems for the feed.
+ */
+export async function getFeedPoems(): Promise<PoemData[]> {
+  return api
+    .get('/api/poems')
+    .then((response) => {
+      const data = response.data
+      console.log('Feed poems:', data)
+      return data
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to get feed poems')
+      return []
+    })
+}
+
+/**
  * Filters a list of poems based on a filter mode.
  * @param poems List of poems to filter.
  * @param filterMode Mode to filter the poems by.
