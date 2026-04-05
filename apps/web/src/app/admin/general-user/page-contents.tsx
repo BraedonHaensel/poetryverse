@@ -115,12 +115,12 @@ export default function GeneralUserManagement() {
 
       <ConfirmationDialog
         isOpen={isPromoteConfirmOpen}
-        title="Are you sure you want to promote this user to admin?"
-        description={
+        title={
           selectedUser
-            ? `This will give ${selectedUser.username} admin priveleges.`
+            ? `Are you sure you want to promote ${selectedUser.username} to admin?`
             : 'This will promote the selected user to admin.'
         }
+        description="This user will be given admin priveleges."
         onClose={handleClosePromoteDialog}
         onAction={handlePromoteConfirm}
         variant="default"
