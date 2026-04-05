@@ -1,6 +1,7 @@
 import { Poem, PoemApprovalStatus, ReasonType } from '@prisma/client'
 import damerauLevenshtein from 'damerau-levenshtein'
 
+import { POEM_INCLUDE_STATEMENT } from '../controllers/poem-controller'
 import { normalizePoemBody } from '../mappers/poem-mapper'
 import {
   type PoemPlagiarismTriageResponse,
@@ -181,7 +182,7 @@ const buildPlagiarismAutoReportReason = (
 
   const reason = [
     `Auto-generated from Gemini plagiarism triage.`,
-    `likelihood=${triage.plagiarismLikelihood.toFixed(3)} confidence=${triage.confidence.toFixed(3)} recommendation=${triage.reviewRecommendation}`,
+    `likelihood=${triage.plagiarismLikelihood.toFixed(3)} confidence=${triage.confidence.toFixed(3)}`,
     triage.reason.slice(0, AUTO_REPORT_REASON_MAX_LENGTH).trim(),
     sourceSummary ? `possibleSources=${sourceSummary}` : undefined,
   ]
@@ -222,6 +223,11 @@ const createAutoReport = async ({
  *   - otherwise => create APPROVED
  */
 export const runPoemValidationPipeline = async (poem: Poem) => {
+  if (!poem.isPublic || poem.approvalStatus !== PoemApprovalStatus.UNCHECKED) {
+    // Don't run the validation pipeline if the poem is private or has already been checked.
+    return poem
+  }
+
   let createdReport = null
 
   // Run external plagiarism check with Gemini.
@@ -259,6 +265,7 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
       aiLikelihoodScore: aiDetection?.aiLikelihood,
       plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood,
     },
+    include: POEM_INCLUDE_STATEMENT,
   })
 
   return updatedPoem

@@ -43,7 +43,7 @@ import {
 import { validateUserExists } from './user-controller'
 
 // Include statement for fetching poems from the database with Prisma.
-const poemIncludeStatement = {
+export const POEM_INCLUDE_STATEMENT = {
   type: true,
   poemTags: {
     select: {
@@ -79,7 +79,7 @@ export const getPoems = async (req: Request, res: Response) => {
       logger.info(`Fetching all poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
         where: { authorId },
-        include: poemIncludeStatement,
+        include: POEM_INCLUDE_STATEMENT,
         orderBy: { createdAt: 'desc' },
       })
       logger.info(
@@ -94,7 +94,7 @@ export const getPoems = async (req: Request, res: Response) => {
           authorId,
           isPublic: true,
         },
-        include: poemIncludeStatement,
+        include: POEM_INCLUDE_STATEMENT,
         orderBy: { createdAt: 'desc' },
       })
       logger.info(
@@ -107,7 +107,7 @@ export const getPoems = async (req: Request, res: Response) => {
     logger.info('Fetching all public poems')
     const poems = await prisma.poem.findMany({
       where: { isPublic: true },
-      include: poemIncludeStatement,
+      include: POEM_INCLUDE_STATEMENT,
     })
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
@@ -151,23 +151,26 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
   const { id: poemId } = req.params as UpdatePoemParamRequest
   const { isPublic } = req.body as UpdatePoemBodyRequest
 
-  const poemData = await validateAndReturnPoem(poemId)
+  const existingPoem = await validateAndReturnPoem(poemId)
 
-  if (poemData.authorId === requesterUserId) {
-    logger.info(
-      `Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
-    )
-    const updatedPoem = await prisma.poem.update({
-      where: { id: poemId },
-      data: { isPublic },
-      include: poemIncludeStatement,
-    })
-    logger.info(
-      `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
-    )
-    return res.status(200).json(updatedPoem)
+  if (existingPoem.authorId !== requesterUserId) {
+    throw unauthorized('You do not have permission to update this poem.')
   }
-  throw unauthorized('You do not have permission to update this poem.')
+
+  logger.info(
+    `Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
+  )
+  const updatedPoem = await prisma.poem.update({
+    where: { id: poemId },
+    data: { isPublic },
+    include: POEM_INCLUDE_STATEMENT,
+  })
+  logger.info(
+    `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
+  )
+
+  const validatedPoem = await runPoemValidationPipeline(updatedPoem)
+  return res.status(200).json(validatedPoem)
 }
 
 /**
@@ -253,7 +256,7 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
       data: poemData,
       tagIds: existingTags.map((tag) => tag.id),
     }),
-    include: poemIncludeStatement,
+    include: POEM_INCLUDE_STATEMENT,
   })
 
   // Validate the poem against the validation pipeline.
@@ -538,7 +541,7 @@ const validateAndReturnPoemTags = async (tagIds: string[]) => {
 const validateAndReturnPoem = async (poemId: string) => {
   const poem = await prisma.poem.findUnique({
     where: { id: poemId },
-    include: poemIncludeStatement,
+    include: POEM_INCLUDE_STATEMENT,
   })
 
   if (!poem) {

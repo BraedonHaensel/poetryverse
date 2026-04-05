@@ -47,7 +47,6 @@ export const PoemPlagiarismTriageResponseSchema = z.object({
       similarityEstimate: z.number().min(0).max(1),
     })
   ),
-  notesForAdmin: z.string(),
 })
 
 /** Type returned by `PoemAIResponseSchema`. */
