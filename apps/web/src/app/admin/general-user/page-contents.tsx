@@ -120,7 +120,7 @@ export default function GeneralUserManagement() {
             ? `Are you sure you want to promote ${selectedUser.username} to admin?`
             : 'This will promote the selected user to admin.'
         }
-        description="This user will be given admin priveleges."
+        description="This user will be given admin privileges."
         onClose={handleClosePromoteDialog}
         onAction={handlePromoteConfirm}
         variant="default"
