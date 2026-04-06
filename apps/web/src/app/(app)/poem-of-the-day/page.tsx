@@ -5,9 +5,15 @@ import { Star } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { api, displayApiError } from '@/lib/api'
 
 interface PoemData {
@@ -40,7 +46,7 @@ const DUMMY_POEM: PoemData = {
     'For you have been my anchor to the Earth,',
     'And to my soul, you are the living spark,',
     'Though time may drift as tide pulls us from the shore,',
-    "I'll love you now, and then forevermore."
+    "I'll love you now, and then forevermore.",
   ],
   linecount: '14',
   rating: 7,
@@ -61,7 +67,7 @@ export default function PoemOfTheDay() {
       try {
         setIsLoading(true)
         if (USE_DUMMY_DATA) {
-          await new Promise(resolve => setTimeout(resolve, 500))
+          await new Promise((resolve) => setTimeout(resolve, 500))
           setPoemData(DUMMY_POEM)
         } else {
           const response = await api.get('/poems/poem-of-the-day')
@@ -83,26 +89,16 @@ export default function PoemOfTheDay() {
     return (
       <>
         <div className="flex flex-1 flex-col gap-4 md:hidden">
-          <MobilePageHeader title="PoetryVerse" showLogo={true} />
-          <div className="flex flex-col gap-2 px-2 pb-2">
-            <ShadowCard>
-              <CardContent className="flex h-96 items-center justify-center">
-                <p className="text-muted-foreground">
-                  Loading poem of the day...
-                </p>
-              </CardContent>
-            </ShadowCard>
-          </div>
+          <MobilePageHeader
+            title="PoetryVerse"
+            showLogo={true}
+            showGuestSignIn={true}
+          />
+          <PageLoadingIndicator />
         </div>
 
         <div className="hidden md:flex">
-          <ShadowCard className="mx-auto w-full max-w-2xl">
-            <CardContent className="flex h-96 items-center justify-center">
-              <p className="text-muted-foreground">
-                Loading poem of the day...
-              </p>
-            </CardContent>
-          </ShadowCard>
+          <PageLoadingIndicator />
         </div>
       </>
     )
@@ -112,26 +108,16 @@ export default function PoemOfTheDay() {
     return (
       <>
         <div className="flex flex-1 flex-col gap-4 md:hidden">
-          <MobilePageHeader title="PoetryVerse" showLogo={true} />
-          <div className="flex flex-col gap-2 px-2 pb-2">
-            <ShadowCard>
-              <CardContent className="flex h-96 items-center justify-center">
-                <p className="text-muted-foreground">
-                  No poem available at the moment
-                </p>
-              </CardContent>
-            </ShadowCard>
-          </div>
+          <MobilePageHeader
+            title="PoetryVerse"
+            showLogo={true}
+            showGuestSignIn={true}
+          />
+          <PageLoadingIndicator />
         </div>
 
         <div className="hidden md:flex">
-          <ShadowCard className="mx-auto w-full max-w-2xl">
-            <CardContent className="flex h-96 items-center justify-center">
-              <p className="text-muted-foreground">
-                No poem available at the moment
-              </p>
-            </CardContent>
-          </ShadowCard>
+          <PageLoadingIndicator />
         </div>
       </>
     )
@@ -141,16 +127,20 @@ export default function PoemOfTheDay() {
     <>
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
-        <MobilePageHeader title="PoetryVerse" showLogo={true} />
+        <MobilePageHeader
+          title="PoetryVerse"
+          showLogo={true}
+          showGuestSignIn={true}
+        />
 
         <div className="flex flex-col gap-2 px-2 pb-2">
           <ShadowCard>
-            <CardHeader className="pb-2">
-              <div className="mb-1 inline-block rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
-                TODAY&#39;S FEATURED POEM
+            <CardHeader className="pb-2 text-center">
+              <div className="mb-1 block w-full rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
+                ✨ TODAY&#39;S FEATURED POEM ✨
               </div>
-              <CardTitle className="text-xl font-bold">{poem.title}</CardTitle>
-              <p className="text-xs font-medium text-muted-foreground">
+              <CardTitle className="text-2xl font-bold">{poem.title}</CardTitle>
+              <p className="text-muted-foreground text-sm font-medium">
                 {poem.authorUsername}
                 {poem.category && ` · ${poem.category}`}
               </p>
@@ -162,7 +152,7 @@ export default function PoemOfTheDay() {
                   {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
                     <p
                       key={index}
-                      className="leading-snug text-sm text-foreground"
+                      className="text-foreground text-sm leading-snug"
                     >
                       {line}
                     </p>
@@ -170,7 +160,7 @@ export default function PoemOfTheDay() {
                   {poem.lines.length > LINES_TO_SHOW && (
                     <button
                       onClick={() => setFullPoemOpen(true)}
-                      className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
+                      className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
                     >
                       ... Read more
                     </button>
@@ -182,7 +172,7 @@ export default function PoemOfTheDay() {
                 {poem.rating !== undefined && (
                   <button
                     onClick={() => setIsLiked(!isLiked)}
-                    className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
                   >
                     <Star
                       size={20}
@@ -192,7 +182,7 @@ export default function PoemOfTheDay() {
                     <span className="text-sm font-semibold">{poem.rating}</span>
                   </button>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {poem.linecount} lines
                 </p>
               </div>
@@ -202,21 +192,21 @@ export default function PoemOfTheDay() {
       </div>
 
       {/* Desktop layout */}
-      <div className="hidden md:flex">
+      <div className="my-auto hidden md:flex">
         <ShadowCard className="mx-auto w-full max-w-2xl">
-          <CardHeader className="pb-0">
-            <div className="space-y-2 pb-2 border-b">
+          <CardHeader className="pb-0 text-center">
+            <div className="space-y-2 border-b pb-2">
               <div>
-                <div className="mb-1 inline-block rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
-                  TODAY&#39;S FEATURED POEM
+                <div className="mb-1 block w-full rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
+                  ✨ TODAY&#39;S FEATURED POEM ✨
                 </div>
-                <CardTitle className="text-xl font-bold md:text-2xl">
+                <CardTitle className="text-2xl font-bold md:text-3xl">
                   {poem.title}
                 </CardTitle>
               </div>
 
               {/* Author info with category */}
-              <p className="text-xs font-medium text-muted-foreground md:text-sm">
+              <p className="text-muted-foreground text-sm font-medium md:text-base">
                 {poem.authorUsername}
                 {poem.category && ` · ${poem.category}`}
               </p>
@@ -230,7 +220,7 @@ export default function PoemOfTheDay() {
                 {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
                   <p
                     key={index}
-                    className="leading-snug text-sm text-foreground md:text-base"
+                    className="text-foreground text-sm leading-snug md:text-base"
                   >
                     {line}
                   </p>
@@ -238,7 +228,7 @@ export default function PoemOfTheDay() {
                 {poem.lines.length > LINES_TO_SHOW && (
                   <button
                     onClick={() => setFullPoemOpen(true)}
-                    className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
+                    className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
                   >
                     ... Read more
                   </button>
@@ -251,7 +241,7 @@ export default function PoemOfTheDay() {
               {poem.rating !== undefined && (
                 <button
                   onClick={() => setIsLiked(!isLiked)}
-                  className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                  className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
                 >
                   <Star
                     size={28}
@@ -261,7 +251,7 @@ export default function PoemOfTheDay() {
                   <span className="text-lg font-semibold">{poem.rating}</span>
                 </button>
               )}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {poem.linecount} lines
               </p>
             </div>
@@ -271,12 +261,12 @@ export default function PoemOfTheDay() {
 
       {/* Full poem modal */}
       <Dialog open={fullPoemOpen} onOpenChange={setFullPoemOpen}>
-        <DialogContent className="!max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] max-w-2xl! overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl">{poem.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4 text-sm">
               {poem.authorUsername}
               {poem.category && ` · ${poem.category}`}
             </p>
@@ -284,7 +274,7 @@ export default function PoemOfTheDay() {
               {poem.lines.map((line, index) => (
                 <p
                   key={index}
-                  className="leading-relaxed text-foreground md:text-lg"
+                  className="text-foreground leading-relaxed md:text-lg"
                 >
                   {line}
                 </p>
@@ -293,7 +283,7 @@ export default function PoemOfTheDay() {
             <div className="mt-4 flex items-center justify-between">
               <button
                 onClick={() => setIsLiked(!isLiked)}
-                className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
               >
                 <Star
                   size={28}
@@ -302,7 +292,7 @@ export default function PoemOfTheDay() {
                 />
                 <span className="text-lg font-semibold">{poem.rating}</span>
               </button>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 {poem.linecount} lines
               </span>
             </div>

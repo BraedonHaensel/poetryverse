@@ -8,7 +8,12 @@ import MobilePageHeader from '@/components/mobile-page-header'
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { displayApiError } from '@/lib/api'
 import {
@@ -96,7 +101,8 @@ const DUMMY_POEMS: PoemData[] = [
 export type { PoemTag }
 
 export default function HomePage() {
-  const [poemTypeFilter, setPoemTypeFilter] = useState<PoemTypeFilterMode>('ALL')
+  const [poemTypeFilter, setPoemTypeFilter] =
+    useState<PoemTypeFilterMode>('ALL')
   const [isFollowingOnly, setIsFollowingOnly] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [likedPoems, setLikedPoems] = useState<Set<string>>(new Set())
@@ -193,7 +199,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   {poem.isAIAssisted && (
-                    <span className="whitespace-nowrap rounded-full bg-black px-3 py-1 text-sm font-bold text-white">
+                    <span className="rounded-full bg-black px-3 py-1 text-sm font-bold whitespace-nowrap text-white">
                       AI Assisted
                     </span>
                   )}
@@ -203,14 +209,14 @@ export default function HomePage() {
                 <p className="text-sm">{poem.body.substring(0, 100)}...</p>
                 <button
                   onClick={() => openFullPoem(poem)}
-                  className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
+                  className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
                 >
                   ... Read more
                 </button>
                 <div className="flex items-center gap-2 border-t pt-2">
                   <button
                     onClick={() => toggleLike(poem.id)}
-                    className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
                   >
                     <Star
                       size={20}
@@ -287,14 +293,14 @@ export default function HomePage() {
                   <p className="text-sm">{poem.body.substring(0, 120)}...</p>
                   <button
                     onClick={() => openFullPoem(poem)}
-                    className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer w-fit"
+                    className="w-fit cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
                   >
                     ... Read more
                   </button>
                   <div className="flex items-center gap-2 border-t pt-2">
                     <button
                       onClick={() => toggleLike(poem.id)}
-                      className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                      className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
                     >
                       <Star
                         size={20}
@@ -313,24 +319,26 @@ export default function HomePage() {
 
       {/* Full poem modal */}
       <Dialog open={fullPoemOpen} onOpenChange={setFullPoemOpen}>
-        <DialogContent className="!max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] max-w-2xl! overflow-y-auto px-4 md:px-8">
           <DialogHeader>
-            <DialogTitle className="text-2xl">{selectedPoem?.title}</DialogTitle>
+            <DialogTitle className="text-2xl">
+              {selectedPoem?.title}
+            </DialogTitle>
           </DialogHeader>
           {selectedPoem && (
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-muted-foreground mb-4 text-sm">
                 {selectedPoem.authorId} · {selectedPoem.type.name}
               </p>
               <div className="space-y-1 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-                <p className="leading-relaxed text-foreground md:text-lg">
+                <p className="text-foreground leading-relaxed md:text-lg">
                   {selectedPoem.body}
                 </p>
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <button
                   onClick={() => toggleLike(selectedPoem.id)}
-                  className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                  className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
                 >
                   <Star
                     size={28}
@@ -347,4 +355,3 @@ export default function HomePage() {
     </>
   )
 }
- 

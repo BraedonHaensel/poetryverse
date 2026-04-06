@@ -13,6 +13,7 @@ type Props = {
   showLogo?: boolean
   title: string
   showSignInButton?: boolean
+  showGuestSignIn?: boolean
   image?: string
   children?: React.ReactNode
 }
@@ -34,6 +35,7 @@ export default function MobilePageHeader({
   showLogo = false,
   title,
   showSignInButton = false,
+  showGuestSignIn = false,
   image,
   className = '',
   children,
@@ -56,7 +58,10 @@ export default function MobilePageHeader({
         )}
 
         {showLogo && (
-          <Link href="/home" className="shrink-0 transition-opacity hover:opacity-70">
+          <Link
+            href="/home"
+            className="shrink-0 transition-opacity hover:opacity-70"
+          >
             <Image
               src="/feather-logo.svg"
               alt="PoetryVerse logo"
@@ -72,6 +77,8 @@ export default function MobilePageHeader({
 
       {/* Right side */}
       {showSignInButton ? (
+        <SignInButton className="w-26" />
+      ) : showGuestSignIn ? (
         <SignInButton className="w-26" />
       ) : image !== undefined ? (
         <Image src={image} alt="" width={40} height={40} />
