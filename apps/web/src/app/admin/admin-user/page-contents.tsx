@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { TableSearch } from '@/components/admin-table/table-search'
+import { ConfirmationDialog } from '@/components/confirmation-dialog'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -40,13 +41,50 @@ const usersData: User[] = [
 export default function GeneralUserManagement() {
   const [search, setSearch] = useState('')
   const [users, setUsers] = useState(usersData)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+  const [isRevokeConfirmOpen, setIsRevokeConfirmOpen] = useState(false)
 
   const handleDelete = (id: number) => {
     setUsers(users.filter((user) => user.id !== id))
   }
 
-  const handlePromote = (id: number) => {
-    console.log('Promote user:', id)
+  const handleRevoke = (id: number) => {
+    console.log('Revoke admin privileges from user:', id)
+  }
+
+  const handleOpenRevokeDialog = (user: User) => {
+    setSelectedUser(user)
+    setIsRevokeConfirmOpen(true)
+  }
+
+  const handleCloseRevokeDialog = () => {
+    setIsRevokeConfirmOpen(false)
+    setSelectedUser(null)
+  }
+
+  const handleRevokeConfirm = async () => {
+    if (!selectedUser) return
+
+    handleRevoke(selectedUser.id)
+    handleCloseRevokeDialog()
+  }
+
+  const handleOpenDeleteDialog = (user: User) => {
+    setSelectedUser(user)
+    setIsDeleteConfirmOpen(true)
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteConfirmOpen(false)
+    setSelectedUser(null)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedUser) return
+
+    handleDelete(selectedUser.id)
+    handleCloseDeleteDialog()
   }
 
   const filteredUsers = users.filter((user) =>
@@ -61,57 +99,86 @@ export default function GeneralUserManagement() {
   ]
 
   return (
-    <div className="min-w-200">
-      <CardHeader className="px-0 pt-0 pb-5">
-        <CardTitle className="text-2xl font-bold">
-          Admin User Management
-        </CardTitle>
-      </CardHeader>
+    <>
+      <ConfirmationDialog
+        isOpen={isDeleteConfirmOpen}
+        title={
+          selectedUser
+            ? `Are you sure you want to delete ${selectedUser.username}?`
+            : 'Are you sure you want to delete this user?'
+        }
+        description="This action cannot be undone."
+        onClose={handleCloseDeleteDialog}
+        onAction={handleDeleteConfirm}
+        variant="delete"
+      />
+      <ConfirmationDialog
+        isOpen={isRevokeConfirmOpen}
+        title={
+          selectedUser
+            ? `Are you sure you want to revoke admin privileges from ${selectedUser.username}?`
+            : 'Are you sure you want to revoke admin privileges from this user?'
+        }
+        description="This user will lose their admin privileges."
+        onClose={handleCloseRevokeDialog}
+        onAction={handleRevokeConfirm}
+        variant="default"
+      />
 
-      <ShadowCard className="bg-admin-panel p-3">
-        <CardContent className="p-0">
-          <div className="mb-4">
-            <TableSearch
-              value={search}
-              onChange={setSearch}
-              placeholder="Search users by username..."
-            />
-          </div>
-          {filteredUsers.length === 0 && search.trim() ? (
-            <div className="rounded-xl bg-white px-6 py-10 text-center">
-              <p className="text-muted-foreground">
-                No users found matching &quot;{search}&quot;
-              </p>
+      <div className="min-w-200">
+        <CardHeader className="px-0 pt-0 pb-5">
+          <CardTitle className="text-2xl font-bold">
+            Admin User Management
+          </CardTitle>
+        </CardHeader>
+
+        <ShadowCard className="bg-admin-panel p-3">
+          <CardContent className="p-0">
+            <div className="mb-4">
+              <TableSearch
+                value={search}
+                onChange={setSearch}
+                placeholder="Search users by username..."
+              />
             </div>
-          ) : (
-            <DataTable
-              columns={columns}
-              data={filteredUsers}
-              gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
-              renderActions={(user) => (
-                <div className="flex items-center justify-center gap-5">
-                  <button
-                    type="button"
-                    className="cursor-pointer transition hover:opacity-70"
-                    onClick={() => handleDelete(user.id)}
-                    aria-label="Delete user"
-                  >
-                    <Trash2 size={28} strokeWidth={2.25} />
-                  </button>
-                  <button
-                    type="button"
-                    className="cursor-pointer transition hover:opacity-70"
-                    onClick={() => handlePromote(user.id)}
-                    aria-label="Promote user"
-                  >
-                    <ArrowDownCircle size={30} strokeWidth={2.25} />
-                  </button>
-                </div>
-              )}
-            />
-          )}
-        </CardContent>
-      </ShadowCard>
-    </div>
+
+            {filteredUsers.length === 0 && search.trim() ? (
+              <div className="rounded-xl bg-white px-6 py-10 text-center">
+                <p className="text-muted-foreground">
+                  No users found matching &quot;{search}&quot;
+                </p>
+              </div>
+            ) : (
+              <DataTable
+                columns={columns}
+                data={filteredUsers}
+                gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
+                renderActions={(user) => (
+                  <div className="flex items-center justify-center gap-5">
+                    <button
+                      type="button"
+                      className="cursor-pointer transition hover:opacity-70"
+                      onClick={() => handleOpenDeleteDialog(user)}
+                      aria-label="Delete user"
+                    >
+                      <Trash2 size={28} strokeWidth={2.25} />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="cursor-pointer transition hover:opacity-70"
+                      onClick={() => handleOpenRevokeDialog(user)}
+                      aria-label="Revoke admin privileges"
+                    >
+                      <ArrowDownCircle size={30} strokeWidth={2.25} />
+                    </button>
+                  </div>
+                )}
+              />
+            )}
+          </CardContent>
+        </ShadowCard>
+      </div>
+    </>
   )
 }
