@@ -111,8 +111,8 @@ model Poem {
   isPublic                  Boolean    @default(true) // Visibility of the poem
   isAIAssisted              Boolean    @default(false) // True if AI was used to help create poem.
   aiLikelihoodScore         Float? // Optional score from moderation/AI detection workflow.
-  plagiarismLikelihoodScore Float?
-  approvalStatus            PoemApprovalStatus @default(UNCHECKED)
+  plagiarismLikelihoodScore Float? // Optional score from moderation/plagiarism detection workflow.
+  approvalStatus            PoemApprovalStatus @default(UNCHECKED) approvalStatus // Approval workflow status - tracks AI/plagiarism checks and admin review
   body                      String
   normalizedBody            String // Normalized poem body string for internal plagiarism checking.
   createdAt                 DateTime   @default(now())
