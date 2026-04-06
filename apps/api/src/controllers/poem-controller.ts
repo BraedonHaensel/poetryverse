@@ -55,6 +55,16 @@ export const POEM_INCLUDE_STATEMENT = {
       },
     },
   },
+  author: {
+    select: {
+      username: true,
+    },
+  },
+  _count: {
+    select: {
+      likes: true,
+    },
+  },
 } satisfies Prisma.PoemInclude
 
 const PUBLIC_APPROVED_POEM_FILTER = {
