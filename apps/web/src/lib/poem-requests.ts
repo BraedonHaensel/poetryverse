@@ -5,7 +5,9 @@ import { api, displayApiError } from './api'
 export type PoemData = {
   id: string
   authorId: string
-
+  author: {
+    username: string
+  }
   title: string
   body: string
   type: PoemType
@@ -15,6 +17,9 @@ export type PoemData = {
   isAIAssisted: boolean
 
   aiLikelihoonScore: number
+  count: {
+    likes: number
+  }
 
   createdAt: Date
   updatedAt: Date
