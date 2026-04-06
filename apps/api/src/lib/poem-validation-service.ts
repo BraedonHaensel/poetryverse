@@ -10,6 +10,7 @@ import {
   PoemPlagiarismTriageResponseSchema,
 } from '../schemas/gemini-response-schemas'
 import { generateGeminiJSONResponse } from './ai'
+import config from './config'
 import { prisma } from './db'
 import { logger } from './logger'
 import { getErrorStatus } from './utils'
@@ -334,8 +335,12 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
     poem.approvalStatus === PoemApprovalStatus.PENDING ||
     poem.approvalStatus === PoemApprovalStatus.UNCHECKED
 
-  if (!poem.isPublic || !isPendingOrUnchecked) {
-    // Don't run the validation pipeline if the poem is private or has already been finalized.
+  if (
+    !poem.isPublic ||
+    !isPendingOrUnchecked ||
+    !config.ENABLE_GEMINI_POEM_VALIDATION
+  ) {
+    // Don't run the validation pipeline if the poem is private, has already been finalized, or gemini validation is disabled.
     logger.info(
       `Skipping poem validation pipeline poemId=${poem.id} reason=${!poem.isPublic ? 'not_public' : 'already_finalized'}`
     )

@@ -2,6 +2,7 @@ import { PoemApprovalStatus, Prisma, RoleEnum } from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
+import config from '../lib/config'
 import { prisma } from '../lib/db'
 import {
   badRequest,
@@ -192,15 +193,21 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
   logger.info(
     `Updating poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
   )
-  const existingPoemStatus = existingPoem.approvalStatus
+
+  // Update approval status to PENDING if the poem has to be validated with Gemini.
+  const existingApprovalStatus = existingPoem.approvalStatus
+  const shouldRunValidationPipeline =
+    config.ENABLE_GEMINI_POEM_VALIDATION &&
+    isPublic &&
+    existingApprovalStatus === PoemApprovalStatus.UNCHECKED
+
   const updatedPoem = await prisma.poem.update({
     where: { id: poemId },
     data: {
       isPublic,
-      approvalStatus:
-        isPublic && existingPoemStatus === PoemApprovalStatus.UNCHECKED
-          ? PoemApprovalStatus.PENDING
-          : existingPoemStatus,
+      approvalStatus: shouldRunValidationPipeline
+        ? PoemApprovalStatus.PENDING
+        : existingApprovalStatus,
     },
     include: POEM_INCLUDE_STATEMENT,
   })
@@ -208,12 +215,14 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
     `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
   )
 
-  // Validate public poems in the background after returning a pending response.
-  void runPoemValidationPipeline(updatedPoem).catch((err: unknown) => {
-    logger.error(
-      `Background poem validation failed for poemId=${updatedPoem.id} userId=${req.auth.userId}: ${String(err)}`
-    )
-  })
+  if (shouldRunValidationPipeline) {
+    // Validate public poems in the background after returning a pending response.
+    void runPoemValidationPipeline(updatedPoem).catch((err: unknown) => {
+      logger.error(
+        `Background poem validation failed for poemId=${updatedPoem.id} userId=${req.auth.userId}: ${String(err)}`
+      )
+    })
+  }
 
   return res.status(200).json(updatedPoem)
 }
@@ -296,9 +305,13 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
   }
 
   // Internal plagiarism check passed, create the poem.
-  const initialApprovalStatus = isPublicPoem
-    ? PoemApprovalStatus.PENDING
-    : PoemApprovalStatus.UNCHECKED
+  // - Initial approval status is APPROVED if the validation pipeline is disabled.
+  // - Otherwise, it depends on the poem's visibility (Public poems will run through the pipeline, so they are PENDING).
+  const initialApprovalStatus = !config.ENABLE_GEMINI_POEM_VALIDATION
+    ? PoemApprovalStatus.APPROVED
+    : isPublicPoem
+      ? PoemApprovalStatus.PENDING
+      : PoemApprovalStatus.UNCHECKED
 
   const createdPoem = await prisma.poem.create({
     data: mapCreatePoemRequestToPrismaInput({
