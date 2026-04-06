@@ -310,6 +310,10 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     include: POEM_INCLUDE_STATEMENT,
   })
 
+  logger.info(
+    `Created poem id=${createdPoem.id} userId=${req.auth.userId} typeId=${createdPoem.typeId} tagCount=${createdPoem.poemTags.length}`
+  )
+
   // Validate public poems in the background after returning a pending response.
   void runPoemValidationPipeline(createdPoem).catch((err: unknown) => {
     logger.error(
