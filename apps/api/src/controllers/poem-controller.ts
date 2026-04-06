@@ -597,7 +597,7 @@ const validateAndReturnPoemTags = async (tagIds: string[]) => {
 }
 
 /** Validates poemId against poems in the database. */
-const validateAndReturnPoem = async (poemId: string) => {
+export const validateAndReturnPoem = async (poemId: string) => {
   const poem = await prisma.poem.findUnique({
     where: { id: poemId },
     include: POEM_INCLUDE_STATEMENT,
