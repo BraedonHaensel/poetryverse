@@ -5,32 +5,25 @@ type AdminTab = 'analytics' | 'general' | 'admin'
 export default function AdminMobileSidebar({
   activeTab,
   setActiveTab,
-  isSuperAdmin,
 }: {
   activeTab: AdminTab
   setActiveTab: (tab: AdminTab) => void
-  isSuperAdmin: boolean
 }) {
+  const isUserManagementTab = activeTab === 'general' || activeTab === 'admin'
+
   return (
     <nav className="fixed right-0 bottom-0 left-0 z-20 border-t border-black/20 bg-white md:hidden">
-      <div className={`grid ${isSuperAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+      <div className="grid grid-cols-2">
         <MobileTabItem
           label="Analytics"
           active={activeTab === 'analytics'}
           onClick={() => setActiveTab('analytics')}
         />
         <MobileTabItem
-          label="General User"
-          active={activeTab === 'general'}
+          label="User Management"
+          active={isUserManagementTab}
           onClick={() => setActiveTab('general')}
         />
-        {isSuperAdmin && (
-          <MobileTabItem
-            label="Admin"
-            active={activeTab === 'admin'}
-            onClick={() => setActiveTab('admin')}
-          />
-        )}
       </div>
     </nav>
   )
@@ -48,7 +41,7 @@ function MobileTabItem({
   return (
     <button
       onClick={onClick}
-      className="flex justify-center py-5 text-center text-sm font-extrabold tracking-[0.04em] min-[380px]:text-sm"
+      className="flex justify-center py-5 text-center text-sm font-extrabold tracking-[0.04em]"
     >
       <span className="relative">
         {label}
