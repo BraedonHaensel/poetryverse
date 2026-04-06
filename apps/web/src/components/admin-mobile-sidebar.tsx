@@ -2,7 +2,7 @@
 
 type AdminTab = 'analytics' | 'general' | 'admin'
 
-export default function AdminMobileNavbar({
+export default function AdminMobileSidebar({
   activeTab,
   setActiveTab,
   isSuperAdmin,
