@@ -10,7 +10,7 @@ export default function AdminLayout({
     <div className="flex h-svh min-w-[320px] flex-col">
       <AdminUserProvider>
         <AdminNavbar />
-        <main className="flex flex-1 flex-col overflow-auto bg-white">
+        <main className="bg-off-white flex flex-1 flex-col overflow-auto md:bg-white">
           {children}
         </main>
       </AdminUserProvider>
