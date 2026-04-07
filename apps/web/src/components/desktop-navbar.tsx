@@ -86,7 +86,11 @@ export default function DesktopNavbar({ className = '' }: Props) {
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
           {/* Main navbar items on the left side */}
           <div className="flex items-center gap-8">
-            <Link href="/" aria-label="Home">
+            <Link
+              href="/"
+              aria-label="Home"
+              className="transition-opacity hover:opacity-70"
+            >
               <Image
                 src="/feather-logo.svg"
                 alt="PoetryVerse logo"
