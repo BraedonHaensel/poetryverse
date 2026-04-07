@@ -9,6 +9,7 @@ import MobilePageHeader from '@/components/mobile-page-header'
 import { PoemCard } from '@/components/poem-card'
 import { PoemTagsFilter } from '@/components/poem-tags-filter'
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { Separator } from '@/components/ui/separator'
 import { displayApiError } from '@/lib/api'
 import {
@@ -115,6 +116,7 @@ export default function HomePage() {
   const [likedPoems, setLikedPoems] = useState<Set<string>>(new Set())
   const [fullPoemOpen, setFullPoemOpen] = useState(false)
   const [selectedPoem, setSelectedPoem] = useState<PoemData | null>(null)
+  const [showSignInDialog, setShowSignInDialog] = useState(false)
 
   const [poems, setPoems] = useState<PoemData[]>(DUMMY_POEMS)
   const [allTags, setAllTags] = useState<PoemTag[]>([])
@@ -145,6 +147,10 @@ export default function HomePage() {
   }, [])
 
   const toggleLike = (poemId: string) => {
+    if (isGuest) {
+      setShowSignInDialog(true)
+      return
+    }
     const newLiked = new Set(likedPoems)
     if (newLiked.has(poemId)) {
       newLiked.delete(poemId)
@@ -268,6 +274,11 @@ export default function HomePage() {
         isLiked={selectedPoem ? likedPoems.has(selectedPoem.id) : false}
         onOpenChange={setFullPoemOpen}
         onToggleLike={() => selectedPoem && toggleLike(selectedPoem.id)}
+      />
+
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
       />
     </>
   )
