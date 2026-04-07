@@ -82,12 +82,16 @@ export const getPoemInclude = (currentUserId?: string) => ({
     },
   },
 })
-//  satisfies Prisma.PoemInclude
 
 const PUBLIC_APPROVED_POEM_FILTER = {
   isPublic: true,
   approvalStatus: PoemApprovalStatus.APPROVED,
 } as const
+
+interface PublicPoemsOptions {
+  requesterUserId?: string
+  excludeUserId?: string
+}
 
 /**
  * Retrieves poems with from the database and returns them as JSON.
@@ -137,7 +141,7 @@ export const getPoems = async (req: Request, res: Response) => {
   } else {
     // If authorId is not provided, return all public poems
     logger.info('Fetching all public poems')
-    const poems = await getPublicPoems(requesterUserId)
+    const poems = await getPublicPoems({ requesterUserId })
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
   }
@@ -154,7 +158,10 @@ export const getPoemsFeed = async (req: Request, res: Response) => {
   const requesterUserId = authReq.auth?.userId
 
   logger.info(`Fetching poems feed for userId=${requesterUserId ?? 'guest'}`)
-  const poems = await getPublicPoems(requesterUserId)
+  const poems = await getPublicPoems({
+    requesterUserId,
+    excludeUserId: requesterUserId,
+  })
   const shuffledPoems = poems.sort(() => Math.random() - 0.5)
   logger.info(`Fetched poems feed count=${shuffledPoems.length}`)
   return res.status(200).json(shuffledPoems)
@@ -750,10 +757,10 @@ export const getDailyPoem = async (req: Request, res: Response) => {
  * @param excludeUserId Optional user ID to exclude poems from.
  * @returns List of public poems, optionally excluding the specified user's poems.
  */
-const getPublicPoems = async (
-  requesterUserId: string,
-  excludeUserId?: string
-) => {
+const getPublicPoems = async ({
+  requesterUserId,
+  excludeUserId,
+}: PublicPoemsOptions) => {
   const constructedWhere: Prisma.PoemWhereInput = {
     ...PUBLIC_APPROVED_POEM_FILTER,
   }
