@@ -49,7 +49,7 @@ import {
 import { validateUserExists } from './user-controller'
 
 // Include statement for fetching poems from the database with Prisma.
-export const POEM_INCLUDE_STATEMENT = {
+export const getPoemInclude = (currentUserId?: string) => ({
   type: true,
   poemTags: {
     select: {
@@ -66,12 +66,23 @@ export const POEM_INCLUDE_STATEMENT = {
       username: true,
     },
   },
+  likes: currentUserId
+    ? {
+        where: {
+          userId: currentUserId,
+        },
+        select: {
+          userId: true,
+        },
+      }
+    : false,
   _count: {
     select: {
       likes: true,
     },
   },
-} satisfies Prisma.PoemInclude
+})
+//  satisfies Prisma.PoemInclude
 
 const PUBLIC_APPROVED_POEM_FILTER = {
   isPublic: true,
@@ -100,7 +111,7 @@ export const getPoems = async (req: Request, res: Response) => {
       logger.info(`Fetching all poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
         where: { authorId },
-        include: POEM_INCLUDE_STATEMENT,
+        include: getPoemInclude(requesterUserId),
         orderBy: { createdAt: 'desc' },
       })
       logger.info(
@@ -115,7 +126,7 @@ export const getPoems = async (req: Request, res: Response) => {
           authorId,
           ...PUBLIC_APPROVED_POEM_FILTER,
         },
-        include: POEM_INCLUDE_STATEMENT,
+        include: getPoemInclude(requesterUserId),
         orderBy: { createdAt: 'desc' },
       })
       logger.info(
@@ -126,7 +137,7 @@ export const getPoems = async (req: Request, res: Response) => {
   } else {
     // If authorId is not provided, return all public poems
     logger.info('Fetching all public poems')
-    const poems = await getPublicPoems()
+    const poems = await getPublicPoems(requesterUserId)
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
   }
@@ -214,7 +225,7 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
         ? PoemApprovalStatus.PENDING
         : existingApprovalStatus,
     },
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(requesterUserId),
   })
   logger.info(
     `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
@@ -325,7 +336,7 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
       tagIds: existingTags.map((tag) => tag.id),
       approvalStatus: initialApprovalStatus,
     }),
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(req.auth.userId),
   })
 
   logger.info(
@@ -623,10 +634,13 @@ const validateAndReturnPoemTags = async (tagIds: string[]) => {
 }
 
 /** Validates poemId against poems in the database. */
-export const validateAndReturnPoem = async (poemId: string) => {
+export const validateAndReturnPoem = async (
+  poemId: string,
+  requesterUserId: string
+) => {
   const poem = await prisma.poem.findUnique({
     where: { id: poemId },
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(requesterUserId),
   })
 
   if (!poem) {
@@ -736,7 +750,10 @@ export const getDailyPoem = async (req: Request, res: Response) => {
  * @param excludeUserId Optional user ID to exclude poems from.
  * @returns List of public poems, optionally excluding the specified user's poems.
  */
-const getPublicPoems = async (excludeUserId?: string) => {
+const getPublicPoems = async (
+  requesterUserId: string,
+  excludeUserId?: string
+) => {
   const constructedWhere: Prisma.PoemWhereInput = {
     ...PUBLIC_APPROVED_POEM_FILTER,
   }
@@ -745,6 +762,6 @@ const getPublicPoems = async (excludeUserId?: string) => {
   }
   return await prisma.poem.findMany({
     where: constructedWhere,
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(requesterUserId),
   })
 }
