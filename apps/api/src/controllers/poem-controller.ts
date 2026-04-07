@@ -643,7 +643,7 @@ const validateAndReturnPoemTags = async (tagIds: string[]) => {
 /** Validates poemId against poems in the database. */
 export const validateAndReturnPoem = async (
   poemId: string,
-  requesterUserId: string
+  requesterUserId?: string
 ) => {
   const poem = await prisma.poem.findUnique({
     where: { id: poemId },
