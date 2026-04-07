@@ -25,9 +25,8 @@ npm start
 
 ## Environment Variables
 
-Create a `.env` file at /api:
+Create a `.env` file at /api. Fill in the missing env var values by following the instructions.
 
-```
-DATABASE_URL=your_database_url
-API_PORT=3001
+```bash
+cp apps/api/.env.example apps/api/.env
 ```
