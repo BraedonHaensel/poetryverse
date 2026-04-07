@@ -90,7 +90,7 @@ export default function PoemOfTheDay() {
       <>
         <div className="flex flex-1 flex-col gap-4 md:hidden">
           <MobilePageHeader
-            title="PoetryVerse"
+            title="Poem of the Day"
             showLogo={true}
             showGuestSignIn={true}
           />
@@ -109,7 +109,7 @@ export default function PoemOfTheDay() {
       <>
         <div className="flex flex-1 flex-col gap-4 md:hidden">
           <MobilePageHeader
-            title="PoetryVerse"
+            title="Poem of the Day"
             showLogo={true}
             showGuestSignIn={true}
           />
@@ -128,7 +128,7 @@ export default function PoemOfTheDay() {
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
-          title="PoetryVerse"
+          title="Poem of the Day"
           showLogo={true}
           showGuestSignIn={true}
         />

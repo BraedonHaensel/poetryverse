@@ -158,7 +158,7 @@ export default function HomePage() {
     <>
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
-        <MobilePageHeader title="Poem of the Day" showLogo={true} />
+        <MobilePageHeader title="PoetryVerse" showLogo={true} />
 
         {/* Filters */}
         <div className="flex flex-col gap-3 px-2">
