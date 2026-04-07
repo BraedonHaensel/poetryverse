@@ -188,7 +188,9 @@ export default function AnalyticsPageContents() {
 
           <section>
             <CardHeader className="px-0 pt-0 pb-5">
-            <CardTitle className="text-2xl font-bold">Reported Poems</CardTitle>
+              <CardTitle className="text-2xl font-bold">
+                Reported Poems
+              </CardTitle>
             </CardHeader>
 
             <ShadowCard className="bg-admin-panel rounded-4xl p-3">
@@ -247,7 +249,7 @@ function MobileStatCard({
 }) {
   return (
     <div className={`rounded-xl bg-white p-3 shadow-sm ${className}`}>
-      <p className="text-sm font-medium text-center">{title}</p>
+      <p className="text-center text-sm font-medium">{title}</p>
       <p className="mt-4 text-center text-3xl font-bold">{value}</p>
     </div>
   )
@@ -284,7 +286,7 @@ function MobilePoemCard({
 
       <p className="mt-2 text-sm whitespace-pre-line">{poem.poem}</p>
 
-      <div className="mt-3 flex gap-4">
+      <div className="mt-3 flex cursor-pointer gap-4 transition hover:opacity-80">
         <button onClick={onDelete}>
           <Trash2 size={22} />
         </button>

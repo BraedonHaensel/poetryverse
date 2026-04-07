@@ -230,7 +230,7 @@ export default function GeneralUserManagement() {
                       <button
                         type="button"
                         onClick={() => handleOpenDeleteDialog(user)}
-                        className="rounded bg-red-800 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                        className="cursor-pointer rounded bg-red-800 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
                       >
                         Delete
                       </button>
@@ -238,7 +238,7 @@ export default function GeneralUserManagement() {
                       <button
                         type="button"
                         onClick={() => handleOpenPromoteDialog(user)}
-                        className="rounded bg-slate-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                        className="cursor-pointer rounded bg-slate-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
                       >
                         Promote
                       </button>

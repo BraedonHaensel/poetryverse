@@ -38,7 +38,7 @@ export default function AdminPage() {
           {isMobileUserManagementTab && (
             <>
               <div className="px-5 pt-3">
-                <div className="flex items-center justify-between text-[15px] font-medium text-black">
+                <div className="flex items-center justify-between text-lg text-black">
                   <button
                     onClick={() => setMobileUserView('general')}
                     className="relative pb-1"
