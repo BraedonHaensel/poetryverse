@@ -5,7 +5,9 @@ import { api, displayApiError } from './api'
 export type PoemData = {
   id: string
   authorId: string
-
+  author: {
+    username: string
+  }
   title: string
   body: string
   type: PoemType
@@ -15,6 +17,9 @@ export type PoemData = {
   isAIAssisted: boolean
 
   aiLikelihoonScore: number
+  count: {
+    likes: number
+  }
 
   createdAt: Date
   updatedAt: Date
@@ -45,6 +50,24 @@ export async function getUserPoems(userId: string): Promise<PoemData[]> {
     })
     .catch((error) => {
       displayApiError(error, 'Failed to get poems')
+      return []
+    })
+}
+
+/**
+ * Gets the feed poems (all public poems).
+ * @returns List of poems for the feed.
+ */
+export async function getFeedPoems(): Promise<PoemData[]> {
+  return api
+    .get('/api/poems/feed')
+    .then((response) => {
+      const data = response.data
+      console.log('Feed poems:', data)
+      return data
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to get feed poems')
       return []
     })
 }
