@@ -43,7 +43,6 @@ export function PoemCard({
       <CardContent className="flex flex-col gap-2">
         <p className="text-sm">
           {poem.body.substring(0, previewLength)}
-          {isPreviewTruncated ? '...' : ''}
         </p>
         {isPreviewTruncated && (
           <button

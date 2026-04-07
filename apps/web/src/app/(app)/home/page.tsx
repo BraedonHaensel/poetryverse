@@ -175,10 +175,12 @@ export default function HomePage() {
             buttonClassName="flex-1"
           />
 
-          <FollowingOnlyToggle
-            isFollowingOnly={isFollowingOnly}
-            setIsFollowingOnly={setIsFollowingOnly}
-          />
+          {!isGuest && (
+            <FollowingOnlyToggle
+              isFollowingOnly={isFollowingOnly}
+              setIsFollowingOnly={setIsFollowingOnly}
+            />
+          )}
 
           <PoemTagsFilter
             poemTags={allTags}
@@ -207,8 +209,7 @@ export default function HomePage() {
       {/* Desktop layout */}
       <div className="hidden min-h-0 w-full flex-1 gap-4 md:flex">
         {/* Left sidebar */}
-        {!isGuest && (
-          <div className="w-75 overflow-y-auto border-r-2 border-black/30 px-4 py-4 lg:w-90">
+        <div className="w-75 overflow-y-auto border-r-2 border-black/30 px-4 py-4 lg:w-90">
           <div className="flex flex-col gap-4">
             <h2 className="text-2xl font-bold">Home</h2>
 
@@ -222,13 +223,15 @@ export default function HomePage() {
               />
             </div>
 
-            <div>
-              <h3 className="mb-2 font-semibold">Feed</h3>
-              <FollowingOnlyToggle
-                isFollowingOnly={isFollowingOnly}
-                setIsFollowingOnly={setIsFollowingOnly}
-              />
-            </div>
+            {!isGuest && (
+              <div>
+                <h3 className="mb-2 font-semibold">Feed</h3>
+                <FollowingOnlyToggle
+                  isFollowingOnly={isFollowingOnly}
+                  setIsFollowingOnly={setIsFollowingOnly}
+                />
+              </div>
+            )}
 
             <div>
               <h3 className="mb-2 font-semibold">Tags</h3>
@@ -242,8 +245,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        )}
-        {/* Main content area */}
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="grid gap-4 grid-cols-1 min-[1200px]:grid-cols-2 min-[1600px]:grid-cols-3">
             {filteredPoems.map((poem) => (
