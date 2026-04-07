@@ -78,8 +78,7 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
   )
 
   const existingReport = await getAndValidateReport(reportId)
-  const reportedPoem = await validateAndReturnPoem(existingReport.poemId)
-  const poemApprovalStatus = reportedPoem.approvalStatus
+  await validateAndReturnPoem(existingReport.poemId)
 
   // Can't resolve a report that's already resolved.
   if (existingReport.status === ReportStatus.RESOLVED) {
@@ -99,18 +98,16 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
   }
 
   // Update the poem:
-  // - Tag as AI assisted if the poem isn't already tagged and the admin selected to update it as such.
-  // - Set approval status to APPROVED if the poem is currently pending review.
+  // - Tag as AI assisted when the admin selected to update it as such.
+  // - Set approval status to APPROVED.
+  const shouldMarkAsAIAssisted =
+    resolveData.resolutionType === ResolutionType.UPDATE_AI_TAG
+
   await prisma.poem.update({
     where: { id: existingReport.poemId },
     data: {
-      isAIAssisted:
-        !reportedPoem.isAIAssisted &&
-        resolveData.resolutionType === ResolutionType.UPDATE_AI_TAG,
-      approvalStatus:
-        poemApprovalStatus === PoemApprovalStatus.ADMIN_REVIEW
-          ? PoemApprovalStatus.APPROVED
-          : poemApprovalStatus,
+      ...(shouldMarkAsAIAssisted ? { isAIAssisted: true } : {}),
+      approvalStatus: PoemApprovalStatus.APPROVED,
     },
   })
 

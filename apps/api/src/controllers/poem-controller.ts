@@ -1,4 +1,9 @@
-import { PoemApprovalStatus, Prisma, RoleEnum } from '@prisma/client'
+import {
+  PoemApprovalStatus,
+  Prisma,
+  ReasonType,
+  RoleEnum,
+} from '@prisma/client'
 import type { Request, Response } from 'express'
 
 import { generateGeminiJSONResponse } from '../lib/ai'
@@ -546,7 +551,15 @@ export const reportPoem = async (req: AuthRequest, res: Response) => {
     `Reporting poem for userId=${req.auth.userId} poemId=${poemId} reasonType=${reasonType}`
   )
 
-  await validateAndReturnPoem(poemId)
+  const existingPoem = await validateAndReturnPoem(poemId)
+
+  if (reasonType === ReasonType.AI && existingPoem.isAIAssisted) {
+    // No need to report poem for AI that's already tagged as AI assisted.
+    logger.info(
+      `Skipped AI report for poemId=${poemId} by userId=${req.auth.userId} because poem is already tagged as AI assisted`
+    )
+    throw conflict('Poem is already tagged as AI assisted.')
+  }
 
   try {
     // Create the report
