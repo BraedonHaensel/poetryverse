@@ -126,15 +126,66 @@ export default function GeneralUserManagement() {
         variant="default"
       />
 
-      <div className="min-w-200">
-        <CardHeader className="px-0 pt-0 pb-5">
-          <CardTitle className="text-2xl font-bold">
-            General User Management
-          </CardTitle>
-        </CardHeader>
+      <div className="w-full min-w-0">
+        {/* Desktop */}
+        <div className="hidden min-w-200 md:block">
+          <CardHeader className="px-0 pt-0 pb-5">
+            <CardTitle className="text-2xl font-bold">
+              General User Management
+            </CardTitle>
+          </CardHeader>
 
-        <ShadowCard className="bg-admin-panel p-3">
-          <CardContent className="p-0">
+          <ShadowCard className="bg-admin-panel p-3">
+            <CardContent className="p-0">
+              <div className="mb-4">
+                <TableSearch
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search users by username..."
+                />
+              </div>
+
+              {filteredUsers.length === 0 && search.trim() ? (
+                <div className="rounded-xl bg-white px-6 py-10 text-center">
+                  <p className="text-muted-foreground">
+                    No users found matching &quot;{search}&quot;
+                  </p>
+                </div>
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={filteredUsers}
+                  gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
+                  renderActions={(user) => (
+                    <div className="flex items-center justify-center gap-5">
+                      <button
+                        type="button"
+                        className="cursor-pointer transition hover:opacity-70"
+                        onClick={() => handleOpenDeleteDialog(user)}
+                        aria-label="Delete user"
+                      >
+                        <Trash2 size={28} strokeWidth={2.25} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="cursor-pointer transition hover:opacity-70"
+                        onClick={() => handleOpenPromoteDialog(user)}
+                        aria-label="Promote user"
+                      >
+                        <ArrowUpCircle size={30} strokeWidth={2.25} />
+                      </button>
+                    </div>
+                  )}
+                />
+              )}
+            </CardContent>
+          </ShadowCard>
+        </div>
+
+        {/* Mobile */}
+        <div className="md:hidden">
+          <div className="p-3">
             <div className="mb-4">
               <TableSearch
                 value={search}
@@ -144,41 +195,60 @@ export default function GeneralUserManagement() {
             </div>
 
             {filteredUsers.length === 0 && search.trim() ? (
-              <div className="rounded-xl bg-white px-6 py-10 text-center">
+              <div className="rounded-xl bg-white px-5 py-8 text-center">
                 <p className="text-muted-foreground">
                   No users found matching &quot;{search}&quot;
                 </p>
               </div>
             ) : (
-              <DataTable
-                columns={columns}
-                data={filteredUsers}
-                gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
-                renderActions={(user) => (
-                  <div className="flex items-center justify-center gap-5">
-                    <button
-                      type="button"
-                      className="cursor-pointer transition hover:opacity-70"
-                      onClick={() => handleOpenDeleteDialog(user)}
-                      aria-label="Delete user"
-                    >
-                      <Trash2 size={28} strokeWidth={2.25} />
-                    </button>
+              <div className="space-y-3">
+                {filteredUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="rounded-md bg-white px-3 py-2 shadow-sm"
+                  >
+                    <div className="space-y-1 text-sm leading-tight text-black/80">
+                      <p>ID: {user.id}</p>
 
-                    <button
-                      type="button"
-                      className="cursor-pointer transition hover:opacity-70"
-                      onClick={() => handleOpenPromoteDialog(user)}
-                      aria-label="Promote user"
-                    >
-                      <ArrowUpCircle size={30} strokeWidth={2.25} />
-                    </button>
+                      <div>
+                        <p className="text-sm text-black/50 italic">Name</p>
+                        <p>{user.name}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-black/50 italic">Username</p>
+                        <p>{user.username}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-black/50 italic">Email</p>
+                        <p>{user.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDeleteDialog(user)}
+                        className="cursor-pointer rounded bg-red-800 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                      >
+                        Delete
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenPromoteDialog(user)}
+                        className="cursor-pointer rounded bg-slate-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                      >
+                        Promote
+                      </button>
+                    </div>
                   </div>
-                )}
-              />
+                ))}
+              </div>
             )}
-          </CardContent>
-        </ShadowCard>
+          </div>
+        </div>
       </div>
     </>
   )

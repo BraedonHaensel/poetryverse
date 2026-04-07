@@ -133,56 +133,97 @@ export default function AnalyticsPageContents() {
         variant="default"
       />
 
-      <div className="flex min-w-225 flex-col gap-10">
-        <section>
-          <CardHeader className="px-0 pt-0 pb-5">
-            <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
-          </CardHeader>
+      {/*Mobile Layout*/}
+      <div className="md:hidden">
+        <div className="flex flex-col gap-6 p-4">
+          <section>
+            <h2 className="mb-3 text-xl font-semibold">Statistics</h2>
 
-          <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
-            <CardContent className="grid grid-cols-3 gap-8 p-0">
-              <StatCard title="Number of Poems" value="50" />
-              <StatCard title="Number of AI Poems" value="23" />
-              <StatCard title="Number of Handwritten Poems" value="27" />
-            </CardContent>
-          </ShadowCard>
-        </section>
+            <div className="grid grid-cols-2 gap-4">
+              <MobileStatCard title="Number of Poems" value="50" />
+              <MobileStatCard title="Number of AI Poems" value="23" />
+            </div>
 
-        <section>
-          <CardHeader className="px-0 pt-0 pb-5">
-            <CardTitle className="text-2xl font-bold">Reported Poems</CardTitle>
-          </CardHeader>
+            <MobileStatCard
+              title="Number of Handwritten Poems"
+              value="27"
+              className="mt-4"
+            />
+          </section>
 
-          <ShadowCard className="bg-admin-panel rounded-4xl p-3">
-            <CardContent className="max-h-117.5 overflow-y-auto p-0">
-              <DataTable
-                columns={columns}
-                data={reportedPoems}
-                renderActions={(row) => (
-                  <div className="flex items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      className="cursor-pointer transition hover:opacity-70"
-                      onClick={() => handleOpenDeleteDialog(row)}
-                      aria-label="Delete report"
-                    >
-                      <Trash2 size={28} strokeWidth={2.25} />
-                    </button>
+          {/* REPORTED POEMS */}
+          <section>
+            <h2 className="mb-3 text-xl font-semibold">Reported Poems</h2>
 
-                    <button
-                      type="button"
-                      className="cursor-pointer transition hover:opacity-70"
-                      onClick={() => handleOpenApproveDialog(row)}
-                      aria-label="Approve report"
-                    >
-                      <CircleCheckBig size={30} strokeWidth={2.25} />
-                    </button>
-                  </div>
-                )}
-              />
-            </CardContent>
-          </ShadowCard>
-        </section>
+            <div className="flex flex-col gap-4">
+              {reportedPoems.map((poem) => (
+                <MobilePoemCard
+                  key={poem.id}
+                  poem={poem}
+                  onDelete={() => handleOpenDeleteDialog(poem)}
+                  onApprove={() => handleOpenApproveDialog(poem)}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/*Desktop Layout*/}
+      <div className="hidden md:block">
+        <div className="flex min-w-225 flex-col gap-10">
+          <section>
+            <CardHeader className="px-0 pt-0 pb-5">
+              <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
+            </CardHeader>
+
+            <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
+              <CardContent className="grid grid-cols-3 gap-8 p-0">
+                <StatCard title="Number of Poems" value="50" />
+                <StatCard title="Number of AI Poems" value="23" />
+                <StatCard title="Number of Handwritten Poems" value="27" />
+              </CardContent>
+            </ShadowCard>
+          </section>
+
+          <section>
+            <CardHeader className="px-0 pt-0 pb-5">
+              <CardTitle className="text-2xl font-bold">
+                Reported Poems
+              </CardTitle>
+            </CardHeader>
+
+            <ShadowCard className="bg-admin-panel rounded-4xl p-3">
+              <CardContent className="max-h-117.5 overflow-y-auto p-0">
+                <DataTable
+                  columns={columns}
+                  data={reportedPoems}
+                  renderActions={(row) => (
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        type="button"
+                        className="cursor-pointer transition hover:opacity-70"
+                        onClick={() => handleOpenDeleteDialog(row)}
+                        aria-label="Delete report"
+                      >
+                        <Trash2 size={28} strokeWidth={2.25} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="cursor-pointer transition hover:opacity-70"
+                        onClick={() => handleOpenApproveDialog(row)}
+                        aria-label="Approve report"
+                      >
+                        <CircleCheckBig size={30} strokeWidth={2.25} />
+                      </button>
+                    </div>
+                  )}
+                />
+              </CardContent>
+            </ShadowCard>
+          </section>
+        </div>
       </div>
     </>
   )
@@ -193,6 +234,66 @@ function StatCard({ title, value }: { title: string; value: string }) {
     <div className="flex flex-col items-center justify-center rounded-4xl bg-white px-6 py-8 text-center shadow-md">
       <div className="mb-5 text-xl font-semibold">{title}</div>
       <div className="text-6xl leading-none font-bold">{value}</div>
+    </div>
+  )
+}
+
+function MobileStatCard({
+  title,
+  value,
+  className = '',
+}: {
+  title: string
+  value: string
+  className?: string
+}) {
+  return (
+    <div className={`rounded-xl bg-white p-3 shadow-sm ${className}`}>
+      <p className="text-center text-sm font-medium">{title}</p>
+      <p className="mt-4 text-center text-3xl font-bold">{value}</p>
+    </div>
+  )
+}
+
+function MobilePoemCard({
+  poem,
+  onDelete,
+  onApprove,
+}: {
+  poem: ReportedPoem
+  onDelete: () => void
+  onApprove: () => void
+}) {
+  const badgeColor =
+    poem.reportType === 'AI Usage' ? 'bg-slate-500' : 'bg-red-800'
+
+  return (
+    <div className="rounded-xl bg-white p-3 shadow-sm">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-sm">
+            <span>ID: {poem.id}</span>
+            <span className="italic">{poem.title}</span>
+          </div>
+
+          <span
+            className={`mt-1 inline-block rounded px-2 py-0.5 text-xs text-white ${badgeColor}`}
+          >
+            {poem.reportType}
+          </span>
+        </div>
+      </div>
+
+      <p className="mt-2 text-sm whitespace-pre-line">{poem.poem}</p>
+
+      <div className="mt-3 flex cursor-pointer gap-4 transition hover:opacity-80">
+        <button onClick={onDelete}>
+          <Trash2 size={22} />
+        </button>
+        <button onClick={onApprove}>
+          <CircleCheckBig size={22} />
+        </button>
+      </div>
     </div>
   )
 }
