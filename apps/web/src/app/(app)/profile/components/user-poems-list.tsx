@@ -1,11 +1,12 @@
+import React from 'react'
+
 import CreateDropdown from '@/components/create-nav-dropdown'
 import CreateSheet from '@/components/create-nav-sheet'
 import { LargeButton } from '@/components/large-button'
 import MyPoemMenu from '@/components/my-poem-menu'
 import OtherUserPoemMenu from '@/components/other-user-poem-menu'
+import PoemCard from '@/components/poem-card'
 import { PoemFilterMode } from '@/components/poem-filters'
-import { ShadowCard } from '@/components/shadow-card'
-import { CardContent, CardHeader } from '@/components/ui/card'
 import { PoemData } from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 
@@ -79,11 +80,16 @@ export default function UserPoemsList({
 
   return (
     <div className={cn('grid gap-2 md:gap-4 xl:grid-cols-2', className)}>
-      {/* TODO Display proper poem cards */}
       {filteredPoems.map((poem) => (
-        <ShadowCard key={poem.id}>
-          <CardHeader>{poem.title}</CardHeader>
-          <CardContent className="whitespace-pre-wrap">{poem.body}</CardContent>
+        <PoemCard
+          key={poem.id}
+          poem={poem}
+          // TODO: Check if user liked the poem
+          isLiked={true}
+          onToggleLike={() => console.log('like')}
+          onReadMore={() => console.log('read more')}
+          isOnMyProfilePage={isMyPage}
+        >
           {isMyPage ? (
             <MyPoemMenu
               poem={poem}
@@ -95,7 +101,7 @@ export default function UserPoemsList({
             // Display the poem menu to registered users
             !isGuest && <OtherUserPoemMenu poem={poem} />
           )}
-        </ShadowCard>
+        </PoemCard>
       ))}
     </div>
   )

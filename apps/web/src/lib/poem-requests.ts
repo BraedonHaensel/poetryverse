@@ -11,7 +11,7 @@ export type PoemData = {
   title: string
   body: string
   type: PoemType
-  poemTags: PoemTag[]
+  poemTags: { tag: PoemTag }[]
 
   isPublic: boolean
   isAIAssisted: boolean
