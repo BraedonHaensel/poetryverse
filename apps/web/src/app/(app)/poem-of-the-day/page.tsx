@@ -7,8 +7,8 @@ import { useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
-import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { ShadowCard } from '@/components/shadow-card'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
