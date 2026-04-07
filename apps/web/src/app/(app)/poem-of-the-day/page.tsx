@@ -2,10 +2,12 @@
 
 import axios from 'axios'
 import { Star } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -56,10 +58,20 @@ const USE_DUMMY_DATA = true
 const LINES_TO_SHOW = 8
 
 export default function PoemOfTheDay() {
+  const { data: session } = useSession()
   const [poem, setPoemData] = useState<PoemData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fullPoemOpen, setFullPoemOpen] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
+  const [showSignInDialog, setShowSignInDialog] = useState(false)
+
+  const toggleLike = () => {
+    if (!session?.user) {
+      setShowSignInDialog(true)
+      return
+    }
+    setIsLiked(!isLiked)
+  }
 
   // Fetch poem data on component mount
   useEffect(() => {
@@ -171,7 +183,7 @@ export default function PoemOfTheDay() {
               <div className="flex items-center justify-between border-t pt-2">
                 {poem.rating !== undefined && (
                   <button
-                    onClick={() => setIsLiked(!isLiked)}
+                    onClick={toggleLike}
                     className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
                   >
                     <Star
@@ -240,7 +252,7 @@ export default function PoemOfTheDay() {
             <div className="flex items-center justify-between border-t pt-2">
               {poem.rating !== undefined && (
                 <button
-                  onClick={() => setIsLiked(!isLiked)}
+                  onClick={toggleLike}
                   className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
                 >
                   <Star
@@ -282,7 +294,7 @@ export default function PoemOfTheDay() {
             </div>
             <div className="mt-4 flex items-center justify-between">
               <button
-                onClick={() => setIsLiked(!isLiked)}
+                onClick={toggleLike}
                 className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
               >
                 <Star
@@ -299,6 +311,11 @@ export default function PoemOfTheDay() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
     </>
   )
 }
