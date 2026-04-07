@@ -1,4 +1,9 @@
-import { Prisma, ReportStatus, ResolutionType } from '@prisma/client'
+import {
+  PoemApprovalStatus,
+  Prisma,
+  ReportStatus,
+  ResolutionType,
+} from '@prisma/client'
 import { Request, Response } from 'express'
 
 import { prisma } from '../lib/db'
@@ -10,6 +15,7 @@ import {
   resolveReportRequest,
   resolveReportRequestParams,
 } from '../schemas/report-schemas'
+import { validateAndReturnPoem } from './poem-controller'
 
 const REPORT_INCLUDE_STATEMENT = {
   poem: {
@@ -72,6 +78,7 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
   )
 
   const existingReport = await getAndValidateReport(reportId)
+  await validateAndReturnPoem(existingReport.poemId)
 
   // Can't resolve a report that's already resolved.
   if (existingReport.status === ReportStatus.RESOLVED) {
@@ -90,14 +97,21 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
     return res.status(204).send()
   }
 
-  // Admin decided that poem was likely AI generated, and should be tagged as such.
-  if (resolveData.resolutionType === ResolutionType.UPDATE_AI_TAG) {
-    await prisma.poem.update({
-      where: { id: existingReport.poemId },
-      data: { isAIAssisted: true },
-    })
-  }
+  // Update the poem:
+  // - Tag as AI assisted when the admin selected to update it as such.
+  // - Set approval status to APPROVED.
+  const shouldMarkAsAIAssisted =
+    resolveData.resolutionType === ResolutionType.UPDATE_AI_TAG
 
+  await prisma.poem.update({
+    where: { id: existingReport.poemId },
+    data: {
+      ...(shouldMarkAsAIAssisted ? { isAIAssisted: true } : {}),
+      approvalStatus: PoemApprovalStatus.APPROVED,
+    },
+  })
+
+  // Resolve the report in the database.
   const resolveDataForPrisma: Prisma.ReportUncheckedUpdateInput = {
     resolution: resolveData.resolutionType,
     adminNote: resolveData.adminNote,
