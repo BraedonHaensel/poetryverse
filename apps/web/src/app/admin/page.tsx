@@ -1,186 +1,102 @@
 'use client'
 
-import { CircleCheckBig, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import AdminUserManagement from '@/app/admin/admin-user/page-contents'
+import AnalyticsPageContents from '@/app/admin/analytics/page-contents'
 import GeneralUserManagement from '@/app/admin/general-user/page-contents'
-import { Column, DataTable } from '@/components/admin-table/data-table'
-import { ShadowCard } from '@/components/shadow-card'
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import AdminMobileSidebar from '@/components/admin-mobile-sidebar'
+import AdminSidebar from '@/components/admin-sidebar'
 import { useAdminUser } from '@/context/admin-user-context'
-type ReportedPoem = {
-  id: number
-  title: string
-  reportType: string
-  poem: string
-  reason: string
-}
 
-const reportedPoems: ReportedPoem[] = [
-  {
-    id: 12,
-    title: 'My Haiku',
-    reportType: 'AI Usage',
-    poem: 'AI writing poetry is made a lot easier when you use AI.',
-    reason: 'Clearly written using AI with repeated phrasing.',
-  },
-  {
-    id: 24,
-    title: 'When I Was One',
-    reportType: 'Inappropriate Content',
-    poem: 'No man is an island, entire of itself...',
-    reason: 'Contains inappropriate and sensitive content.',
-  },
-  {
-    id: 45,
-    title: 'Simple Haiku',
-    reportType: 'AI Usage',
-    poem: 'This is a haiku demonstrating a sample poem creation.',
-    reason:
-      'Low effort poem, clearly written by AI. Admins please take this low quality content off of the platform.',
-  },
-]
-
-const columns: Column<ReportedPoem>[] = [
-  { key: 'id', label: 'ID' },
-  { key: 'title', label: 'Title' },
-  { key: 'reportType', label: 'Report Type' },
-
-  // use row later for deletion
-  {
-    key: 'poem',
-    label: 'Poem',
-    className: 'justify-start text-left text-sm',
-  },
-  {
-    key: 'reason',
-    label: 'Reason',
-    className: 'justify-start text-left text-sm',
-  },
-]
+type AdminTab = 'analytics' | 'general' | 'admin'
+type UserManagementView = 'general' | 'admin'
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState('analytics')
-
+  const [activeTab, setActiveTab] = useState<AdminTab>('analytics')
+  const [mobileUserView, setMobileUserView] =
+    useState<UserManagementView>('general')
   const { role } = useAdminUser()
 
+  const isSuperAdmin = role === 'SUPER_ADMIN'
+  const isMobileUserManagementTab =
+    activeTab === 'general' || activeTab === 'admin'
+
   return (
-    <div className="flex min-h-0 w-fit min-w-full flex-1">
-      {/* Sidebar */}
-      <aside className="w-69.5 shrink-0 border-r border-black/10">
-        <div className="flex flex-col pt-0">
-          <SidebarItem
-            label="Analytics"
-            active={activeTab === 'analytics'}
-            onClick={() => setActiveTab('analytics')}
-          />
-          <SidebarItem
-            label="General User Management"
-            active={activeTab === 'general'}
-            onClick={() => setActiveTab('general')}
-          />
-          {role === 'SUPER_ADMIN' && (
-            <SidebarItem
-              label="Admin User Management"
-              active={activeTab === 'admin'}
-              onClick={() => setActiveTab('admin')}
-            />
-          )}
-        </div>
-      </aside>
+    <div className="flex min-h-0 w-full flex-1">
+      <AdminSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isSuperAdmin={isSuperAdmin}
+      />
 
-      {/* Main contents */}
-      <div className="flex-1 overflow-y-auto p-10">
-        {activeTab === 'analytics' && <AnalyticsView />}
-        {activeTab === 'general' && <GeneralUserManagement />}
-        {activeTab === 'admin' && <AdminUserManagement />}
-      </div>
-    </div>
-  )
-}
+      <div className="flex min-h-0 flex-1 flex-col">
+        {/* Mobile */}
+        <main className="flex-1 overflow-y-auto pb-24 md:hidden">
+          {activeTab === 'analytics' && <AnalyticsPageContents />}
 
-function SidebarItem({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={[
-        'w-full cursor-pointer border-b border-black/10 px-7 py-6 text-left text-[18px] font-semibold transition',
-        active ? 'bg-admin-sidebar-active' : 'hover:bg-admin-hover bg-white',
-      ].join(' ')}
-    >
-      {label}
-    </button>
-  )
-}
-
-function AnalyticsView() {
-  return (
-    <div className="flex min-w-225 flex-col gap-10">
-      <section>
-        <CardHeader className="px-0 pt-0 pb-5">
-          <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
-        </CardHeader>
-
-        <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
-          <CardContent className="grid grid-cols-3 gap-8 p-0">
-            <StatCard title="Number of Poems" value="50" />
-            <StatCard title="Number of AI Poems" value="23" />
-            <StatCard title="Number of Handwritten Poems" value="27" />
-          </CardContent>
-        </ShadowCard>
-      </section>
-
-      <section>
-        <CardHeader className="px-0 pt-0 pb-5">
-          <CardTitle className="text-2xl font-bold">Reported Poems</CardTitle>
-        </CardHeader>
-
-        <ShadowCard className="bg-admin-panel rounded-4xl p-3">
-          <CardContent className="max-h-117.5 overflow-y-auto p-0">
-            <DataTable
-              columns={columns}
-              data={reportedPoems}
-              renderActions={(_row) => (
-                <div className="flex items-center justify-center gap-3">
+          {isMobileUserManagementTab && (
+            <>
+              <div className="px-5 pt-3">
+                <div className="flex items-center justify-between text-lg text-black">
                   <button
-                    type="button"
-                    className="cursor-pointer transition hover:opacity-70"
-                    aria-label="Delete report"
+                    onClick={() => setMobileUserView('general')}
+                    className="relative pb-1"
                   >
-                    <Trash2 size={28} strokeWidth={2.25} />
+                    <span
+                      className={
+                        mobileUserView === 'general'
+                          ? 'text-black'
+                          : 'text-black/60'
+                      }
+                    >
+                      General User
+                    </span>
+                    {mobileUserView === 'general' && (
+                      <span className="absolute right-0 bottom-0 left-0 h-[1.5px] bg-black/40" />
+                    )}
                   </button>
 
-                  <button
-                    type="button"
-                    className="cursor-pointer transition hover:opacity-70"
-                    aria-label="Approve report"
-                  >
-                    <CircleCheckBig size={30} strokeWidth={2.25} />
-                  </button>
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => setMobileUserView('admin')}
+                      className="relative pb-1"
+                    >
+                      <span
+                        className={
+                          mobileUserView === 'admin'
+                            ? 'text-black'
+                            : 'text-black/60'
+                        }
+                      >
+                        Admin
+                      </span>
+                      {mobileUserView === 'admin' && (
+                        <span className="absolute right-0 bottom-0 left-0 h-[1.5px] bg-black/40" />
+                      )}
+                    </button>
+                  )}
                 </div>
-              )}
-            />
-          </CardContent>
-        </ShadowCard>
-      </section>
-    </div>
-  )
-}
+              </div>
 
-function StatCard({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="flex min-h-[px] flex-col items-center justify-center rounded-4xl bg-white px-6 py-8 text-center shadow-md">
-      <div className="mb-5 text-xl font-semibold">{title}</div>
-      <div className="text-6xl leading-none font-bold">{value}</div>
+              {mobileUserView === 'general' && <GeneralUserManagement />}
+              {mobileUserView === 'admin' && isSuperAdmin && (
+                <AdminUserManagement />
+              )}
+            </>
+          )}
+        </main>
+
+        {/* Desktop */}
+        <main className="hidden flex-1 overflow-y-auto p-10 md:block">
+          {activeTab === 'analytics' && <AnalyticsPageContents />}
+          {activeTab === 'general' && <GeneralUserManagement />}
+          {activeTab === 'admin' && isSuperAdmin && <AdminUserManagement />}
+        </main>
+
+        {/* Mobile bottom nav */}
+        <AdminMobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      </div>
     </div>
   )
 }

@@ -2,11 +2,20 @@
 
 import axios from 'axios'
 import { Star } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
+import MobilePageHeader from '@/components/mobile-page-header'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { api, displayApiError } from '@/lib/api'
 
 interface PoemData {
@@ -39,7 +48,7 @@ const DUMMY_POEM: PoemData = {
     'For you have been my anchor to the Earth,',
     'And to my soul, you are the living spark,',
     'Though time may drift as tide pulls us from the shore,',
-    "I'll love you now, and then forevermore."
+    "I'll love you now, and then forevermore.",
   ],
   linecount: '14',
   rating: 7,
@@ -49,10 +58,20 @@ const USE_DUMMY_DATA = true
 const LINES_TO_SHOW = 8
 
 export default function PoemOfTheDay() {
+  const { data: session } = useSession()
   const [poem, setPoemData] = useState<PoemData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fullPoemOpen, setFullPoemOpen] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
+  const [showSignInDialog, setShowSignInDialog] = useState(false)
+
+  const toggleLike = () => {
+    if (!session?.user) {
+      setShowSignInDialog(true)
+      return
+    }
+    setIsLiked(!isLiked)
+  }
 
   // Fetch poem data on component mount
   useEffect(() => {
@@ -60,7 +79,7 @@ export default function PoemOfTheDay() {
       try {
         setIsLoading(true)
         if (USE_DUMMY_DATA) {
-          await new Promise(resolve => setTimeout(resolve, 500))
+          await new Promise((resolve) => setTimeout(resolve, 500))
           setPoemData(DUMMY_POEM)
         } else {
           const response = await api.get('/poems/poem-of-the-day')
@@ -80,97 +99,186 @@ export default function PoemOfTheDay() {
 
   if (isLoading) {
     return (
-      <ShadowCard className="mx-auto w-full max-w-2xl">
-        <CardContent className="flex h-96 items-center justify-center">
-          <p className="text-muted-foreground">Loading poem of the day...</p>
-        </CardContent>
-      </ShadowCard>
+      <>
+        <div className="flex flex-1 flex-col gap-4 md:hidden">
+          <MobilePageHeader
+            title="Poem of the Day"
+            showLogo={true}
+            showGuestSignIn={true}
+          />
+          <PageLoadingIndicator />
+        </div>
+
+        <div className="hidden md:flex">
+          <PageLoadingIndicator />
+        </div>
+      </>
     )
   }
 
   if (!poem) {
     return (
-      <ShadowCard className="mx-auto w-full max-w-2xl">
-        <CardContent className="flex h-96 items-center justify-center">
-          <p className="text-muted-foreground">
-            No poem available at the moment
-          </p>
-        </CardContent>
-      </ShadowCard>
+      <>
+        <div className="flex flex-1 flex-col gap-4 md:hidden">
+          <MobilePageHeader
+            title="Poem of the Day"
+            showLogo={true}
+            showGuestSignIn={true}
+          />
+          <PageLoadingIndicator />
+        </div>
+
+        <div className="hidden md:flex">
+          <PageLoadingIndicator />
+        </div>
+      </>
     )
   }
 
   return (
-    <ShadowCard className="mx-auto w-full max-w-2xl">
-      <CardHeader className="pb-0">
-        <div className="space-y-2 pb-2 border-b">
-          <div>
-            <div className="mb-1 inline-block rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
-              TODAY&#39;S FEATURED POEM
-            </div>
-            <CardTitle className="text-xl font-bold md:text-2xl">
-              {poem.title}
-            </CardTitle>
-          </div>
+    <>
+      {/* Mobile layout */}
+      <div className="flex flex-1 flex-col gap-4 md:hidden">
+        <MobilePageHeader
+          title="Poem of the Day"
+          showLogo={true}
+          showGuestSignIn={true}
+        />
 
-          {/* Author info with category */}
-          <p className="text-xs font-medium text-muted-foreground md:text-sm">
-            {poem.authorUsername}
-            {poem.category && ` · ${poem.category}`}
-          </p>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-3 py-0">
-        {/* Poem lines */}
-        <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
-          <div className="space-y-0.5">
-            {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
-              <p
-                key={index}
-                className="leading-snug text-sm text-foreground md:text-base"
-              >
-                {line}
+        <div className="flex flex-col gap-2 px-2 pb-2">
+          <ShadowCard>
+            <CardHeader className="pb-2 text-center">
+              <div className="mb-1 block w-full rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
+                ✨ TODAY&#39;S FEATURED POEM ✨
+              </div>
+              <CardTitle className="text-2xl font-bold">{poem.title}</CardTitle>
+              <p className="text-muted-foreground text-sm font-medium">
+                {poem.authorUsername}
+                {poem.category && ` · ${poem.category}`}
               </p>
-            ))}
-            {poem.lines.length > LINES_TO_SHOW && (
-              <button
-                onClick={() => setFullPoemOpen(true)}
-                className="text-sm text-gray-400 hover:text-gray-500 transition-colors cursor-pointer"
-              >
-                ... Read more
-              </button>
-            )}
-          </div>
-        </div>
+            </CardHeader>
 
-        {/* Poem metadata and rating */}
-        <div className="flex items-center justify-between border-t pt-2">
-          {poem.rating !== undefined && (
-            <button
-              onClick={() => setIsLiked(!isLiked)}
-              className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <Star
-                size={28}
-                className="text-black"
-                fill={isLiked ? '#fbbf24' : 'none'}
-              />
-              <span className="text-lg font-semibold">{poem.rating}</span>
-            </button>
-          )}
-          <p className="text-xs text-muted-foreground">{poem.linecount} lines</p>
+            <CardContent className="flex flex-col gap-2">
+              <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
+                <div className="space-y-0.5">
+                  {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
+                    <p
+                      key={index}
+                      className="text-foreground text-sm leading-snug"
+                    >
+                      {line}
+                    </p>
+                  ))}
+                  {poem.lines.length > LINES_TO_SHOW && (
+                    <button
+                      onClick={() => setFullPoemOpen(true)}
+                      className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
+                    >
+                      ... Read more
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between border-t pt-2">
+                {poem.rating !== undefined && (
+                  <button
+                    onClick={toggleLike}
+                    className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+                  >
+                    <Star
+                      size={20}
+                      className="text-black"
+                      fill={isLiked ? '#fbbf24' : 'none'}
+                    />
+                    <span className="text-sm font-semibold">{poem.rating}</span>
+                  </button>
+                )}
+                <p className="text-muted-foreground text-xs">
+                  {poem.linecount} lines
+                </p>
+              </div>
+            </CardContent>
+          </ShadowCard>
         </div>
-      </CardContent>
+      </div>
+
+      {/* Desktop layout */}
+      <div className="my-auto hidden md:flex">
+        <ShadowCard className="mx-auto w-full max-w-2xl">
+          <CardHeader className="pb-0 text-center">
+            <div className="space-y-2 border-b pb-2">
+              <div>
+                <div className="mb-1 block w-full rounded-full bg-yellow-400 px-3 py-0.5 text-xs font-semibold text-black">
+                  ✨ TODAY&#39;S FEATURED POEM ✨
+                </div>
+                <CardTitle className="text-2xl font-bold md:text-3xl">
+                  {poem.title}
+                </CardTitle>
+              </div>
+
+              {/* Author info with category */}
+              <p className="text-muted-foreground text-sm font-medium md:text-base">
+                {poem.authorUsername}
+                {poem.category && ` · ${poem.category}`}
+              </p>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-3 py-0">
+            {/* Poem lines */}
+            <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
+              <div className="space-y-0.5">
+                {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
+                  <p
+                    key={index}
+                    className="text-foreground text-sm leading-snug md:text-base"
+                  >
+                    {line}
+                  </p>
+                ))}
+                {poem.lines.length > LINES_TO_SHOW && (
+                  <button
+                    onClick={() => setFullPoemOpen(true)}
+                    className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
+                  >
+                    ... Read more
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Poem metadata and rating */}
+            <div className="flex items-center justify-between border-t pt-2">
+              {poem.rating !== undefined && (
+                <button
+                  onClick={toggleLike}
+                  className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+                >
+                  <Star
+                    size={28}
+                    className="text-black"
+                    fill={isLiked ? '#fbbf24' : 'none'}
+                  />
+                  <span className="text-lg font-semibold">{poem.rating}</span>
+                </button>
+              )}
+              <p className="text-muted-foreground text-xs">
+                {poem.linecount} lines
+              </p>
+            </div>
+          </CardContent>
+        </ShadowCard>
+      </div>
 
       {/* Full poem modal */}
       <Dialog open={fullPoemOpen} onOpenChange={setFullPoemOpen}>
-        <DialogContent className="!max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] max-w-2xl! overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl">{poem.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4 text-sm">
               {poem.authorUsername}
               {poem.category && ` · ${poem.category}`}
             </p>
@@ -178,7 +286,7 @@ export default function PoemOfTheDay() {
               {poem.lines.map((line, index) => (
                 <p
                   key={index}
-                  className="leading-relaxed text-foreground md:text-lg"
+                  className="text-foreground leading-relaxed md:text-lg"
                 >
                   {line}
                 </p>
@@ -186,8 +294,8 @@ export default function PoemOfTheDay() {
             </div>
             <div className="mt-4 flex items-center justify-between">
               <button
-                onClick={() => setIsLiked(!isLiked)}
-                className="flex items-center gap-2 border border-black p-1 pr-2 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={toggleLike}
+                className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
               >
                 <Star
                   size={28}
@@ -196,13 +304,18 @@ export default function PoemOfTheDay() {
                 />
                 <span className="text-lg font-semibold">{poem.rating}</span>
               </button>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 {poem.linecount} lines
               </span>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </ShadowCard>
+
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+    </>
   )
 }
