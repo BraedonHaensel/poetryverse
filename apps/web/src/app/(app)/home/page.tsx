@@ -48,6 +48,7 @@ const DUMMY_POEMS: PoemData[] = [
     createdAt: new Date('2026-03-15T03:09:16.151Z'),
     updatedAt: new Date('2026-03-15T03:09:16.151Z'),
     approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
   {
     id: 'cmnauvd5y0007356uo71h9zsh',
@@ -64,6 +65,7 @@ const DUMMY_POEMS: PoemData[] = [
     createdAt: new Date('2026-03-17T05:11:13.151Z'),
     updatedAt: new Date('2026-03-17T05:11:13.151Z'),
     approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: false,
   },
   {
     id: 'cmn5hpdln000204kzfbg941te',
@@ -80,6 +82,7 @@ const DUMMY_POEMS: PoemData[] = [
     createdAt: new Date('2026-03-19T05:12:13.151Z'),
     updatedAt: new Date('2026-03-19T05:12:13.151Z'),
     approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
   {
     id: 'cmnauycv2000d356u2oq6xzt9',
@@ -96,6 +99,7 @@ const DUMMY_POEMS: PoemData[] = [
     createdAt: new Date('2026-03-20T05:12:13.151Z'),
     updatedAt: new Date('2026-03-20T05:12:13.151Z'),
     approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
   {
     id: 'cmn5hq2m4000604kzj8mn2b5p',
@@ -112,6 +116,7 @@ const DUMMY_POEMS: PoemData[] = [
     createdAt: new Date('2026-03-10T14:20:45.151Z'),
     updatedAt: new Date('2026-03-10T14:20:45.151Z'),
     approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
 ]
 

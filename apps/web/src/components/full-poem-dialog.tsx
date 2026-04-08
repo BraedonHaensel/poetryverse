@@ -12,8 +12,7 @@ type Props = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   poem: PoemData
-  isLiked: boolean
-  onToggleLike: () => void
+  onToggleLike: (poemId: string, isLike: boolean) => void
   isOnProfilePage?: boolean
   isOnMyProfilePage?: boolean
 }
@@ -23,8 +22,7 @@ type Props = {
  * @param isOpen Whether the dialog is open.
  * @param onOpenChange Callback called when the dialog is opened or closed.
  * @param poem Poem to display.
- * @param isLiked Whether the poem is currently liked by the user.
- * @param onToggleLike Toggled liking and removing a like from the poem.
+ * @param onToggleLike Callback to handle liking or removing a like from the poem.
  * @param onReadMore Callback to open a read more viewer.
  * @param isOnProfilePage Whether the poem is being viewed from the profile page.
  * @param isOnMyProfilePage Whether the poem is being viewed from the user's own
@@ -34,7 +32,6 @@ export function FullPoemDialog({
   isOpen,
   onOpenChange,
   poem,
-  isLiked,
   onToggleLike,
   isOnProfilePage = false,
   isOnMyProfilePage = false,
@@ -87,10 +84,13 @@ export function FullPoemDialog({
           {/* Like button */}
           <div className="mt-4 flex items-center gap-2">
             <button
-              onClick={onToggleLike}
-              className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+              onClick={() => onToggleLike(poem.id, !poem.isLikedByCurrentUser)}
+              className="flex min-w-16 cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
             >
-              <Star size={28} fill={isLiked ? '#fbbf24' : 'none'} />
+              <Star
+                size={28}
+                fill={poem.isLikedByCurrentUser ? '#fbbf24' : 'none'}
+              />
               <span className="text-lg font-semibold">{poem._count.likes}</span>
             </button>
           </div>

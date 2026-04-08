@@ -20,6 +20,7 @@ export type PoemData = {
   _count: {
     likes: number
   }
+  isLikedByCurrentUser: boolean
 
   approvalStatus: PoemApprovalStatus
 
@@ -143,5 +144,35 @@ export async function getPoemTags(): Promise<PoemTag[]> {
     .catch((error) => {
       displayApiError(error, 'Failed to get poem tags')
       return []
+    })
+}
+
+/**
+ * Likes a poem.
+ * @param poemId ID of the poem to like.
+ */
+export function likePoem(poemId: string) {
+  api
+    .put('/api/poems/like', { poemId: poemId })
+    .then(() => {
+      console.log('Poem liked:', poemId)
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to like poem')
+    })
+}
+
+/**
+ * Removes a like from a poem.
+ * @param poemId ID of the poem to remove the like from.
+ */
+export function unlikePoem(poemId: string) {
+  api
+    .delete('/api/poems/like', { data: { poemId: poemId } })
+    .then(() => {
+      console.log('Poem unliked:', poemId)
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to unlike poem')
     })
 }

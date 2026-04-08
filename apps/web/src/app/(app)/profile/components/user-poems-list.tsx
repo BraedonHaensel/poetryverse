@@ -19,6 +19,7 @@ type Props = {
   onSetPublic: (poemid: string) => void
   onSetPrivate: (poemId: string) => void
   onDeletePoem: (poemId: string) => void
+  onToggleLike: (poemId: string, isLike: boolean) => void
 }
 
 /**
@@ -31,6 +32,7 @@ type Props = {
  * @param onSetPublic Callback to set a poem's visibility to public.
  * @param onSetPrivate Callback to set a poem's visibility to private.
  * @param onDeletePoem Callback to delete a poem.
+ * @param onToggleLike Callback to handle liking or removing a like from the poem.
  */
 export default function UserPoemsList({
   className,
@@ -41,6 +43,7 @@ export default function UserPoemsList({
   onSetPublic,
   onSetPrivate,
   onDeletePoem,
+  onToggleLike,
 }: Props) {
   if (filteredPoems.length === 0) {
     // No poems to display
@@ -84,9 +87,7 @@ export default function UserPoemsList({
         <PoemCard
           key={poem.id}
           poem={poem}
-          // TODO: Check if user liked the poem
-          isLiked={true}
-          onToggleLike={() => console.log('like')}
+          onToggleLike={onToggleLike}
           isOnProfilePage={true}
           isOnMyProfilePage={isMyPage}
         >

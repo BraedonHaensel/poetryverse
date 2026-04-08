@@ -12,8 +12,7 @@ import { FullPoemDialog } from './full-poem-dialog'
 
 type Props = {
   poem: PoemData
-  isLiked: boolean
-  onToggleLike: () => void
+  onToggleLike: (poemId: string, isLike: boolean) => void
   isOnProfilePage?: boolean
   isOnMyProfilePage?: boolean
   children?: ReactNode
@@ -22,7 +21,6 @@ type Props = {
 /**
  * Reusable poem card display component.
  * @param poem Poem to display.
- * @param isLiked Whether the poem is currently liked by the user.
  * @param onToggleLike Toggled liking and removing a like from the poem.
  * @param onReadMore Callback to open a read more viewer.
  * @param isOnProfilePage Whether the poem is being viewed from the profile page.
@@ -32,7 +30,6 @@ type Props = {
  */
 export default function PoemCard({
   poem,
-  isLiked,
   onToggleLike,
   isOnProfilePage = false,
   isOnMyProfilePage = false,
@@ -70,7 +67,6 @@ export default function PoemCard({
           isOpen={isReadMoreOpen}
           onOpenChange={setIsReadMoreOpen}
           poem={poem}
-          isLiked={isLiked}
           onToggleLike={onToggleLike}
           isOnProfilePage={isOnProfilePage}
           isOnMyProfilePage={isOnMyProfilePage}
@@ -142,10 +138,13 @@ export default function PoemCard({
           <div className="mt-auto flex items-center justify-between gap-2 border-t pt-2">
             {/* Like button */}
             <button
-              onClick={onToggleLike}
-              className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+              onClick={() => onToggleLike(poem.id, !poem.isLikedByCurrentUser)}
+              className="flex min-w-13 cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
             >
-              <Star size={20} fill={isLiked ? '#fbbf24' : 'none'} />
+              <Star
+                size={20}
+                fill={poem.isLikedByCurrentUser ? '#fbbf24' : 'none'}
+              />
               <span className="text-sm font-semibold">
                 {poem._count?.likes ?? 0}
               </span>
