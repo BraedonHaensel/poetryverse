@@ -325,7 +325,7 @@ const shouldFlagAIDetection = (triage: PoemAIDetectionResponse) =>
  * @returns Resolves when validation and persistence complete, or immediately when skipped.
  * @throws {Error} Propagates database/model errors from report creation or poem updates.
  */
-export const runPoemValidationPipeline = async (poem: Poem, userId: string) => {
+export const runPoemValidationPipeline = async (poem: Poem) => {
   const startedAt = Date.now()
   logger.info(
     `Starting poem validation pipeline poemId=${poem.id} isPublic=${poem.isPublic} approvalStatus=${poem.approvalStatus} isAIAssisted=${poem.isAIAssisted}`
