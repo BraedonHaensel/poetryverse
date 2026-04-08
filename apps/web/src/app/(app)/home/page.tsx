@@ -22,11 +22,12 @@ import {
   type PoemTag,
   unlikePoem,
 } from '@/lib/poem-requests'
+import { getUserFollowing } from '@/lib/user-requests'
 
 import { FollowingOnlyToggle } from './following-only-toggle'
 import PoemTypeFilters, { PoemTypeFilterMode } from './poem-type-filters'
 
-const USE_DUMMY_DATA = true
+const USE_DUMMY_DATA = false
 
 // Dummy poem data for development/preview
 const DUMMY_POEMS: PoemData[] = [
@@ -130,6 +131,8 @@ export default function HomePage() {
   const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [allTags, setAllTags] = useState<PoemTag[]>([])
 
+  const [followingUserIds, setFollowingUserIds] = useState<string[]>()
+
   const session = useSession()
   const isGuest = session.status === 'unauthenticated'
 
@@ -146,6 +149,15 @@ export default function HomePage() {
           ])
           setPoems(fetchedPoems)
           setAllTags(fetchedTags)
+
+          if (!isGuest) {
+            const followingUsers = await getUserFollowing()
+            setFollowingUserIds(
+              followingUsers === undefined
+                ? []
+                : followingUsers.map((user) => user.id)
+            )
+          }
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -156,15 +168,32 @@ export default function HomePage() {
     }
 
     fetchData()
-  }, [])
+  }, [isGuest])
 
   // Update the filtered poems to display
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFilteredPoems(
+    // Filter by AI Assisted vs Handwritten
+    let filteredPoems =
       poems === undefined ? [] : filterPoems(poems, poemTypeFilter)
-    )
-  }, [poems, poemTypeFilter])
+
+    // Filter by poem tags
+    if (selectedTags.length > 0) {
+      filteredPoems = filteredPoems.filter((poem) =>
+        poem.poemTags.some((tag) => selectedTags.includes(tag.tag.id))
+      )
+    }
+
+    // Filter by following users
+    if (isFollowingOnly && followingUserIds !== undefined) {
+      filteredPoems = filteredPoems.filter((poem) =>
+        followingUserIds.some((id) => poem.authorId === id)
+      )
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilteredPoems(filteredPoems)
+    console.log(selectedTags)
+  }, [poems, poemTypeFilter, selectedTags, isFollowingOnly, followingUserIds])
 
   if (poems === undefined) return <PageLoadingIndicator />
 

@@ -1,5 +1,3 @@
-import React from 'react'
-
 import CreateDropdown from '@/components/create-nav-dropdown'
 import CreateSheet from '@/components/create-nav-sheet'
 import { LargeButton } from '@/components/large-button'
