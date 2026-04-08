@@ -87,7 +87,7 @@ export default function UserPoemsList({
           // TODO: Check if user liked the poem
           isLiked={true}
           onToggleLike={() => console.log('like')}
-          onReadMore={() => console.log('read more')}
+          isOnProfilePage={true}
           isOnMyProfilePage={isMyPage}
         >
           {isMyPage ? (

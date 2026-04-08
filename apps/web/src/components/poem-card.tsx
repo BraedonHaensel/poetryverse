@@ -1,6 +1,6 @@
 'use client'
 
-import { Globe, LockKeyhole, Star } from 'lucide-react'
+import { Globe, Info, LockKeyhole, Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 
@@ -8,11 +8,13 @@ import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader } from '@/components/ui/card'
 import type { PoemData } from '@/lib/poem-requests'
 
-interface PoemCardProps {
+import { FullPoemDialog } from './full-poem-dialog'
+
+type Props = {
   poem: PoemData
   isLiked: boolean
   onToggleLike: () => void
-  onReadMore: () => void
+  isOnProfilePage?: boolean
   isOnMyProfilePage?: boolean
   children?: ReactNode
 }
@@ -23,21 +25,22 @@ interface PoemCardProps {
  * @param isLiked Whether the poem is currently liked by the user.
  * @param onToggleLike Toggled liking and removing a like from the poem.
  * @param onReadMore Callback to open a read more viewer.
+ * @param isOnProfilePage Whether the poem is being viewed from the profile page.
  * @param isOnMyProfilePage Whether the poem is being viewed from the user's own
  * profile page.
  * @param children Child menu component to display on the poem card.
- * @returns
  */
 export default function PoemCard({
   poem,
   isLiked,
   onToggleLike,
-  onReadMore,
+  isOnProfilePage = false,
   isOnMyProfilePage = false,
   children,
-}: PoemCardProps) {
+}: Props) {
   const textClampRef = useRef<HTMLParagraphElement>(null)
-  const [isClamped, setIsClamped] = useState(false)
+  const [hasReadMore, setHasReadMore] = useState(false)
+  const [isReadMoreOpen, setIsReadMoreOpen] = useState(false)
 
   const router = useRouter()
 
@@ -48,7 +51,7 @@ export default function PoemCard({
 
     // Check if the poem line height exceeds the permitted space
     const checkClamp = () => {
-      setIsClamped(el.scrollHeight > el.clientHeight)
+      setHasReadMore(el.scrollHeight > el.clientHeight)
     }
     checkClamp()
 
@@ -60,9 +63,23 @@ export default function PoemCard({
   }, [])
 
   return (
-    <ShadowCard className="gap-3">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2 break-normal wrap-anywhere">
+    <>
+      {/* Dialog after clicking "Read more" */}
+      {hasReadMore && (
+        <FullPoemDialog
+          isOpen={isReadMoreOpen}
+          onOpenChange={setIsReadMoreOpen}
+          poem={poem}
+          isLiked={isLiked}
+          onToggleLike={onToggleLike}
+          isOnProfilePage={isOnProfilePage}
+          isOnMyProfilePage={isOnMyProfilePage}
+        />
+      )}
+
+      {/* Poem card */}
+      <ShadowCard className="gap-3">
+        <CardHeader className="flex items-start justify-between gap-2 break-normal wrap-anywhere">
           <div className="space-y-2">
             {/* Poem title */}
             <div className="flex items-center gap-2">
@@ -78,8 +95,8 @@ export default function PoemCard({
 
             {/* Poem details */}
             <p className="text-sm text-gray-600">
-              {!isOnMyProfilePage && (
-                // Display the auther's username, unless viewing your own profile page
+              {!isOnProfilePage && (
+                // Display the auther's username, unless currently on their profile page
                 <span
                   className="cursor-pointer hover:opacity-70"
                   onClick={() =>
@@ -102,44 +119,48 @@ export default function PoemCard({
             )}
             {children}
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col gap-2">
-        {/* Poem contents */}
-        <p
-          ref={textClampRef}
-          className="line-clamp-4 text-sm whitespace-pre-wrap"
-        >
-          {poem.body}
-        </p>
-
-        {/* Read more button */}
-        {isClamped && (
-          <button
-            onClick={onReadMore}
-            className="w-fit cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col gap-2">
+          {/* Poem contents */}
+          <p
+            ref={textClampRef}
+            className="line-clamp-4 text-sm whitespace-pre-wrap"
           >
-            Read more
-          </button>
-        )}
+            {poem.body}
+          </p>
 
-        {/* Like button */}
-        <div className="mt-auto flex items-center gap-2 border-t pt-2">
-          <button
-            onClick={onToggleLike}
-            className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-          >
-            <Star
-              size={20}
-              className="text-black"
-              fill={isLiked ? '#fbbf24' : 'none'}
-            />
-            <span className="text-sm font-semibold">
-              {poem.count?.likes ?? 0}
-            </span>
-          </button>
-        </div>
-      </CardContent>
-    </ShadowCard>
+          {/* Read more button */}
+          {hasReadMore && (
+            <button
+              onClick={() => setIsReadMoreOpen(true)}
+              className="w-fit cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
+            >
+              Read more
+            </button>
+          )}
+
+          <div className="mt-auto flex items-center justify-between gap-2 border-t pt-2">
+            {/* Like button */}
+            <button
+              onClick={onToggleLike}
+              className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+            >
+              <Star size={20} fill={isLiked ? '#fbbf24' : 'none'} />
+              <span className="text-sm font-semibold">
+                {poem._count?.likes ?? 0}
+              </span>
+            </button>
+
+            {/* Poem pending approval indicator */}
+            {['PENDING', 'ADMIN_REVIEW'].includes(poem.approvalStatus) && (
+              <span className="flex items-center gap-2 rounded-full bg-amber-300 px-3 py-1 text-xs whitespace-nowrap min-[400px]:text-sm">
+                <Info size={18} />
+                <span>Pending Approval</span>
+              </span>
+            )}
+          </div>
+        </CardContent>
+      </ShadowCard>
+    </>
   )
 }

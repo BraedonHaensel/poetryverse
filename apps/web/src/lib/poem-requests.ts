@@ -17,9 +17,11 @@ export type PoemData = {
   isAIAssisted: boolean
 
   aiLikelihoonScore: number
-  count: {
+  _count: {
     likes: number
   }
+
+  approvalStatus: PoemApprovalStatus
 
   createdAt: Date
   updatedAt: Date
@@ -34,6 +36,15 @@ export type PoemTag = {
   id: string
   name: string
 }
+
+export const PoemApprovalStatus = {
+  PENDING: 'PENDING',
+  UNCHECKED: 'UNCHECKED',
+  ADMIN_REVIEW: 'ADMIN_REVIEW',
+  APPROVED: 'APPROVED',
+}
+export type PoemApprovalStatus =
+  (typeof PoemApprovalStatus)[keyof typeof PoemApprovalStatus]
 
 /**
  * Gets the list of poems for a user.

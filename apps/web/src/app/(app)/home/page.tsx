@@ -1,12 +1,11 @@
 'use client'
 
 import axios from 'axios'
+import { Star } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
-import { FullPoemDialog } from '@/components/full-poem-dialog'
 import MobilePageHeader from '@/components/mobile-page-header'
-import { PoemCard } from '@/components/poem-card'
 import { PoemTagsFilter } from '@/components/poem-tags-filter'
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
 import { ShadowCard } from '@/components/shadow-card'
@@ -45,9 +44,10 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.26,
-    count: { likes: 5 },
+    _count: { likes: 5 },
     createdAt: new Date('2026-03-15T03:09:16.151Z'),
     updatedAt: new Date('2026-03-15T03:09:16.151Z'),
+    approvalStatus: 'APPROVED',
   },
   {
     id: 'cmnauvd5y0007356uo71h9zsh',
@@ -60,9 +60,10 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.75,
-    count: { likes: 8 },
+    _count: { likes: 8 },
     createdAt: new Date('2026-03-17T05:11:13.151Z'),
     updatedAt: new Date('2026-03-17T05:11:13.151Z'),
+    approvalStatus: 'APPROVED',
   },
   {
     id: 'cmn5hpdln000204kzfbg941te',
@@ -75,9 +76,10 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.16,
-    count: { likes: 3 },
+    _count: { likes: 3 },
     createdAt: new Date('2026-03-19T05:12:13.151Z'),
     updatedAt: new Date('2026-03-19T05:12:13.151Z'),
+    approvalStatus: 'APPROVED',
   },
   {
     id: 'cmnauycv2000d356u2oq6xzt9',
@@ -90,9 +92,10 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: true,
     aiLikelihoonScore: 0.85,
-    count: { likes: 12 },
+    _count: { likes: 12 },
     createdAt: new Date('2026-03-20T05:12:13.151Z'),
     updatedAt: new Date('2026-03-20T05:12:13.151Z'),
+    approvalStatus: 'APPROVED',
   },
   {
     id: 'cmn5hq2m4000604kzj8mn2b5p',
@@ -105,9 +108,10 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.22,
-    count: { likes: 6 },
+    _count: { likes: 6 },
     createdAt: new Date('2026-03-10T14:20:45.151Z'),
     updatedAt: new Date('2026-03-10T14:20:45.151Z'),
+    approvalStatus: 'APPROVED',
   },
 ]
 
@@ -124,6 +128,9 @@ export default function HomePage() {
 
   const [poems, setPoems] = useState<PoemData[]>(DUMMY_POEMS)
   const [allTags, setAllTags] = useState<PoemTag[]>([])
+
+  const session = useSession()
+  const isGuest = session.status === 'unauthenticated'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -171,7 +178,11 @@ export default function HomePage() {
     <>
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
-        <MobilePageHeader title="PoetryVerse" showLogo={true} showSignInButton={isGuest} />
+        <MobilePageHeader
+          title="PoetryVerse"
+          showLogo={true}
+          showSignInButton={isGuest}
+        />
 
         {/* Filters */}
         <div className="flex flex-col gap-3 px-2">
@@ -283,7 +294,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto px-4 py-4">
-          <div className="grid gap-4 grid-cols-1 min-[1200px]:grid-cols-2 min-[1600px]:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 min-[1200px]:grid-cols-2 min-[1600px]:grid-cols-3">
             {filteredPoems.map((poem) => (
               <ShadowCard key={poem.id}>
                 <CardHeader className="pb-2">

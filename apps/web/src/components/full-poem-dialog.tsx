@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react'
+import { Globe, LockKeyhole, Star } from 'lucide-react'
 
 import {
   Dialog,
@@ -8,52 +8,93 @@ import {
 } from '@/components/ui/dialog'
 import type { PoemData } from '@/lib/poem-requests'
 
-interface FullPoemDialogProps {
-  poem: PoemData | null
+type Props = {
   isOpen: boolean
-  isLiked: boolean
   onOpenChange: (open: boolean) => void
+  poem: PoemData
+  isLiked: boolean
   onToggleLike: () => void
+  isOnProfilePage?: boolean
+  isOnMyProfilePage?: boolean
 }
 
+/**
+ * Dialog for viewing an enlarged poem card.
+ * @param isOpen Whether the dialog is open.
+ * @param onOpenChange Callback called when the dialog is opened or closed.
+ * @param poem Poem to display.
+ * @param isLiked Whether the poem is currently liked by the user.
+ * @param onToggleLike Toggled liking and removing a like from the poem.
+ * @param onReadMore Callback to open a read more viewer.
+ * @param isOnProfilePage Whether the poem is being viewed from the profile page.
+ * @param isOnMyProfilePage Whether the poem is being viewed from the user's own
+ * profile page.
+ */
 export function FullPoemDialog({
-  poem,
   isOpen,
-  isLiked,
   onOpenChange,
+  poem,
+  isLiked,
   onToggleLike,
-}: FullPoemDialogProps) {
+  isOnProfilePage = false,
+  isOnMyProfilePage = false,
+}: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] max-w-2xl! overflow-y-auto px-4 md:px-8">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{poem?.title}</DialogTitle>
-        </DialogHeader>
-        {poem && (
-          <div className="space-y-1">
-            <p className="text-muted-foreground mb-4 text-sm">
-              {poem.author?.username || poem.authorId} · {poem.type.name}
+      <DialogContent
+        className="max-w-2xl! overflow-auto px-4 md:px-8"
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="flex flex-row items-start justify-between gap-2 break-normal wrap-anywhere">
+          <div className="space-y-2">
+            {/* Poem title */}
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              {isOnMyProfilePage &&
+                // Visibility icon when viewing your own profile page
+                (poem.isPublic ? (
+                  <Globe size={22} />
+                ) : (
+                  <LockKeyhole size={22} />
+                ))}
+              <span className="font-bold">{poem.title}</span>
+            </DialogTitle>
+
+            {/* Poem details */}
+            <p className="text-sm text-gray-600">
+              {!isOnProfilePage && (
+                // Display the auther's username, unless currently on their profile page
+                <span>{`${poem.author.username} · `}</span>
+              )}
+              {`${poem.type.name} · ${poem.poemTags.map((tag) => tag.tag.name).join(', ')}`}
             </p>
-            <div className="space-y-1 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-              <p className="text-foreground leading-relaxed md:text-lg">
-                {poem.body}
-              </p>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              <button
-                onClick={onToggleLike}
-                className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-              >
-                <Star
-                  size={28}
-                  className="text-black"
-                  fill={isLiked ? '#fbbf24' : 'none'}
-                />
-                  <span className="text-lg font-semibold">{poem.count?.likes ?? 0}</span>
-              </button>
-            </div>
           </div>
-        )}
+
+          {/* AI Assisted indicator */}
+          {poem.isAIAssisted && (
+            <span className="mr-4 rounded-full bg-black px-3 py-1 text-xs font-bold whitespace-nowrap text-white min-[400px]:text-base">
+              AI Assisted
+            </span>
+          )}
+        </DialogHeader>
+        <div className="space-y-1">
+          {/* Poem contents */}
+          <div className="bg-off-white max-h-[60vh] overflow-y-auto rounded-lg border p-4">
+            <p className="leading-relaxed whitespace-pre-wrap md:text-lg">
+              {poem.body}
+            </p>
+          </div>
+
+          {/* Like button */}
+          <div className="mt-4 flex items-center gap-2">
+            <button
+              onClick={onToggleLike}
+              className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+            >
+              <Star size={28} fill={isLiked ? '#fbbf24' : 'none'} />
+              <span className="text-lg font-semibold">{poem._count.likes}</span>
+            </button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
