@@ -17,7 +17,7 @@ type DataTableProps<T> = {
   gridClassName?: string
 }
 
-export function DataTable<T extends { id: number }>({
+export function DataTable<T extends { id: string | number }>({
   columns,
   data,
   renderActions,
