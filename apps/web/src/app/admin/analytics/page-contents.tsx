@@ -52,7 +52,10 @@ function formatReportType(reasonType: string) {
   return reasonType
     .toLowerCase()
     .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .map((part) => {
+      if (part === 'ai') return 'AI'
+      return part.charAt(0).toUpperCase() + part.slice(1)
+    })
     .join(' ')
 }
 
