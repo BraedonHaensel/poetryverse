@@ -206,3 +206,21 @@ export function unlikePoem(poemId: string) {
 export function isPendingApproval(approvalStatus: PoemApprovalStatus): boolean {
   return ['PENDING', 'ADMIN_REVIEW'].includes(approvalStatus)
 }
+
+/**
+ * Gets the list of all poems.
+ * @returns List of poems.
+ */
+export async function getAllPoems(): Promise<PoemData[]> {
+  return api
+    .get('/api/poems')
+    .then((response) => {
+      const data = response.data
+      console.log('All poems:', data)
+      return data
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to get all poems')
+      return []
+    })
+}

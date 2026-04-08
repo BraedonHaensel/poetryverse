@@ -1,12 +1,21 @@
 'use client'
 
 import { CircleCheckBig, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getAllPoems } from '@/lib/poem-requests'
+import {
+  getReports,
+  ReportData,
+  ReportResolutionType,
+  resolveReport,
+} from '@/lib/report-requests'
 
 type ReportedPoem = {
   id: number
@@ -16,30 +25,12 @@ type ReportedPoem = {
   reason: string
 }
 
-const initialReportedPoems: ReportedPoem[] = [
-  {
-    id: 12,
-    title: 'My Haiku',
-    reportType: 'AI Usage',
-    poem: 'AI writing poetry is made a lot easier when you use AI.',
-    reason: 'Clearly written using AI with repeated phrasing.',
-  },
-  {
-    id: 24,
-    title: 'When I Was One',
-    reportType: 'Inappropriate Content',
-    poem: 'No man is an island, entire of itself...',
-    reason: 'Contains inappropriate and sensitive content.',
-  },
-  {
-    id: 45,
-    title: 'Simple Haiku',
-    reportType: 'AI Usage',
-    poem: 'This is a haiku demonstrating a sample poem creation.',
-    reason:
-      'Low effort poem, clearly written by AI. Admins please take this low quality content off of the platform.',
-  },
-]
+type AnalyticsSnapshot = {
+  totalPoems: number
+  aiPoems: number
+  handwrittenPoems: number
+  reportedPoems: ReportedPoem[]
+}
 
 const columns: Column<ReportedPoem>[] = [
   { key: 'id', label: 'ID' },
@@ -57,18 +48,84 @@ const columns: Column<ReportedPoem>[] = [
   },
 ]
 
+function formatReportType(reasonType: string) {
+  return reasonType
+    .toLowerCase()
+    .split('_')
+    .map((part) => {
+      if (part === 'ai') return 'AI'
+      return part.charAt(0).toUpperCase() + part.slice(1)
+    })
+    .join(' ')
+}
+
+function mapReportToReportedPoem(report: ReportData): ReportedPoem {
+  return {
+    id: report.id,
+    title: report.poem.title,
+    reportType: formatReportType(report.reasonType),
+    poem: report.poem.body,
+    reason: report.reason,
+  }
+}
+
+async function fetchAnalyticsSnapshot(): Promise<AnalyticsSnapshot> {
+  const [allPoems, reports] = await Promise.all([getAllPoems(), getReports()])
+
+  return {
+    totalPoems: allPoems.length,
+    aiPoems: allPoems.filter((poem) => poem.isAIAssisted).length,
+    handwrittenPoems: allPoems.filter((poem) => !poem.isAIAssisted).length,
+    reportedPoems: (reports ?? []).map(mapReportToReportedPoem),
+  }
+}
+
 export default function AnalyticsPageContents() {
-  const [reportedPoems, setReportedPoems] = useState(initialReportedPoems)
+  const [reportedPoems, setReportedPoems] = useState<ReportedPoem[]>([])
   const [selectedPoem, setSelectedPoem] = useState<ReportedPoem | null>(null)
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [isApproveConfirmOpen, setIsApproveConfirmOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleDelete = (id: number) => {
-    setReportedPoems((prevPoems) => prevPoems.filter((poem) => poem.id !== id))
-  }
+  const [totalPoems, setTotalPoems] = useState(0)
+  const [aiPoems, setAiPoems] = useState(0)
+  const [handwrittenPoems, setHandwrittenPoems] = useState(0)
 
-  const handleApprove = (id: number) => {
-    console.log('Approve report:', id)
+  const didFetch = useRef(false)
+
+  const selectedPoemTitle = useMemo(
+    () => selectedPoem?.title ?? 'this poem',
+    [selectedPoem]
+  )
+
+  useEffect(() => {
+    if (didFetch.current) return
+    didFetch.current = true
+
+    async function initializeAnalytics() {
+      try {
+        const data = await fetchAnalyticsSnapshot()
+
+        setTotalPoems(data.totalPoems)
+        setAiPoems(data.aiPoems)
+        setHandwrittenPoems(data.handwrittenPoems)
+        setReportedPoems(data.reportedPoems)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void initializeAnalytics()
+  }, [])
+
+  async function refreshAnalyticsData() {
+    const data = await fetchAnalyticsSnapshot()
+
+    setTotalPoems(data.totalPoems)
+    setAiPoems(data.aiPoems)
+    setHandwrittenPoems(data.handwrittenPoems)
+    setReportedPoems(data.reportedPoems)
   }
 
   const handleOpenDeleteDialog = (poem: ReportedPoem) => {
@@ -94,26 +151,48 @@ export default function AnalyticsPageContents() {
   const handleDeleteConfirm = async () => {
     if (!selectedPoem) return
 
-    handleDelete(selectedPoem.id)
-    handleCloseDeleteDialog()
+    setIsSubmitting(true)
+
+    const success = await resolveReport(
+      selectedPoem.id,
+      ReportResolutionType.REMOVE
+    )
+
+    if (success) {
+      toast.success('Poem deleted and report resolved')
+      await refreshAnalyticsData()
+      handleCloseDeleteDialog()
+    }
+
+    setIsSubmitting(false)
   }
 
   const handleApproveConfirm = async () => {
     if (!selectedPoem) return
 
-    handleApprove(selectedPoem.id)
-    handleCloseApproveDialog()
+    setIsSubmitting(true)
+
+    const success = await resolveReport(
+      selectedPoem.id,
+      ReportResolutionType.KEEP
+    )
+
+    if (success) {
+      toast.success('Report approved and closed')
+      await refreshAnalyticsData()
+      handleCloseApproveDialog()
+    }
+
+    setIsSubmitting(false)
   }
+
+  if (isLoading) return <PageLoadingIndicator />
 
   return (
     <>
       <ConfirmationDialog
         isOpen={isDeleteConfirmOpen}
-        title={
-          selectedPoem
-            ? `Are you sure you want to delete ${selectedPoem.title}?`
-            : 'Are you sure you want to delete this poem?'
-        }
+        title={`Are you sure you want to delete ${selectedPoemTitle}?`}
         description="This action cannot be undone."
         onClose={handleCloseDeleteDialog}
         onAction={handleDeleteConfirm}
@@ -122,11 +201,7 @@ export default function AnalyticsPageContents() {
 
       <ConfirmationDialog
         isOpen={isApproveConfirmOpen}
-        title={
-          selectedPoem
-            ? `Are you sure you want to approve ${selectedPoem.title}?`
-            : 'Are you sure you want to approve this poem?'
-        }
+        title={`Are you sure you want to approve ${selectedPoemTitle}?`}
         description="The report will be closed and the poem will remain on PoetryVerse."
         onClose={handleCloseApproveDialog}
         onAction={handleApproveConfirm}
@@ -134,95 +209,125 @@ export default function AnalyticsPageContents() {
       />
 
       {/*Mobile Layout*/}
-      <div className="md:hidden">
-        <div className="flex flex-col gap-6 p-4">
-          <section>
-            <h2 className="mb-3 text-xl font-semibold">Statistics</h2>
+      <div className={isSubmitting ? 'pointer-events-none opacity-70' : ''}>
+        <div className="md:hidden">
+          <div className="flex flex-col gap-6 p-4">
+            <section>
+              <h2 className="mb-3 text-xl font-semibold">Statistics</h2>
 
-            <div className="grid grid-cols-2 gap-4">
-              <MobileStatCard title="Number of Poems" value="50" />
-              <MobileStatCard title="Number of AI Poems" value="23" />
-            </div>
-
-            <MobileStatCard
-              title="Number of Handwritten Poems"
-              value="27"
-              className="mt-4"
-            />
-          </section>
-
-          {/* REPORTED POEMS */}
-          <section>
-            <h2 className="mb-3 text-xl font-semibold">Reported Poems</h2>
-
-            <div className="flex flex-col gap-4">
-              {reportedPoems.map((poem) => (
-                <MobilePoemCard
-                  key={poem.id}
-                  poem={poem}
-                  onDelete={() => handleOpenDeleteDialog(poem)}
-                  onApprove={() => handleOpenApproveDialog(poem)}
+              <div className="grid grid-cols-2 gap-4">
+                <MobileStatCard
+                  title="Number of Poems"
+                  value={String(totalPoems)}
                 />
-              ))}
-            </div>
-          </section>
+                <MobileStatCard
+                  title="Number of AI Poems"
+                  value={String(aiPoems)}
+                />
+              </div>
+
+              <MobileStatCard
+                title="Number of Handwritten Poems"
+                value={String(handwrittenPoems)}
+                className="mt-4"
+              />
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-xl font-semibold">Reported Poems</h2>
+
+              <div className="flex flex-col gap-4">
+                {reportedPoems.map((poem) => (
+                  <MobilePoemCard
+                    key={poem.id}
+                    poem={poem}
+                    onDelete={() => handleOpenDeleteDialog(poem)}
+                    onApprove={() => handleOpenApproveDialog(poem)}
+                  />
+                ))}
+
+                {reportedPoems.length === 0 && (
+                  <ShadowCard className="p-4">
+                    <CardContent className="text-center">
+                      There are no open reports.
+                    </CardContent>
+                  </ShadowCard>
+                )}
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
 
-      {/*Desktop Layout*/}
-      <div className="hidden md:block">
-        <div className="flex min-w-225 flex-col gap-10">
-          <section>
-            <CardHeader className="px-0 pt-0 pb-5">
-              <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
-            </CardHeader>
+        {/*Desktop Layout*/}
+        <div className="hidden md:block">
+          <div className="flex min-w-225 flex-col gap-10">
+            <section>
+              <CardHeader className="px-0 pt-0 pb-5">
+                <CardTitle className="text-2xl font-bold">Statistics</CardTitle>
+              </CardHeader>
 
-            <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
-              <CardContent className="grid grid-cols-3 gap-8 p-0">
-                <StatCard title="Number of Poems" value="50" />
-                <StatCard title="Number of AI Poems" value="23" />
-                <StatCard title="Number of Handwritten Poems" value="27" />
-              </CardContent>
-            </ShadowCard>
-          </section>
+              <ShadowCard className="bg-admin-panel rounded-4xl px-10 py-12">
+                <CardContent className="grid grid-cols-3 gap-8 p-0">
+                  <StatCard
+                    title="Number of Poems"
+                    value={String(totalPoems)}
+                  />
+                  <StatCard
+                    title="Number of AI Poems"
+                    value={String(aiPoems)}
+                  />
+                  <StatCard
+                    title="Number of Handwritten Poems"
+                    value={String(handwrittenPoems)}
+                  />
+                </CardContent>
+              </ShadowCard>
+            </section>
 
-          <section>
-            <CardHeader className="px-0 pt-0 pb-5">
-              <CardTitle className="text-2xl font-bold">
-                Reported Poems
-              </CardTitle>
-            </CardHeader>
+            <section>
+              <CardHeader className="px-0 pt-0 pb-5">
+                <CardTitle className="text-2xl font-bold">
+                  Reported Poems
+                </CardTitle>
+              </CardHeader>
 
-            <ShadowCard className="bg-admin-panel rounded-4xl p-3">
-              <CardContent className="max-h-117.5 overflow-y-auto p-0">
-                <DataTable
-                  columns={columns}
-                  data={reportedPoems}
-                  renderActions={(row) => (
-                    <div className="flex items-center justify-center gap-3">
-                      <button
-                        type="button"
-                        className="cursor-pointer transition hover:opacity-70"
-                        onClick={() => handleOpenDeleteDialog(row)}
-                        aria-label="Delete report"
-                      >
-                        <Trash2 size={28} strokeWidth={2.25} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="cursor-pointer transition hover:opacity-70"
-                        onClick={() => handleOpenApproveDialog(row)}
-                        aria-label="Approve report"
-                      >
-                        <CircleCheckBig size={30} strokeWidth={2.25} />
-                      </button>
+              <ShadowCard className="bg-admin-panel rounded-4xl p-3">
+                <CardContent className="max-h-117.5 overflow-y-auto p-0">
+                  {reportedPoems.length === 0 ? (
+                    <div className="p-6 text-center">
+                      There are no reported poems.
                     </div>
+                  ) : (
+                    <DataTable
+                      columns={columns}
+                      data={reportedPoems}
+                      renderActions={(row) => (
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            type="button"
+                            className="cursor-pointer transition hover:opacity-70"
+                            onClick={() => handleOpenDeleteDialog(row)}
+                            aria-label="Delete report"
+                          >
+                            <Trash2 size={28} strokeWidth={2.25} />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="cursor-pointer transition hover:opacity-70"
+                            onClick={() => handleOpenApproveDialog(row)}
+                            aria-label="Approve report"
+                          >
+                            <CircleCheckBig size={30} strokeWidth={2.25} />
+                          </button>
+                        </div>
+                      )}
+                    />
                   )}
-                />
-              </CardContent>
-            </ShadowCard>
-          </section>
+                </CardContent>
+              </ShadowCard>
+            </section>
+          </div>
         </div>
       </div>
     </>
@@ -264,8 +369,9 @@ function MobilePoemCard({
   onDelete: () => void
   onApprove: () => void
 }) {
-  const badgeColor =
-    poem.reportType === 'AI Usage' ? 'bg-slate-500' : 'bg-red-800'
+  const badgeColor = poem.reportType.toLowerCase().includes('ai')
+    ? 'bg-slate-500'
+    : 'bg-red-800'
 
   return (
     <div className="rounded-xl bg-white p-3 shadow-sm">

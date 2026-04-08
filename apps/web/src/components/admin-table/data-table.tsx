@@ -17,7 +17,7 @@ type DataTableProps<T> = {
   gridClassName?: string
 }
 
-export function DataTable<T extends { id: number }>({
+export function DataTable<T extends { id: string | number }>({
   columns,
   data,
   renderActions,
@@ -65,11 +65,7 @@ export function DataTable<T extends { id: number }>({
             {columns.map((col) => (
               <div
                 key={String(col.key)}
-                className={cn(
-                  cellStyles,
-                  col.key === 'id' && 'font-bold',
-                  col.className
-                )}
+                className={cn(cellStyles, col.className)}
               >
                 {col.render ? col.render(row) : String(row[col.key])}
               </div>
