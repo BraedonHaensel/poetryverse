@@ -134,3 +134,21 @@ export async function getPoemTags(): Promise<PoemTag[]> {
       return []
     })
 }
+
+/**
+ * Gets the list of all poems.
+ * @returns List of poems.
+ */
+export async function getAllPoems(): Promise<PoemData[]> {
+  return api
+    .get('/api/poems')
+    .then((response) => {
+      const data = response.data
+      console.log('All poems:', data)
+      return data
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to get all poems')
+      return []
+    })
+}
