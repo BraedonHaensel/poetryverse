@@ -1,7 +1,7 @@
 import { Poem, PoemApprovalStatus, ReasonType } from '@prisma/client'
 import damerauLevenshtein from 'damerau-levenshtein'
 
-import { POEM_INCLUDE_STATEMENT } from '../controllers/poem-controller'
+import { getPoemInclude } from '../controllers/poem-controller'
 import { normalizePoemBody } from '../mappers/poem-mapper'
 import {
   type PoemAIDetectionResponse,
@@ -397,7 +397,7 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
       aiLikelihoodScore: aiDetection?.aiLikelihood,
       plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood,
     },
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(),
   })
 
   logger.info(
