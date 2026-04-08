@@ -24,7 +24,7 @@ export function DataTable<T extends { id: string | number }>({
   gridClassName = 'grid-cols-[88px_1.1fr_1.2fr_2fr_2fr_110px]',
 }: DataTableProps<T>) {
   const cellStyles =
-    'text-md [display:flex] items-center justify-center py-4 px-2 xl:px-4 text-center wrap-break-word line-clamp-4'
+    'text-md [display:flex] items-center justify-center py-4 px-2 xl:px-4 text-center wrap-break-word'
 
   return (
     <div className="flex flex-col gap-1.5">
