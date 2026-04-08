@@ -57,7 +57,9 @@ export default function UserConnectionCard({
 
     // On the Following tab
     return userConnectionData.isFollowingUser
-      ? { icon: UserMinus, text: 'Unfollow', onClick: sendUnfollow }
+      ? isMyPage
+        ? { icon: UserMinus, text: 'Unfollow', onClick: sendUnfollow }
+        : { icon: Users, text: 'Following' }
       : { icon: UserPlus, text: 'Follow', onClick: sendFollow }
   })()
 
