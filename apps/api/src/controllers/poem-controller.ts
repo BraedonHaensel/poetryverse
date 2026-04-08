@@ -754,6 +754,7 @@ export const getDailyPoem = async (req: Request, res: Response) => {
 
 /**
  * Helper function to get public poems, with optional exclusion of a user's own poems.
+ * @param requesterUserId Optional user ID of the requester, used to determine if they have liked the poems.
  * @param excludeUserId Optional user ID to exclude poems from.
  * @returns List of public poems, optionally excluding the specified user's poems.
  */
