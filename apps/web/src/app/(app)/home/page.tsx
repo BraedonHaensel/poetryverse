@@ -110,6 +110,8 @@ export default function HomePage() {
   const [poemTypeFilter, setPoemTypeFilter] =
     useState<PoemTypeFilterMode>('ALL')
   const [isFollowingOnly, setIsFollowingOnly] = useState(false)
+  const session = useSession()
+  const isGuest = session.status === 'unauthenticated'
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [likedPoems, setLikedPoems] = useState<Set<string>>(new Set())
   const [fullPoemOpen, setFullPoemOpen] = useState(false)
