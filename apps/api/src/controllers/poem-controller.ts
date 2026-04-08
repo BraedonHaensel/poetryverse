@@ -372,8 +372,13 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     }
   )
 
+  const poemWithLikeInfo = {
+    ...createdPoem,
+    isLikedByCurrentUser: false,
+  }
+
   // Return the created poem.
-  return res.status(201).json({ data: createdPoem })
+  return res.status(201).json({ data: poemWithLikeInfo })
 }
 
 /**
