@@ -17,41 +17,32 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { api, displayApiError } from '@/lib/api'
-
-interface PoemData {
-  id: string
-  title: string
-  authorUsername: string
-  category?: string
-  lines: string[]
-  linecount: string
-  rating?: number
-}
+import { type PoemData } from '@/lib/poem-requests'
 
 // Dummy poem data for development/preview
 const DUMMY_POEM: PoemData = {
-  id: '1',
+  id: 'poem1',
   title: 'Sonnet 1',
-  authorUsername: 'User 2',
-  category: 'Sonnet · Romance',
-  lines: [
-    'Beneath the velvet cloak of silver night,',
-    'I find my world reflected in your eyes,',
-    'A soft and steady, soul-consuming light,',
-    'That steals the breath of all my weary sighs,',
-    'The winter frost may chill the hollow air,',
-    'And summer blooms may wither in the sun,',
-    'But nothing dims the grace of what we share,',
-    'Two separate paths that are joined and beat as one',
-    'No gilded crown could ever hold the worth,',
-    'Of quiet moments whispered in the dark,',
-    'For you have been my anchor to the Earth,',
-    'And to my soul, you are the living spark,',
-    'Though time may drift as tide pulls us from the shore,',
-    "I'll love you now, and then forevermore.",
-  ],
-  linecount: '14',
-  rating: 7,
+  authorId: 'cmn5hpdln000104kzfbg941tb',
+  author: {
+    username: 'User 2',
+  },
+  type: {
+    id: 'type-sonnet',
+    name: 'Sonnet',
+  },
+  body: "Beneath the velvet cloak of silver night,\nI find my world reflected in your eyes,\nA soft and steady, soul-consuming light,\nThat steals the breath of all my weary sighs,\nThe winter frost may chill the hollow air,\nAnd summer blooms may wither in the sun,\nBut nothing dims the grace of what we share,\nTwo separate paths that are joined and beat as one\nNo gilded crown could ever hold the worth,\nOf quiet moments whispered in the dark,\nFor you have been my anchor to the Earth,\nAnd to my soul, you are the living spark,\nThough time may drift as tide pulls us from the shore,\nI'll love you now, and then forevermore.",
+  _count: {
+    likes: 2,
+  },
+  isPublic: true,
+  isAIAssisted: false,
+  aiLikelihoonScore: 0.26,
+  poemTags: [],
+  createdAt: new Date('2026-03-15T03:09:16.151Z'),
+  updatedAt: new Date('2026-03-15T03:09:16.151Z'),
+  approvalStatus: 'APPROVED',
+  isLikedByCurrentUser: true,
 }
 
 const USE_DUMMY_DATA = true
@@ -59,6 +50,7 @@ const LINES_TO_SHOW = 8
 
 export default function PoemOfTheDay() {
   const { data: session } = useSession()
+  const isGuest = !session
   const [poem, setPoemData] = useState<PoemData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fullPoemOpen, setFullPoemOpen] = useState(false)
@@ -66,7 +58,7 @@ export default function PoemOfTheDay() {
   const [showSignInDialog, setShowSignInDialog] = useState(false)
 
   const toggleLike = () => {
-    if (!session?.user) {
+    if (isGuest) {
       setShowSignInDialog(true)
       return
     }
@@ -83,11 +75,11 @@ export default function PoemOfTheDay() {
           setPoemData(DUMMY_POEM)
         } else {
           const response = await api.get('/poems/poem-of-the-day')
-          setPoemData(response.data)
+          setPoemData(response.data.data)
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          displayApiError(error, 'Failed to load poem of the day')
+          displayApiError(error, 'Failed to load Poem of the Day')
         }
       } finally {
         setIsLoading(false)
@@ -137,11 +129,16 @@ export default function PoemOfTheDay() {
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
           title="Poem of the Day"
-          showLogo={true}
+          showLogo={false}
           showGuestSignIn={true}
         />
 
@@ -153,23 +150,25 @@ export default function PoemOfTheDay() {
               </div>
               <CardTitle className="text-2xl font-bold">{poem.title}</CardTitle>
               <p className="text-muted-foreground text-sm font-medium">
-                {poem.authorUsername}
-                {poem.category && ` · ${poem.category}`}
+                {poem.author.username}
               </p>
             </CardHeader>
 
             <CardContent className="flex flex-col gap-2">
               <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
                 <div className="space-y-0.5">
-                  {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
-                    <p
-                      key={index}
-                      className="text-foreground text-sm leading-snug"
-                    >
-                      {line}
-                    </p>
-                  ))}
-                  {poem.lines.length > LINES_TO_SHOW && (
+                  {poem.body
+                    .split('\n')
+                    .slice(0, LINES_TO_SHOW)
+                    .map((line, index) => (
+                      <p
+                        key={index}
+                        className="text-foreground text-sm leading-snug"
+                      >
+                        {line}
+                      </p>
+                    ))}
+                  {poem.body.split('\n').length > LINES_TO_SHOW && (
                     <button
                       onClick={() => setFullPoemOpen(true)}
                       className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
@@ -181,21 +180,21 @@ export default function PoemOfTheDay() {
               </div>
 
               <div className="flex items-center justify-between border-t pt-2">
-                {poem.rating !== undefined && (
-                  <button
-                    onClick={toggleLike}
-                    className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-                  >
-                    <Star
-                      size={20}
-                      className="text-black"
-                      fill={isLiked ? '#fbbf24' : 'none'}
-                    />
-                    <span className="text-sm font-semibold">{poem.rating}</span>
-                  </button>
-                )}
+                <button
+                  onClick={toggleLike}
+                  className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+                >
+                  <Star
+                    size={20}
+                    className="text-black"
+                    fill={isLiked ? '#fbbf24' : 'none'}
+                  />
+                  <span className="text-sm font-semibold">
+                    {poem._count.likes}
+                  </span>
+                </button>
                 <p className="text-muted-foreground text-xs">
-                  {poem.linecount} lines
+                  {poem.body.split('\n').length} lines
                 </p>
               </div>
             </CardContent>
@@ -217,10 +216,9 @@ export default function PoemOfTheDay() {
                 </CardTitle>
               </div>
 
-              {/* Author info with category */}
+              {/* Author info */}
               <p className="text-muted-foreground text-sm font-medium md:text-base">
-                {poem.authorUsername}
-                {poem.category && ` · ${poem.category}`}
+                {poem.author.username}
               </p>
             </div>
           </CardHeader>
@@ -229,15 +227,18 @@ export default function PoemOfTheDay() {
             {/* Poem lines */}
             <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
               <div className="space-y-0.5">
-                {poem.lines.slice(0, LINES_TO_SHOW).map((line, index) => (
-                  <p
-                    key={index}
-                    className="text-foreground text-sm leading-snug md:text-base"
-                  >
-                    {line}
-                  </p>
-                ))}
-                {poem.lines.length > LINES_TO_SHOW && (
+                {poem.body
+                  .split('\n')
+                  .slice(0, LINES_TO_SHOW)
+                  .map((line, index) => (
+                    <p
+                      key={index}
+                      className="text-foreground text-sm leading-snug md:text-base"
+                    >
+                      {line}
+                    </p>
+                  ))}
+                {poem.body.split('\n').length > LINES_TO_SHOW && (
                   <button
                     onClick={() => setFullPoemOpen(true)}
                     className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
@@ -248,23 +249,23 @@ export default function PoemOfTheDay() {
               </div>
             </div>
 
-            {/* Poem metadata and rating */}
+            {/* Poem metadata and likes */}
             <div className="flex items-center justify-between border-t pt-2">
-              {poem.rating !== undefined && (
-                <button
-                  onClick={toggleLike}
-                  className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-                >
-                  <Star
-                    size={28}
-                    className="text-black"
-                    fill={isLiked ? '#fbbf24' : 'none'}
-                  />
-                  <span className="text-lg font-semibold">{poem.rating}</span>
-                </button>
-              )}
+              <button
+                onClick={toggleLike}
+                className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
+              >
+                <Star
+                  size={28}
+                  className="text-black"
+                  fill={isLiked ? '#fbbf24' : 'none'}
+                />
+                <span className="text-lg font-semibold">
+                  {poem._count.likes}
+                </span>
+              </button>
               <p className="text-muted-foreground text-xs">
-                {poem.linecount} lines
+                {poem.body.split('\n').length} lines
               </p>
             </div>
           </CardContent>
@@ -279,11 +280,10 @@ export default function PoemOfTheDay() {
           </DialogHeader>
           <div className="space-y-1">
             <p className="text-muted-foreground mb-4 text-sm">
-              {poem.authorUsername}
-              {poem.category && ` · ${poem.category}`}
+              {poem.author.username}
             </p>
             <div className="space-y-1 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-              {poem.lines.map((line, index) => (
+              {poem.body.split('\n').map((line, index) => (
                 <p
                   key={index}
                   className="text-foreground leading-relaxed md:text-lg"
@@ -302,20 +302,17 @@ export default function PoemOfTheDay() {
                   className="text-black"
                   fill={isLiked ? '#fbbf24' : 'none'}
                 />
-                <span className="text-lg font-semibold">{poem.rating}</span>
+                <span className="text-lg font-semibold">
+                  {poem._count.likes}
+                </span>
               </button>
               <span className="text-muted-foreground text-sm">
-                {poem.linecount} lines
+                {poem.body.split('\n').length} lines
               </span>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-
-      <SignInRequiredDialog
-        isOpen={showSignInDialog}
-        onClose={() => setShowSignInDialog(false)}
-      />
     </>
   )
 }

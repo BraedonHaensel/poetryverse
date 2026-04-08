@@ -58,7 +58,11 @@ interface PublicPoemsOptions {
   excludeUserId?: string
 }
 
-// Include statement for fetching poems from the database with Prisma.
+/**
+ * Function that returns the include statement for fetching poems from the database
+ * with Prisma. Includes poem type, tags, author username, and like information (whether
+ * the current user has liked the poem, and total like count).
+ */
 export const getPoemInclude = (currentUserId?: string) => ({
   type: true,
   poemTags: {
@@ -93,6 +97,7 @@ export const getPoemInclude = (currentUserId?: string) => ({
   },
 })
 
+/** Maps poems to include like information. */
 function mapPoems(
   poems: Prisma.PoemGetPayload<{ include: ReturnType<typeof getPoemInclude> }>[]
 ) {

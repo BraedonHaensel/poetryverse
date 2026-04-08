@@ -1,29 +1,26 @@
 'use client'
 
 import axios from 'axios'
-import { Star } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
+import OtherUserPoemMenu from '@/components/other-user-poem-menu'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
+import PoemCard from '@/components/poem-card'
 import { PoemTagsFilter } from '@/components/poem-tags-filter'
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
-import { ShadowCard } from '@/components/shadow-card'
-import { CardContent, CardHeader } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { Separator } from '@/components/ui/separator'
 import { displayApiError } from '@/lib/api'
 import {
   filterPoems,
   getFeedPoems,
   getPoemTags,
+  likePoem,
   type PoemData,
   type PoemTag,
+  unlikePoem,
 } from '@/lib/poem-requests'
 
 import { FollowingOnlyToggle } from './following-only-toggle'
@@ -127,11 +124,10 @@ export default function HomePage() {
     useState<PoemTypeFilterMode>('ALL')
   const [isFollowingOnly, setIsFollowingOnly] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [likedPoems, setLikedPoems] = useState<Set<string>>(new Set())
-  const [fullPoemOpen, setFullPoemOpen] = useState(false)
-  const [selectedPoem, setSelectedPoem] = useState<PoemData | null>(null)
+  const [showSignInDialog, setShowSignInDialog] = useState(false)
 
-  const [poems, setPoems] = useState<PoemData[]>(DUMMY_POEMS)
+  const [poems, setPoems] = useState<PoemData[] | undefined>(DUMMY_POEMS)
+  const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [allTags, setAllTags] = useState<PoemTag[]>([])
 
   const session = useSession()
@@ -162,25 +158,54 @@ export default function HomePage() {
     fetchData()
   }, [])
 
-  const toggleLike = (poemId: string) => {
-    const newLiked = new Set(likedPoems)
-    if (newLiked.has(poemId)) {
-      newLiked.delete(poemId)
-    } else {
-      newLiked.add(poemId)
+  // Update the filtered poems to display
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilteredPoems(
+      poems === undefined ? [] : filterPoems(poems, poemTypeFilter)
+    )
+  }, [poems, poemTypeFilter])
+
+  if (poems === undefined) return <PageLoadingIndicator />
+
+  /** Handles liking or removing a like from a poem. */
+  const handleToggleLike = (poemId: string, isLike: boolean) => {
+    if (isGuest) {
+      setShowSignInDialog(true)
+      return
     }
-    setLikedPoems(newLiked)
-  }
 
-  const openFullPoem = (poem: PoemData) => {
-    setSelectedPoem(poem)
-    setFullPoemOpen(true)
-  }
+    // Send the like or unlike request to the API
+    if (isLike) {
+      likePoem(poemId)
+    } else {
+      unlikePoem(poemId)
+    }
 
-  const filteredPoems = filterPoems(poems, poemTypeFilter)
+    // Update the poem data for the like or unlike
+    setPoems((prev) => {
+      if (prev === undefined) return undefined
+      return prev.map((poem) =>
+        poem.id === poemId
+          ? {
+              ...poem,
+              isLikedByCurrentUser: isLike,
+              _count: {
+                likes: isLike ? poem._count.likes + 1 : poem._count.likes - 1,
+              },
+            }
+          : poem
+      )
+    })
+  }
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
@@ -216,45 +241,10 @@ export default function HomePage() {
         {/* Poems */}
         <div className="flex flex-col gap-2 px-2 pb-2">
           {filteredPoems.map((poem) => (
-            <ShadowCard key={poem.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <h3 className="font-bold">{poem.title}</h3>
-                    <p className="text-sm text-gray-600">
-                      {poem.authorId} · {poem.type.name}
-                    </p>
-                  </div>
-                  {poem.isAIAssisted && (
-                    <span className="rounded-full bg-black px-3 py-1 text-sm font-bold whitespace-nowrap text-white">
-                      AI Assisted
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                <p className="text-sm">{poem.body.substring(0, 100)}...</p>
-                <button
-                  onClick={() => openFullPoem(poem)}
-                  className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
-                >
-                  ... Read more
-                </button>
-                <div className="flex items-center gap-2 border-t pt-2">
-                  <button
-                    onClick={() => toggleLike(poem.id)}
-                    className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-                  >
-                    <Star
-                      size={20}
-                      className="text-black"
-                      fill={likedPoems.has(poem.id) ? '#fbbf24' : 'none'}
-                    />
-                    <span className="text-sm font-semibold">0</span>
-                  </button>
-                </div>
-              </CardContent>
-            </ShadowCard>
+            <PoemCard key={poem.id} poem={poem} onToggleLike={handleToggleLike}>
+              {/* Poem dropdown menu */}
+              {!isGuest && <OtherUserPoemMenu poem={poem} />}
+            </PoemCard>
           ))}
         </div>
       </div>
@@ -301,85 +291,18 @@ export default function HomePage() {
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="grid grid-cols-1 gap-4 min-[1200px]:grid-cols-2 min-[1600px]:grid-cols-3">
             {filteredPoems.map((poem) => (
-              <ShadowCard key={poem.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-start gap-2">
-                    <div className="flex-1">
-                      <h3 className="font-bold">{poem.title}</h3>
-                      <p className="text-xs text-gray-600">
-                        {poem.authorId} · {poem.type.name}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                  {poem.isAIAssisted && (
-                    <span className="inline-block w-fit rounded-full bg-black px-3 py-1 text-xs font-bold text-white">
-                      AI Assisted
-                    </span>
-                  )}
-                  <p className="text-sm">{poem.body.substring(0, 120)}...</p>
-                  <button
-                    onClick={() => openFullPoem(poem)}
-                    className="w-fit cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
-                  >
-                    ... Read more
-                  </button>
-                  <div className="flex items-center gap-2 border-t pt-2">
-                    <button
-                      onClick={() => toggleLike(poem.id)}
-                      className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-                    >
-                      <Star
-                        size={20}
-                        className="text-black"
-                        fill={likedPoems.has(poem.id) ? '#fbbf24' : 'none'}
-                      />
-                      <span className="text-sm font-semibold">0</span>
-                    </button>
-                  </div>
-                </CardContent>
-              </ShadowCard>
+              <PoemCard
+                key={poem.id}
+                poem={poem}
+                onToggleLike={handleToggleLike}
+              >
+                {/* Poem dropdown menu */}
+                {!isGuest && <OtherUserPoemMenu poem={poem} />}
+              </PoemCard>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Full poem modal */}
-      <Dialog open={fullPoemOpen} onOpenChange={setFullPoemOpen}>
-        <DialogContent className="max-h-[80vh] max-w-2xl! overflow-y-auto px-4 md:px-8">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">
-              {selectedPoem?.title}
-            </DialogTitle>
-          </DialogHeader>
-          {selectedPoem && (
-            <div className="space-y-1">
-              <p className="text-muted-foreground mb-4 text-sm">
-                {selectedPoem.authorId} · {selectedPoem.type.name}
-              </p>
-              <div className="space-y-1 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-                <p className="text-foreground leading-relaxed md:text-lg">
-                  {selectedPoem.body}
-                </p>
-              </div>
-              <div className="mt-4 flex items-center gap-2">
-                <button
-                  onClick={() => toggleLike(selectedPoem.id)}
-                  className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-                >
-                  <Star
-                    size={28}
-                    className="text-black"
-                    fill={likedPoems.has(selectedPoem.id) ? '#fbbf24' : 'none'}
-                  />
-                  <span className="text-lg font-semibold">0</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

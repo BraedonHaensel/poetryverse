@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { PoemFilterMode } from '@/components/poem-filters'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { Button } from '@/components/ui/button'
 import { api, displayApiError } from '@/lib/api'
 import {
@@ -72,6 +73,8 @@ export default function ProfilePageContents({
 
   const pendingPoemIdsRef = useRef<string[]>([])
   const [pendingPoemIds, setPendingPoemIds] = useState<string[]>([])
+  
+  const [showSignInDialog, setShowSignInDialog] = useState(false)
 
   const session = useSession()
   const isGuest = session.status === 'unauthenticated'
@@ -270,7 +273,7 @@ export default function ProfilePageContents({
   /** Handles liking or removing a like from a poem. */
   function handleToggleLike(poemId: string, isLike: boolean) {
     if (isGuest) {
-      console.log('TODO: Open Sign In Required Dialog')
+      setShowSignInDialog(true)
       return
     }
 
@@ -325,6 +328,11 @@ export default function ProfilePageContents({
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-2 divide-y-2 divide-gray-300 md:hidden">
         {/* Header */}
