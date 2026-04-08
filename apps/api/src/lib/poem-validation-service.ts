@@ -14,7 +14,6 @@ import config from './config'
 import { prisma } from './db'
 import { logger } from './logger'
 import { getErrorStatus } from './utils'
-import { get } from 'http'
 
 // Prompt constants
 const PLAGIARISM_PROMPT = `You are assisting with plagiarism triage for a poetry platform.
