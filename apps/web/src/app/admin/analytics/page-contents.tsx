@@ -107,7 +107,7 @@ export default function AnalyticsPageContents() {
           onClick={() => handleOpenFullPoem(row.poem, row.title)}
           className="block w-full cursor-pointer text-left transition hover:opacity-70"
         >
-          <p className="line-clamp-4 wrap-break-word whitespace-pre-wrap">
+          <p className="line-clamp-4 wrap-anywhere break-all whitespace-pre-wrap">
             {row.poem}
           </p>
         </button>
@@ -232,7 +232,7 @@ export default function AnalyticsPageContents() {
       <FullTextDialog
         isOpen={isFullPoemOpen}
         onOpenChange={setIsFullPoemOpen}
-        title={fullPoemTitle || "Full Poem"}
+        title={fullPoemTitle || 'Full Poem'}
         content={selectedPoemText}
       />
 
@@ -271,7 +271,9 @@ export default function AnalyticsPageContents() {
                     poem={poem}
                     onDelete={() => handleOpenDeleteDialog(poem)}
                     onApprove={() => handleOpenApproveDialog(poem)}
-                    onOpenFullPoem={() => handleOpenFullPoem(poem.poem, poem.title)}
+                    onOpenFullPoem={() =>
+                      handleOpenFullPoem(poem.poem, poem.title)
+                    }
                   />
                 ))}
 
