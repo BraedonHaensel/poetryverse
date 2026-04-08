@@ -17,58 +17,30 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { api, displayApiError } from '@/lib/api'
-
-interface PoemTag {
-  id: string
-  name: string
-}
-
-interface PoemData {
-  id: string
-  title: string
-  author: {
-    id: string
-    image?: string
-    name: string
-    username: string
-  }
-  aiLikelihoodScore: number | null
-  body: string
-  createdAt: string
-  isAIAssisted: boolean
-  isPublic: boolean
-  likes: Array<{
-    createdAt: string
-    poemId: string
-    userId: string
-  }>
-  poemTags: PoemTag[]
-  typeId: string
-  updatedAt: string
-}
+import { type PoemData } from '@/lib/poem-requests'
 
 // Dummy poem data for development/preview
 const DUMMY_POEM: PoemData = {
   id: 'poem1',
   title: 'Sonnet 1',
+  authorId: 'cmn5hpdln000104kzfbg941tb',
   author: {
-    id: 'cmn5hpdln000104kzfbg941tb',
     username: 'User 2',
-    name: 'User 2',
-    image: 'https://example.com/image.jpg',
   },
-  typeId: 'sonnet',
+  type: {
+    id: 'type-sonnet',
+    name: 'Sonnet',
+  },
   body: "Beneath the velvet cloak of silver night,\nI find my world reflected in your eyes,\nA soft and steady, soul-consuming light,\nThat steals the breath of all my weary sighs,\nThe winter frost may chill the hollow air,\nAnd summer blooms may wither in the sun,\nBut nothing dims the grace of what we share,\nTwo separate paths that are joined and beat as one\nNo gilded crown could ever hold the worth,\nOf quiet moments whispered in the dark,\nFor you have been my anchor to the Earth,\nAnd to my soul, you are the living spark,\nThough time may drift as tide pulls us from the shore,\nI'll love you now, and then forevermore.",
-  likes: [
-    { userId: 'user1', poemId: 'poem1', createdAt: '2026-03-22T14:42:44.942Z' },
-    { userId: 'user2', poemId: 'poem1', createdAt: '2026-03-22T14:43:03.151Z' },
-  ],
+  count: {
+    likes: 2,
+  },
   isPublic: true,
   isAIAssisted: false,
-  aiLikelihoodScore: 0.26,
+  aiLikelihoonScore: 0.26,
   poemTags: [],
-  createdAt: '2026-03-15T03:09:16.151Z',
-  updatedAt: '2026-03-15T03:09:16.151Z',
+  createdAt: new Date('2026-03-15T03:09:16.151Z'),
+  updatedAt: new Date('2026-03-15T03:09:16.151Z'),
 }
 
 const USE_DUMMY_DATA = true
@@ -105,7 +77,7 @@ export default function PoemOfTheDay() {
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          displayApiError(error, 'Failed to load poem of the day')
+          displayApiError(error, 'Failed to load Poem of the Day')
         }
       } finally {
         setIsLoading(false)
@@ -159,7 +131,7 @@ export default function PoemOfTheDay() {
       <div className="flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
           title="Poem of the Day"
-          showLogo={true}
+          showLogo={false}
           showGuestSignIn={true}
         />
 
@@ -210,7 +182,7 @@ export default function PoemOfTheDay() {
                     className="text-black"
                     fill={isLiked ? '#fbbf24' : 'none'}
                   />
-                  <span className="text-sm font-semibold">{poem.likes.length}</span>
+                  <span className="text-sm font-semibold">{poem.count.likes}</span>
                 </button>
                 <p className="text-muted-foreground text-xs">
                   {poem.body.split('\n').length} lines
@@ -235,7 +207,7 @@ export default function PoemOfTheDay() {
                 </CardTitle>
               </div>
 
-              {/* Author info with category */}
+              {/* Author info */}
               <p className="text-muted-foreground text-sm font-medium md:text-base">
                 {poem.author.username}
               </p>
@@ -268,7 +240,7 @@ export default function PoemOfTheDay() {
               </div>
             </div>
 
-            {/* Poem metadata and rating */}
+            {/* Poem metadata and likes */}
             <div className="flex items-center justify-between border-t pt-2">
               <button
                 onClick={toggleLike}
@@ -279,7 +251,7 @@ export default function PoemOfTheDay() {
                   className="text-black"
                   fill={isLiked ? '#fbbf24' : 'none'}
                 />
-                <span className="text-lg font-semibold">{poem.likes.length}</span>
+                <span className="text-lg font-semibold">{poem.count.likes}</span>
               </button>
               <p className="text-muted-foreground text-xs">
                 {poem.body.split('\n').length} lines
@@ -320,7 +292,7 @@ export default function PoemOfTheDay() {
                   fill={isLiked ? '#fbbf24' : 'none'}
                 />
                 <span className="text-lg font-semibold">
-                  {poem.likes.length}
+                  {poem.count.likes}
                 </span>
               </button>
               <span className="text-muted-foreground text-sm">
