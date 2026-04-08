@@ -200,45 +200,13 @@ export default function HomePage() {
         {/* Poems */}
         <div className="flex flex-col gap-2 px-2 pb-2">
           {filteredPoems.map((poem) => (
-            <ShadowCard key={poem.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <h3 className="font-bold">{poem.title}</h3>
-                    <p className="text-sm text-gray-600">
-                      {poem.authorId} · {poem.type.name}
-                    </p>
-                  </div>
-                  {poem.isAIAssisted && (
-                    <span className="rounded-full bg-black px-3 py-1 text-sm font-bold whitespace-nowrap text-white">
-                      AI Assisted
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                <p className="text-sm">{poem.body.substring(0, 100)}...</p>
-                <button
-                  onClick={() => openFullPoem(poem)}
-                  className="cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
-                >
-                  ... Read more
-                </button>
-                <div className="flex items-center gap-2 border-t pt-2">
-                  <button
-                    onClick={() => toggleLike(poem.id)}
-                    className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-                  >
-                    <Star
-                      size={20}
-                      className="text-black"
-                      fill={likedPoems.has(poem.id) ? '#fbbf24' : 'none'}
-                    />
-                    <span className="text-sm font-semibold">0</span>
-                  </button>
-                </div>
-              </CardContent>
-            </ShadowCard>
+            <PoemCard
+              key={poem.id}
+              poem={poem}
+              isLiked={likedPoems.has(poem.id)}
+              onToggleLike={() => toggleLike(poem.id)}
+              onReadMore={() => openFullPoem(poem)}
+            />
           ))}
         </div>
       </div>
@@ -285,45 +253,13 @@ export default function HomePage() {
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="grid gap-4 grid-cols-1 min-[1200px]:grid-cols-2 min-[1600px]:grid-cols-3">
             {filteredPoems.map((poem) => (
-              <ShadowCard key={poem.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-start gap-2">
-                    <div className="flex-1">
-                      <h3 className="font-bold">{poem.title}</h3>
-                      <p className="text-xs text-gray-600">
-                        {poem.authorId} · {poem.type.name}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                  {poem.isAIAssisted && (
-                    <span className="inline-block w-fit rounded-full bg-black px-3 py-1 text-xs font-bold text-white">
-                      AI Assisted
-                    </span>
-                  )}
-                  <p className="text-sm">{poem.body.substring(0, 120)}...</p>
-                  <button
-                    onClick={() => openFullPoem(poem)}
-                    className="w-fit cursor-pointer text-sm text-gray-400 transition-colors hover:text-gray-500"
-                  >
-                    ... Read more
-                  </button>
-                  <div className="flex items-center gap-2 border-t pt-2">
-                    <button
-                      onClick={() => toggleLike(poem.id)}
-                      className="flex cursor-pointer items-center gap-2 border border-black p-1 pr-2 transition-opacity hover:opacity-80"
-                    >
-                      <Star
-                        size={20}
-                        className="text-black"
-                        fill={likedPoems.has(poem.id) ? '#fbbf24' : 'none'}
-                      />
-                      <span className="text-sm font-semibold">0</span>
-                    </button>
-                  </div>
-                </CardContent>
-              </ShadowCard>
+              <PoemCard
+                key={poem.id}
+                poem={poem}
+                isLiked={likedPoems.has(poem.id)}
+                onToggleLike={() => toggleLike(poem.id)}
+                onReadMore={() => openFullPoem(poem)}
+              />
             ))}
           </div>
         </div>
