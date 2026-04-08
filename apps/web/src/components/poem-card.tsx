@@ -6,7 +6,7 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader } from '@/components/ui/card'
-import type { PoemData } from '@/lib/poem-requests'
+import { isPendingApproval, type PoemData } from '@/lib/poem-requests'
 
 import { FullPoemDialog } from './full-poem-dialog'
 
@@ -151,7 +151,7 @@ export default function PoemCard({
             </button>
 
             {/* Poem pending approval indicator */}
-            {['PENDING', 'ADMIN_REVIEW'].includes(poem.approvalStatus) && (
+            {poem.isPublic && isPendingApproval(poem.approvalStatus) && (
               <span className="flex items-center gap-2 rounded-full bg-amber-300 px-3 py-1 text-xs whitespace-nowrap min-[400px]:text-sm">
                 <Info size={18} />
                 <span>Pending Approval</span>
