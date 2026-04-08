@@ -78,7 +78,13 @@ export default function GeneralUserManagement() {
   )
 
   const columns: Column<ManagedUser>[] = [
-    { key: 'id', label: 'ID' },
+    {
+      key: 'id',
+      label: 'ID',
+      className:
+        'text-left text-xs font-normal',
+      headerClassName: 'text-sm',
+    },
     { key: 'name', label: 'Name' },
     { key: 'username', label: 'Username' },
     { key: 'email', label: 'Email' },

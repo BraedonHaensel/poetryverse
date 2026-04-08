@@ -65,11 +65,7 @@ export function DataTable<T extends { id: string | number }>({
             {columns.map((col) => (
               <div
                 key={String(col.key)}
-                className={cn(
-                  cellStyles,
-                  col.key === 'id' && 'font-bold',
-                  col.className
-                )}
+                className={cn(cellStyles, col.className)}
               >
                 {col.render ? col.render(row) : String(row[col.key])}
               </div>
