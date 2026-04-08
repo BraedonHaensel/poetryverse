@@ -681,7 +681,7 @@ export const validateAndReturnPoem = async (
 }
 
 /** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
-async function getPoemOfDay() {
+async function getPoemOfDay(requesterUserId?: string) {
   //Retrieve the timestamp of the previous 24 hours.
   const DAY_MS = 24 * 60 * 60 * 1000
   const now = new Date()
@@ -715,13 +715,7 @@ async function getPoemOfDay() {
         id: topLikedPoem[0].poemId,
         ...PUBLIC_APPROVED_POEM_FILTER,
       },
-      include: {
-        author: true,
-        likes: true,
-        poemTags: {
-          include: { tag: true },
-        },
-      },
+      include: getPoemInclude(requesterUserId),
     })
     if (poem) {
       return poem
@@ -741,11 +735,7 @@ async function getPoemOfDay() {
     skip: randIndex,
     take: 1,
     where: PUBLIC_APPROVED_POEM_FILTER,
-    include: {
-      author: true,
-      likes: true,
-      poemTags: { include: { tag: true } },
-    },
+    include: getPoemInclude(requesterUserId),
   })
   return randPoem
 }
@@ -758,8 +748,11 @@ async function getPoemOfDay() {
  * @throws {HttpError} 404 if the poem does not exist.
  */
 export const getDailyPoem = async (req: Request, res: Response) => {
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
+
   logger.info('Fetch new poem of the day.')
-  const poem = await getPoemOfDay()
+  const poem = await getPoemOfDay(requesterUserId)
   if (!poem) {
     logger.warn('Poem of the day failed to retrieve')
     throw new HttpError(
