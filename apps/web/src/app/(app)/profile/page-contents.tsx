@@ -3,7 +3,7 @@
 import { UserMinus, UserPlus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import MobilePageHeader from '@/components/mobile-page-header'
@@ -14,7 +14,9 @@ import { Button } from '@/components/ui/button'
 import { api, displayApiError } from '@/lib/api'
 import {
   filterPoems,
+  getPoemById,
   getUserPoems,
+  isPendingApproval,
   likePoem,
   PoemData,
   unlikePoem,
@@ -69,6 +71,9 @@ export default function ProfilePageContents({
   const [followers, setFollowers] = useState<FollowerData[]>()
   const [following, setFollowing] = useState<FollowingData[]>()
 
+  const pendingPoemIdsRef = useRef<string[]>([])
+  const [pendingPoemIds, setPendingPoemIds] = useState<string[]>([])
+  
   const [showSignInDialog, setShowSignInDialog] = useState(false)
 
   const session = useSession()
@@ -96,8 +101,51 @@ export default function ProfilePageContents({
     setViewingUserData(undefined)
     reset()
     refreshUserData()
-    getUserPoems(viewingUserId).then(setPoems)
+    getUserPoems(viewingUserId).then((poems) => {
+      setPoems(poems)
+      setPendingPoemIds(
+        poems
+          .filter((poem) => isPendingApproval(poem.approvalStatus))
+          .map((poem) => poem.id)
+      )
+    })
   }, [viewingUserId, refreshUserData])
+
+  useEffect(() => {
+    pendingPoemIdsRef.current = pendingPoemIds
+  }, [pendingPoemIds])
+
+  /** Periodically check the status of poems pending approval. */
+  useEffect(() => {
+    if (pendingPoemIds.length === 0) return
+
+    // Check the status of each pending poem
+    const checkPendingPoems = () => {
+      pendingPoemIdsRef.current.forEach((poemId) => {
+        getPoemById(poemId).then((poem) => {
+          if (poem === undefined) return
+          if (!isPendingApproval(poem.approvalStatus)) {
+            // Poem is no longer pending approval
+            setPendingPoemIds((prev) => prev.filter((id) => id !== poem.id))
+            setPoems((prev) => {
+              if (prev === undefined) return undefined
+              return prev.map((prevPoem) =>
+                prevPoem.id === poemId ? poem : prevPoem
+              )
+            })
+            if (poem.approvalStatus === 'APPROVED') {
+              console.log(`Poem '${poem.title}' approved`)
+              toast.success(`Poem '${poem.title}' approved`)
+            }
+          }
+        })
+      })
+    }
+
+    // Start the periodic check interval
+    const refreshPoemsInterval = setInterval(checkPendingPoems, 3000)
+    return () => clearInterval(refreshPoemsInterval)
+  }, [pendingPoemIds])
 
   // Update the filtered poems to display
   useEffect(() => {
@@ -115,13 +163,23 @@ export default function ProfilePageContents({
   function setPublic(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: true })
-      .then(() => {
+      .then((res) => {
+        const poem: PoemData = res.data
         setPoems((prev) => {
           if (prev === undefined) return undefined
-          return prev.map((poem) =>
-            poem.id === poemId ? { ...poem, isPublic: true } : poem
+          return prev.map((prevPoem) =>
+            prevPoem.id === poemId ? poem : prevPoem
           )
         })
+
+        // Check if the poem is pending approval
+        if (isPendingApproval(poem.approvalStatus)) {
+          setPendingPoemIds((prev) =>
+            // Add pending check for the poem, if not already included
+            prev.includes(poem.id) ? prev : [...prev, poem.id]
+          )
+        }
+
         console.log('Poem visibility updated to public:', poemId)
         toast.success('Poem visibility updated')
       })
@@ -134,13 +192,18 @@ export default function ProfilePageContents({
   function setPrivate(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: false })
-      .then(() => {
+      .then((res) => {
+        const poem: PoemData = res.data
         setPoems((prev) => {
           if (prev === undefined) return undefined
-          return prev.map((poem) =>
-            poem.id === poemId ? { ...poem, isPublic: false } : poem
+          return prev.map((prevPoem) =>
+            prevPoem.id === poemId ? poem : prevPoem
           )
         })
+
+        // Remove any pending approval checks for the poem
+        setPendingPoemIds((prev) => prev.filter((id) => id !== poem.id))
+
         console.log('Poem visibility updated to private:', poemId)
         toast.success('Poem visibility updated')
       })
@@ -154,6 +217,7 @@ export default function ProfilePageContents({
     api
       .delete(`/api/poems/${poemId}`)
       .then(() => {
+        setPendingPoemIds((prev) => prev.filter((id) => id !== poemId))
         setPoems((prev) => {
           if (prev === undefined) return undefined
           return prev.filter((poem) => poem.id !== poemId)

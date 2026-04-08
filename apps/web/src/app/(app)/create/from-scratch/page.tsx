@@ -72,8 +72,8 @@ export default function CreatePoemFromScratch() {
         // Publish successful
         const data = response.data.data
         console.log('Poem published successfully:', data)
-        toast.success('Poem published successfully')
         router.push('/profile')
+        toast.success('Poem published successfully')
         // Note: Keep isPublishing false to prevent resubmits
       })
       .catch((error) => {

@@ -85,6 +85,27 @@ export async function getFeedPoems(): Promise<PoemData[]> {
 }
 
 /**
+ * Gets the data for a specific poem by its ID.
+ * @param poemId The poem's ID.
+ * @returns The poem's data.
+ */
+export async function getPoemById(
+  poemId: string
+): Promise<PoemData | undefined> {
+  return api
+    .get(`/api/poems/${poemId}`)
+    .then((response) => {
+      const data = response.data
+      console.log(`Poem ${poemId}:`, data)
+      return data
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to get poem')
+      return undefined
+    })
+}
+
+/**
  * Filters a list of poems based on a filter mode.
  * @param poems List of poems to filter.
  * @param filterMode Mode to filter the poems by.
@@ -175,4 +196,13 @@ export function unlikePoem(poemId: string) {
     .catch((error) => {
       displayApiError(error, 'Failed to unlike poem')
     })
+}
+
+/**
+ * Checks if a poem is pending approval.
+ * @param approvalStatus The current approval status.
+ * @returns Whether the poem is pending approval.
+ */
+export function isPendingApproval(approvalStatus: PoemApprovalStatus): boolean {
+  return ['PENDING', 'ADMIN_REVIEW'].includes(approvalStatus)
 }
