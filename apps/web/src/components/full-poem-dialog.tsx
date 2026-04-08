@@ -1,4 +1,5 @@
 import { Globe, LockKeyhole, Star } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import {
   Dialog,
@@ -36,6 +37,8 @@ export function FullPoemDialog({
   isOnProfilePage = false,
   isOnMyProfilePage = false,
 }: Props) {
+  const router = useRouter()
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
@@ -60,7 +63,14 @@ export function FullPoemDialog({
             <p className="text-sm text-gray-600">
               {!isOnProfilePage && (
                 // Display the auther's username, unless currently on their profile page
-                <span>{`${poem.author.username} · `}</span>
+                <span
+                  className="cursor-pointer hover:opacity-70"
+                  onClick={() =>
+                    router.push(`/profile?userId=${poem.authorId}`)
+                  }
+                >
+                  {`${poem.author.username} · `}
+                </span>
               )}
               {`${poem.type.name} · ${poem.poemTags.map((tag) => tag.tag.name).join(', ')}`}
             </p>

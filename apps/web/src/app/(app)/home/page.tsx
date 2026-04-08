@@ -1,11 +1,13 @@
 'use client'
 
 import axios from 'axios'
-import { Star } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 import MobilePageHeader from '@/components/mobile-page-header'
+import OtherUserPoemMenu from '@/components/other-user-poem-menu'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
+import PoemCard from '@/components/poem-card'
 import { PoemTagsFilter } from '@/components/poem-tags-filter'
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
 import SignInRequiredDialog from '@/components/sign-in-required-dialog'
@@ -15,8 +17,10 @@ import {
   filterPoems,
   getFeedPoems,
   getPoemTags,
+  likePoem,
   type PoemData,
   type PoemTag,
+  unlikePoem,
 } from '@/lib/poem-requests'
 
 import { FollowingOnlyToggle } from './following-only-toggle'
@@ -120,12 +124,10 @@ export default function HomePage() {
     useState<PoemTypeFilterMode>('ALL')
   const [isFollowingOnly, setIsFollowingOnly] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [likedPoems, setLikedPoems] = useState<Set<string>>(new Set())
-  const [fullPoemOpen, setFullPoemOpen] = useState(false)
-  const [selectedPoem, setSelectedPoem] = useState<PoemData | null>(null)
   const [showSignInDialog, setShowSignInDialog] = useState(false)
 
-  const [poems, setPoems] = useState<PoemData[]>(DUMMY_POEMS)
+  const [poems, setPoems] = useState<PoemData[] | undefined>(DUMMY_POEMS)
+  const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [allTags, setAllTags] = useState<PoemTag[]>([])
 
   const session = useSession()
@@ -156,29 +158,54 @@ export default function HomePage() {
     fetchData()
   }, [])
 
-  const toggleLike = (poemId: string) => {
+  // Update the filtered poems to display
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilteredPoems(
+      poems === undefined ? [] : filterPoems(poems, poemTypeFilter)
+    )
+  }, [poems, poemTypeFilter])
+
+  if (poems === undefined) return <PageLoadingIndicator />
+
+  /** Handles liking or removing a like from a poem. */
+  const handleToggleLike = (poemId: string, isLike: boolean) => {
     if (isGuest) {
       setShowSignInDialog(true)
       return
     }
-    const newLiked = new Set(likedPoems)
-    if (newLiked.has(poemId)) {
-      newLiked.delete(poemId)
+
+    // Send the like or unlike request to the API
+    if (isLike) {
+      likePoem(poemId)
     } else {
-      newLiked.add(poemId)
+      unlikePoem(poemId)
     }
-    setLikedPoems(newLiked)
-  }
 
-  const openFullPoem = (poem: PoemData) => {
-    setSelectedPoem(poem)
-    setFullPoemOpen(true)
+    // Update the poem data for the like or unlike
+    setPoems((prev) => {
+      if (prev === undefined) return undefined
+      return prev.map((poem) =>
+        poem.id === poemId
+          ? {
+              ...poem,
+              isLikedByCurrentUser: isLike,
+              _count: {
+                likes: isLike ? poem._count.likes + 1 : poem._count.likes - 1,
+              },
+            }
+          : poem
+      )
+    })
   }
-
-  const filteredPoems = filterPoems(poems, poemTypeFilter)
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
@@ -214,13 +241,10 @@ export default function HomePage() {
         {/* Poems */}
         <div className="flex flex-col gap-2 px-2 pb-2">
           {filteredPoems.map((poem) => (
-            <PoemCard
-              key={poem.id}
-              poem={poem}
-              isLiked={likedPoems.has(poem.id)}
-              onToggleLike={() => toggleLike(poem.id)}
-              onReadMore={() => openFullPoem(poem)}
-            />
+            <PoemCard key={poem.id} poem={poem} onToggleLike={handleToggleLike}>
+              {/* Poem dropdown menu */}
+              {!isGuest && <OtherUserPoemMenu poem={poem} />}
+            </PoemCard>
           ))}
         </div>
       </div>
@@ -270,28 +294,15 @@ export default function HomePage() {
               <PoemCard
                 key={poem.id}
                 poem={poem}
-                isLiked={likedPoems.has(poem.id)}
-                onToggleLike={() => toggleLike(poem.id)}
-                onReadMore={() => openFullPoem(poem)}
-              />
+                onToggleLike={handleToggleLike}
+              >
+                {/* Poem dropdown menu */}
+                {!isGuest && <OtherUserPoemMenu poem={poem} />}
+              </PoemCard>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Full poem modal */}
-      <FullPoemDialog
-        poem={selectedPoem}
-        isOpen={fullPoemOpen}
-        isLiked={selectedPoem ? likedPoems.has(selectedPoem.id) : false}
-        onOpenChange={setFullPoemOpen}
-        onToggleLike={() => selectedPoem && toggleLike(selectedPoem.id)}
-      />
-
-      <SignInRequiredDialog
-        isOpen={showSignInDialog}
-        onClose={() => setShowSignInDialog(false)}
-      />
     </>
   )
 }
