@@ -242,7 +242,7 @@ export default function HomePage() {
         <div className="flex flex-col gap-2 px-2 pb-2">
           {filteredPoems.map((poem) => (
             <PoemCard key={poem.id} poem={poem} onToggleLike={handleToggleLike}>
-              {/* Poem dropdown menu */}
+              {/* Poem dropdown menu - only on mobile */}
               {!isGuest && <OtherUserPoemMenu poem={poem} />}
             </PoemCard>
           ))}

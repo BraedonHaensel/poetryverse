@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { FullPoemDialog } from '@/components/full-poem-dialog'
 import MobilePageHeader from '@/components/mobile-page-header'
+import OtherUserPoemMenu from '@/components/other-user-poem-menu'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import SignInRequiredDialog from '@/components/sign-in-required-dialog'
@@ -253,9 +254,13 @@ export default function PoemOfTheDay() {
                     {poem._count?.likes}
                   </span>
                 </button>
-                <p className="text-muted-foreground text-sm">
-                  {poem.body.split('\n').length} lines
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-muted-foreground text-sm">
+                    {poem.body.split('\n').length} lines
+                  </p>
+                  {/* Dropdown menu for signed-in users */}
+                  {!isGuest && <OtherUserPoemMenu poem={poem} />}
+                </div>
               </div>
             </CardContent>
           </ShadowCard>
@@ -325,9 +330,13 @@ export default function PoemOfTheDay() {
                   {poem._count?.likes}
                 </span>
               </button>
-              <p className="text-muted-foreground text-sm">
-                {poem.body.split('\n').length} lines
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-muted-foreground text-sm">
+                  {poem.body.split('\n').length} lines
+                </p>
+                {/* Dropdown menu for signed-in users */}
+                {!isGuest && <OtherUserPoemMenu poem={poem} />}
+              </div>
             </div>
           </CardContent>
         </ShadowCard>
