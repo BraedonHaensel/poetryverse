@@ -718,7 +718,7 @@ async function getPoemOfDay(requesterUserId?: string) {
       include: getPoemInclude(requesterUserId),
     })
     if (poem) {
-      return poem
+      return mapPoems([poem])[0]
     }
   }
 
@@ -737,7 +737,7 @@ async function getPoemOfDay(requesterUserId?: string) {
     where: PUBLIC_APPROVED_POEM_FILTER,
     include: getPoemInclude(requesterUserId),
   })
-  return randPoem
+  return mapPoems(randPoem ? [randPoem] : [])[0] || null
 }
 
 /**
