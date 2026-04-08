@@ -3,15 +3,24 @@
 import { UserMinus, UserPlus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { PoemFilterMode } from '@/components/poem-filters'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { Button } from '@/components/ui/button'
 import { api, displayApiError } from '@/lib/api'
-import { filterPoems, getUserPoems, PoemData } from '@/lib/poem-requests'
+import {
+  filterPoems,
+  getPoemById,
+  getUserPoems,
+  isPendingApproval,
+  likePoem,
+  PoemData,
+  unlikePoem,
+} from '@/lib/poem-requests'
 import {
   FollowerData,
   FollowingData,
@@ -62,6 +71,11 @@ export default function ProfilePageContents({
   const [followers, setFollowers] = useState<FollowerData[]>()
   const [following, setFollowing] = useState<FollowingData[]>()
 
+  const pendingPoemIdsRef = useRef<string[]>([])
+  const [pendingPoemIds, setPendingPoemIds] = useState<string[]>([])
+  
+  const [showSignInDialog, setShowSignInDialog] = useState(false)
+
   const session = useSession()
   const isGuest = session.status === 'unauthenticated'
 
@@ -87,8 +101,51 @@ export default function ProfilePageContents({
     setViewingUserData(undefined)
     reset()
     refreshUserData()
-    getUserPoems(viewingUserId).then(setPoems)
+    getUserPoems(viewingUserId).then((poems) => {
+      setPoems(poems)
+      setPendingPoemIds(
+        poems
+          .filter((poem) => isPendingApproval(poem.approvalStatus))
+          .map((poem) => poem.id)
+      )
+    })
   }, [viewingUserId, refreshUserData])
+
+  useEffect(() => {
+    pendingPoemIdsRef.current = pendingPoemIds
+  }, [pendingPoemIds])
+
+  /** Periodically check the status of poems pending approval. */
+  useEffect(() => {
+    if (pendingPoemIds.length === 0) return
+
+    // Check the status of each pending poem
+    const checkPendingPoems = () => {
+      pendingPoemIdsRef.current.forEach((poemId) => {
+        getPoemById(poemId).then((poem) => {
+          if (poem === undefined) return
+          if (!isPendingApproval(poem.approvalStatus)) {
+            // Poem is no longer pending approval
+            setPendingPoemIds((prev) => prev.filter((id) => id !== poem.id))
+            setPoems((prev) => {
+              if (prev === undefined) return undefined
+              return prev.map((prevPoem) =>
+                prevPoem.id === poemId ? poem : prevPoem
+              )
+            })
+            if (poem.approvalStatus === 'APPROVED') {
+              console.log(`Poem '${poem.title}' approved`)
+              toast.success(`Poem '${poem.title}' approved`)
+            }
+          }
+        })
+      })
+    }
+
+    // Start the periodic check interval
+    const refreshPoemsInterval = setInterval(checkPendingPoems, 3000)
+    return () => clearInterval(refreshPoemsInterval)
+  }, [pendingPoemIds])
 
   // Update the filtered poems to display
   useEffect(() => {
@@ -106,13 +163,23 @@ export default function ProfilePageContents({
   function setPublic(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: true })
-      .then(() => {
+      .then((res) => {
+        const poem: PoemData = res.data
         setPoems((prev) => {
           if (prev === undefined) return undefined
-          return prev.map((poem) =>
-            poem.id === poemId ? { ...poem, isPublic: true } : poem
+          return prev.map((prevPoem) =>
+            prevPoem.id === poemId ? poem : prevPoem
           )
         })
+
+        // Check if the poem is pending approval
+        if (isPendingApproval(poem.approvalStatus)) {
+          setPendingPoemIds((prev) =>
+            // Add pending check for the poem, if not already included
+            prev.includes(poem.id) ? prev : [...prev, poem.id]
+          )
+        }
+
         console.log('Poem visibility updated to public:', poemId)
         toast.success('Poem visibility updated')
       })
@@ -125,13 +192,18 @@ export default function ProfilePageContents({
   function setPrivate(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: false })
-      .then(() => {
+      .then((res) => {
+        const poem: PoemData = res.data
         setPoems((prev) => {
           if (prev === undefined) return undefined
-          return prev.map((poem) =>
-            poem.id === poemId ? { ...poem, isPublic: false } : poem
+          return prev.map((prevPoem) =>
+            prevPoem.id === poemId ? poem : prevPoem
           )
         })
+
+        // Remove any pending approval checks for the poem
+        setPendingPoemIds((prev) => prev.filter((id) => id !== poem.id))
+
         console.log('Poem visibility updated to private:', poemId)
         toast.success('Poem visibility updated')
       })
@@ -145,6 +217,7 @@ export default function ProfilePageContents({
     api
       .delete(`/api/poems/${poemId}`)
       .then(() => {
+        setPendingPoemIds((prev) => prev.filter((id) => id !== poemId))
         setPoems((prev) => {
           if (prev === undefined) return undefined
           return prev.filter((poem) => poem.id !== poemId)
@@ -197,6 +270,37 @@ export default function ProfilePageContents({
       })
   }
 
+  /** Handles liking or removing a like from a poem. */
+  function handleToggleLike(poemId: string, isLike: boolean) {
+    if (isGuest) {
+      setShowSignInDialog(true)
+      return
+    }
+
+    // Send the like or unlike request to the API
+    if (isLike) {
+      likePoem(poemId)
+    } else {
+      unlikePoem(poemId)
+    }
+
+    // Update the poem data for the like or unlike
+    setPoems((prev) => {
+      if (prev === undefined) return undefined
+      return prev.map((poem) =>
+        poem.id === poemId
+          ? {
+              ...poem,
+              isLikedByCurrentUser: isLike,
+              _count: {
+                likes: isLike ? poem._count.likes + 1 : poem._count.likes - 1,
+              },
+            }
+          : poem
+      )
+    })
+  }
+
   // Get the profile stats to display
   const profileStats: ProfileStat[] = [
     {
@@ -224,6 +328,11 @@ export default function ProfilePageContents({
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-2 divide-y-2 divide-gray-300 md:hidden">
         {/* Header */}
@@ -268,6 +377,7 @@ export default function ProfilePageContents({
             onSetPublic={setPublic}
             onSetPrivate={setPrivate}
             onDeletePoem={deletePoem}
+            onToggleLike={handleToggleLike}
           />
         ) : (
           <ConnectionsTab
@@ -312,6 +422,7 @@ export default function ProfilePageContents({
                   onSetPublic={setPublic}
                   onSetPrivate={setPrivate}
                   onDeletePoem={deletePoem}
+                  onToggleLike={handleToggleLike}
                 />
               ) : (
                 <ConnectionsTab

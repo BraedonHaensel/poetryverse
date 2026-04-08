@@ -11,15 +11,18 @@ export type PoemData = {
   title: string
   body: string
   type: PoemType
-  poemTags: PoemTag[]
+  poemTags: { tag: PoemTag }[]
 
   isPublic: boolean
   isAIAssisted: boolean
 
   aiLikelihoonScore: number
-  count: {
+  _count: {
     likes: number
   }
+  isLikedByCurrentUser: boolean
+
+  approvalStatus: PoemApprovalStatus
 
   createdAt: Date
   updatedAt: Date
@@ -34,6 +37,15 @@ export type PoemTag = {
   id: string
   name: string
 }
+
+export const PoemApprovalStatus = {
+  PENDING: 'PENDING',
+  UNCHECKED: 'UNCHECKED',
+  ADMIN_REVIEW: 'ADMIN_REVIEW',
+  APPROVED: 'APPROVED',
+}
+export type PoemApprovalStatus =
+  (typeof PoemApprovalStatus)[keyof typeof PoemApprovalStatus]
 
 /**
  * Gets the list of poems for a user.
@@ -69,6 +81,27 @@ export async function getFeedPoems(): Promise<PoemData[]> {
     .catch((error) => {
       displayApiError(error, 'Failed to get feed poems')
       return []
+    })
+}
+
+/**
+ * Gets the data for a specific poem by its ID.
+ * @param poemId The poem's ID.
+ * @returns The poem's data.
+ */
+export async function getPoemById(
+  poemId: string
+): Promise<PoemData | undefined> {
+  return api
+    .get(`/api/poems/${poemId}`)
+    .then((response) => {
+      const data = response.data
+      console.log(`Poem ${poemId}:`, data)
+      return data
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to get poem')
+      return undefined
     })
 }
 
@@ -133,6 +166,45 @@ export async function getPoemTags(): Promise<PoemTag[]> {
       displayApiError(error, 'Failed to get poem tags')
       return []
     })
+}
+
+/**
+ * Likes a poem.
+ * @param poemId ID of the poem to like.
+ */
+export function likePoem(poemId: string) {
+  api
+    .put('/api/poems/like', { poemId: poemId })
+    .then(() => {
+      console.log('Poem liked:', poemId)
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to like poem')
+    })
+}
+
+/**
+ * Removes a like from a poem.
+ * @param poemId ID of the poem to remove the like from.
+ */
+export function unlikePoem(poemId: string) {
+  api
+    .delete('/api/poems/like', { data: { poemId: poemId } })
+    .then(() => {
+      console.log('Poem unliked:', poemId)
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to unlike poem')
+    })
+}
+
+/**
+ * Checks if a poem is pending approval.
+ * @param approvalStatus The current approval status.
+ * @returns Whether the poem is pending approval.
+ */
+export function isPendingApproval(approvalStatus: PoemApprovalStatus): boolean {
+  return ['PENDING', 'ADMIN_REVIEW'].includes(approvalStatus)
 }
 
 /**

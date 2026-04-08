@@ -48,8 +48,22 @@ import {
 } from '../schemas/poem-schemas'
 import { validateUserExists } from './user-controller'
 
-// Include statement for fetching poems from the database with Prisma.
-export const POEM_INCLUDE_STATEMENT = {
+const PUBLIC_APPROVED_POEM_FILTER = {
+  isPublic: true,
+  approvalStatus: PoemApprovalStatus.APPROVED,
+} as const
+
+interface PublicPoemsOptions {
+  requesterUserId?: string
+  excludeUserId?: string
+}
+
+/**
+ * Function that returns the include statement for fetching poems from the database
+ * with Prisma. Includes poem type, tags, author username, and like information (whether
+ * the current user has liked the poem, and total like count).
+ */
+export const getPoemInclude = (currentUserId?: string) => ({
   type: true,
   poemTags: {
     select: {
@@ -66,17 +80,32 @@ export const POEM_INCLUDE_STATEMENT = {
       username: true,
     },
   },
+  likes: currentUserId
+    ? {
+        where: {
+          userId: currentUserId,
+        },
+        select: {
+          userId: true,
+        },
+      }
+    : false,
   _count: {
     select: {
       likes: true,
     },
   },
-} satisfies Prisma.PoemInclude
+})
 
-const PUBLIC_APPROVED_POEM_FILTER = {
-  isPublic: true,
-  approvalStatus: PoemApprovalStatus.APPROVED,
-} as const
+/** Maps poems to include like information. */
+function mapPoems(
+  poems: Prisma.PoemGetPayload<{ include: ReturnType<typeof getPoemInclude> }>[]
+) {
+  return poems.map((poem) => ({
+    ...poem,
+    isLikedByCurrentUser: poem.likes?.length > 0,
+  }))
+}
 
 /**
  * Retrieves poems with from the database and returns them as JSON.
@@ -100,13 +129,14 @@ export const getPoems = async (req: Request, res: Response) => {
       logger.info(`Fetching all poems with authorId=${authorId}`)
       const poems = await prisma.poem.findMany({
         where: { authorId },
-        include: POEM_INCLUDE_STATEMENT,
+        include: getPoemInclude(requesterUserId),
         orderBy: { createdAt: 'desc' },
       })
+      const poemsWithLikeInfo = mapPoems(poems)
       logger.info(
-        `Fetched all poems with authorId=${authorId}, count=${poems.length}`
+        `Fetched all poems with authorId=${authorId}, count=${poemsWithLikeInfo.length}`
       )
-      return res.status(200).json(poems)
+      return res.status(200).json(poemsWithLikeInfo)
     } else {
       // Guest or user is requsting someone else's poems, return only public poems
       logger.info(`Fetching all public poems with authorId=${authorId}`)
@@ -115,18 +145,19 @@ export const getPoems = async (req: Request, res: Response) => {
           authorId,
           ...PUBLIC_APPROVED_POEM_FILTER,
         },
-        include: POEM_INCLUDE_STATEMENT,
+        include: getPoemInclude(requesterUserId),
         orderBy: { createdAt: 'desc' },
       })
+      const poemsWithLikeInfo = mapPoems(poems)
       logger.info(
-        `Fetched all public poems with authorId=${authorId}, count=${poems.length}`
+        `Fetched all public poems with authorId=${authorId}, count=${poemsWithLikeInfo.length}`
       )
-      return res.status(200).json(poems)
+      return res.status(200).json(poemsWithLikeInfo)
     }
   } else {
     // If authorId is not provided, return all public poems
     logger.info('Fetching all public poems')
-    const poems = await getPublicPoems()
+    const poems = await getPublicPoems({ requesterUserId })
     logger.info(`Fetched all public poems count=${poems.length}`)
     return res.status(200).json(poems)
   }
@@ -143,7 +174,10 @@ export const getPoemsFeed = async (req: Request, res: Response) => {
   const requesterUserId = authReq.auth?.userId
 
   logger.info(`Fetching poems feed for userId=${requesterUserId ?? 'guest'}`)
-  const poems = await getPublicPoems(requesterUserId)
+  const poems = await getPublicPoems({
+    requesterUserId,
+    excludeUserId: requesterUserId,
+  })
   const shuffledPoems = poems.sort(() => Math.random() - 0.5)
   logger.info(`Fetched poems feed count=${shuffledPoems.length}`)
   return res.status(200).json(shuffledPoems)
@@ -214,7 +248,7 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
         ? PoemApprovalStatus.PENDING
         : existingApprovalStatus,
     },
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(requesterUserId),
   })
   logger.info(
     `Updated poem poemId=${poemId} for userId=${requesterUserId} with isPublic=${isPublic}`
@@ -228,8 +262,8 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
       )
     })
   }
-
-  return res.status(200).json(updatedPoem)
+  const poemWithLikeInfo = mapPoems([updatedPoem])[0]
+  return res.status(200).json(poemWithLikeInfo)
 }
 
 /**
@@ -325,7 +359,7 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
       tagIds: existingTags.map((tag) => tag.id),
       approvalStatus: initialApprovalStatus,
     }),
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(req.auth.userId),
   })
 
   logger.info(
@@ -339,8 +373,13 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
     )
   })
 
+  const poemWithLikeInfo = {
+    ...createdPoem,
+    isLikedByCurrentUser: false,
+  }
+
   // Return the created poem.
-  return res.status(201).json({ data: createdPoem })
+  return res.status(201).json({ data: poemWithLikeInfo })
 }
 
 /**
@@ -623,17 +662,22 @@ const validateAndReturnPoemTags = async (tagIds: string[]) => {
 }
 
 /** Validates poemId against poems in the database. */
-export const validateAndReturnPoem = async (poemId: string) => {
+export const validateAndReturnPoem = async (
+  poemId: string,
+  requesterUserId?: string
+) => {
   const poem = await prisma.poem.findUnique({
     where: { id: poemId },
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(requesterUserId),
   })
 
-  if (!poem) {
+  const poemWithLikeInfo = poem ? mapPoems([poem])[0] : null
+
+  if (!poemWithLikeInfo) {
     logger.warn(`Poem not found: poemId=${poemId}`)
     throw notFound('Invalid poem ID')
   }
-  return poem
+  return poemWithLikeInfo
 }
 
 /** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
@@ -733,18 +777,23 @@ export const getDailyPoem = async (req: Request, res: Response) => {
 
 /**
  * Helper function to get public poems, with optional exclusion of a user's own poems.
+ * @param requesterUserId Optional user ID of the requester, used to determine if they have liked the poems.
  * @param excludeUserId Optional user ID to exclude poems from.
  * @returns List of public poems, optionally excluding the specified user's poems.
  */
-const getPublicPoems = async (excludeUserId?: string) => {
+const getPublicPoems = async ({
+  requesterUserId,
+  excludeUserId,
+}: PublicPoemsOptions) => {
   const constructedWhere: Prisma.PoemWhereInput = {
     ...PUBLIC_APPROVED_POEM_FILTER,
   }
   if (excludeUserId) {
     constructedWhere.authorId = { not: excludeUserId }
   }
-  return await prisma.poem.findMany({
+  const poems = await prisma.poem.findMany({
     where: constructedWhere,
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(requesterUserId),
   })
+  return mapPoems(poems)
 }

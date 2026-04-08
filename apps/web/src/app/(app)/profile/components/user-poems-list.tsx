@@ -1,11 +1,12 @@
+import React from 'react'
+
 import CreateDropdown from '@/components/create-nav-dropdown'
 import CreateSheet from '@/components/create-nav-sheet'
 import { LargeButton } from '@/components/large-button'
 import MyPoemMenu from '@/components/my-poem-menu'
 import OtherUserPoemMenu from '@/components/other-user-poem-menu'
+import PoemCard from '@/components/poem-card'
 import { PoemFilterMode } from '@/components/poem-filters'
-import { ShadowCard } from '@/components/shadow-card'
-import { CardContent, CardHeader } from '@/components/ui/card'
 import { PoemData } from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 
@@ -18,6 +19,7 @@ type Props = {
   onSetPublic: (poemid: string) => void
   onSetPrivate: (poemId: string) => void
   onDeletePoem: (poemId: string) => void
+  onToggleLike: (poemId: string, isLike: boolean) => void
 }
 
 /**
@@ -30,6 +32,7 @@ type Props = {
  * @param onSetPublic Callback to set a poem's visibility to public.
  * @param onSetPrivate Callback to set a poem's visibility to private.
  * @param onDeletePoem Callback to delete a poem.
+ * @param onToggleLike Callback to handle liking or removing a like from the poem.
  */
 export default function UserPoemsList({
   className,
@@ -40,6 +43,7 @@ export default function UserPoemsList({
   onSetPublic,
   onSetPrivate,
   onDeletePoem,
+  onToggleLike,
 }: Props) {
   if (filteredPoems.length === 0) {
     // No poems to display
@@ -79,11 +83,14 @@ export default function UserPoemsList({
 
   return (
     <div className={cn('grid gap-2 md:gap-4 xl:grid-cols-2', className)}>
-      {/* TODO Display proper poem cards */}
       {filteredPoems.map((poem) => (
-        <ShadowCard key={poem.id}>
-          <CardHeader>{poem.title}</CardHeader>
-          <CardContent className="whitespace-pre-wrap">{poem.body}</CardContent>
+        <PoemCard
+          key={poem.id}
+          poem={poem}
+          onToggleLike={onToggleLike}
+          isOnProfilePage={true}
+          isOnMyProfilePage={isMyPage}
+        >
           {isMyPage ? (
             <MyPoemMenu
               poem={poem}
@@ -95,7 +102,7 @@ export default function UserPoemsList({
             // Display the poem menu to registered users
             !isGuest && <OtherUserPoemMenu poem={poem} />
           )}
-        </ShadowCard>
+        </PoemCard>
       ))}
     </div>
   )

@@ -15,6 +15,7 @@ type Props = {
   onSetPublic: (poemid: string) => void
   onSetPrivate: (poemId: string) => void
   onDeletePoem: (poemId: string) => void
+  onToggleLike: (poemId: string, isLike: boolean) => void
 }
 
 /**
@@ -28,6 +29,7 @@ type Props = {
  * @param onSetPublic Callback to set a poem's visibility to public.
  * @param onSetPrivate Callback to set a poem's visibility to private.
  * @param onDeletePoem Callback to delete a poem.
+ * @param onToggleLike Callback to handle liking or removing a like from the poem.
  */
 export default function PoemsTab({
   isMyPage,
@@ -39,6 +41,7 @@ export default function PoemsTab({
   onSetPublic,
   onSetPrivate,
   onDeletePoem,
+  onToggleLike,
 }: Props) {
   return (
     <>
@@ -83,6 +86,7 @@ export default function PoemsTab({
         onSetPublic={onSetPublic}
         onSetPrivate={onSetPrivate}
         onDeletePoem={onDeletePoem}
+        onToggleLike={onToggleLike}
       />
     </>
   )
