@@ -722,7 +722,7 @@ async function getPoemOfDay(requesterUserId?: string) {
     }
   }
 
-  // If each poem does not have a like. Then fetch a random poem from the poems database
+  // If each poem does not have a like, then fetch a random poem from the poems database
   const count = await prisma.poem.count({
     where: PUBLIC_APPROVED_POEM_FILTER,
   })
@@ -751,7 +751,7 @@ export const getDailyPoem = async (req: Request, res: Response) => {
   const authReq = req as OptionalAuthRequest
   const requesterUserId = authReq.auth?.userId
 
-  logger.info('Fetch new poem of the day.')
+  logger.info('Fetching the poem of the day.')
   const poem = await getPoemOfDay(requesterUserId)
   if (!poem) {
     logger.warn('Poem of the day failed to retrieve')
@@ -763,7 +763,7 @@ export const getDailyPoem = async (req: Request, res: Response) => {
     )
   }
 
-  logger.info(`Poem of the day: ${poem.id}`)
+  logger.info(`Retrieved poem of the day poemId=${poem.id}`)
 
   return res.status(200).json({ data: poem })
 }
