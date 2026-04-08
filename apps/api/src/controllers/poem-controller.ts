@@ -708,7 +708,7 @@ async function getPoemOfDay(requesterUserId?: string) {
     take: 1,
   })
 
-  //Fetch the poem using the poemId with the greatest number of likes in the past 24 hours. Ensure the author, number of likes, and tags are included.
+  // Fetch the poem using the poemId with the greatest number of likes in the past 24 hours.
   if (topLikedPoem.length > 0) {
     const poem = await prisma.poem.findFirst({
       where: {
@@ -750,8 +750,10 @@ async function getPoemOfDay(requesterUserId?: string) {
 export const getDailyPoem = async (req: Request, res: Response) => {
   const authReq = req as OptionalAuthRequest
   const requesterUserId = authReq.auth?.userId
+  logger.info(
+    `Received request for daily poem from userId=${requesterUserId ?? 'guest'}`
+  )
 
-  logger.info('Fetching the poem of the day.')
   const poem = await getPoemOfDay(requesterUserId)
   if (!poem) {
     logger.warn('Poem of the day failed to retrieve')
