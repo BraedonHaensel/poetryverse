@@ -74,6 +74,7 @@ export default function AnalyticsPageContents() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedPoemText, setSelectedPoemText] = useState('')
   const [isFullPoemOpen, setIsFullPoemOpen] = useState(false)
+  const [fullPoemTitle, setFullPoemTitle] = useState('')
 
   const [totalPoems, setTotalPoems] = useState(0)
   const [aiPoems, setAiPoems] = useState(0)
@@ -86,8 +87,9 @@ export default function AnalyticsPageContents() {
     [selectedPoem]
   )
 
-  const handleOpenFullPoem = (poemText: string) => {
+  const handleOpenFullPoem = (poemText: string, poemTitle: string) => {
     setSelectedPoemText(poemText)
+    setFullPoemTitle(poemTitle)
     setIsFullPoemOpen(true)
   }
 
@@ -102,7 +104,7 @@ export default function AnalyticsPageContents() {
       render: (row) => (
         <button
           type="button"
-          onClick={() => handleOpenFullPoem(row.poem)}
+          onClick={() => handleOpenFullPoem(row.poem, row.title)}
           className="block w-full cursor-pointer text-left transition hover:opacity-70"
         >
           <p className="line-clamp-4 wrap-break-word whitespace-pre-wrap">
@@ -230,7 +232,7 @@ export default function AnalyticsPageContents() {
       <FullTextDialog
         isOpen={isFullPoemOpen}
         onOpenChange={setIsFullPoemOpen}
-        title="Full poem"
+        title={fullPoemTitle || "Full Poem"}
         content={selectedPoemText}
       />
 
@@ -269,7 +271,7 @@ export default function AnalyticsPageContents() {
                     poem={poem}
                     onDelete={() => handleOpenDeleteDialog(poem)}
                     onApprove={() => handleOpenApproveDialog(poem)}
-                    onOpenFullPoem={() => handleOpenFullPoem(poem.poem)}
+                    onOpenFullPoem={() => handleOpenFullPoem(poem.poem, poem.title)}
                   />
                 ))}
 
