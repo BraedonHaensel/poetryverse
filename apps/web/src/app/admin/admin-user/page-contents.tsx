@@ -1,59 +1,96 @@
 'use client'
 
 import { ArrowDownCircle, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { TableSearch } from '@/components/admin-table/table-search'
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAdminUser } from '@/context/admin-user-context'
+import { deleteUser, getUsers, updateUserRole } from '@/lib/admin-user-requests'
+import { UserData, UserRole } from '@/lib/user-requests'
 
-type User = {
-  id: number
+type ManagedUser = {
+  id: string
   name: string
   username: string
   email: string
 }
 
-const usersData: User[] = [
-  { id: 1, name: 'John Doe', username: '@johndoe20', email: 'john@email.com' },
-  {
-    id: 2,
-    name: 'Jane Miller',
-    username: '@janemiller30',
-    email: 'janemiller@email.com',
-  },
-  {
-    id: 3,
-    name: 'Betty Smith',
-    username: '@bettysmith',
-    email: 'betty@email.com',
-  },
-  {
-    id: 4,
-    name: 'Bob McCarthy',
-    username: '@bobmccarthy123',
-    email: 'bob@email.com',
-  },
-]
+function mapUserToManagedUser(user: UserData): ManagedUser {
+  return {
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    email: user.email,
+  }
+}
+
+async function fetchAdminUsersSnapshot(): Promise<ManagedUser[]> {
+  const users = await getUsers(UserRole.ADMIN)
+  return (users ?? []).map(mapUserToManagedUser)
+}
 
 export default function AdminUserManagement() {
   const [search, setSearch] = useState('')
-  const [users, setUsers] = useState(usersData)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [users, setUsers] = useState<ManagedUser[]>([])
+  const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null)
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [isRevokeConfirmOpen, setIsRevokeConfirmOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleDelete = (id: number) => {
-    setUsers(users.filter((user) => user.id !== id))
+  const didFetch = useRef(false)
+  const adminUser = useAdminUser()
+  const isSuperAdmin = adminUser.role === UserRole.SUPER_ADMIN
+
+  useEffect(() => {
+    if (didFetch.current) return
+    didFetch.current = true
+
+    async function initializeUsers() {
+      try {
+        const data = await fetchAdminUsersSnapshot()
+        setUsers(data)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void initializeUsers()
+  }, [])
+
+  async function refreshUsers() {
+    const data = await fetchAdminUsersSnapshot()
+    setUsers(data)
   }
 
-  const handleRevoke = (id: number) => {
-    console.log('Revoke admin privileges from user:', id)
-  }
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((user) =>
+        user.username.toLowerCase().includes(search.toLowerCase())
+      ),
+    [users, search]
+  )
 
-  const handleOpenRevokeDialog = (user: User) => {
+  const columns: Column<ManagedUser>[] = [
+    {
+      key: 'id',
+      label: 'ID',
+      className:
+        'text-left text-xs font-normal',
+      headerClassName: 'text-sm',
+    },
+    { key: 'name', label: 'Name' },
+    { key: 'username', label: 'Username' },
+    { key: 'email', label: 'Email' },
+  ]
+
+  const handleOpenRevokeDialog = (user: ManagedUser) => {
     setSelectedUser(user)
     setIsRevokeConfirmOpen(true)
   }
@@ -66,11 +103,20 @@ export default function AdminUserManagement() {
   const handleRevokeConfirm = async () => {
     if (!selectedUser) return
 
-    handleRevoke(selectedUser.id)
-    handleCloseRevokeDialog()
+    setIsSubmitting(true)
+
+    const updatedUser = await updateUserRole(selectedUser.id, UserRole.USER)
+
+    if (updatedUser) {
+      toast.success('Admin privileges revoked')
+      await refreshUsers()
+      handleCloseRevokeDialog()
+    }
+
+    setIsSubmitting(false)
   }
 
-  const handleOpenDeleteDialog = (user: User) => {
+  const handleOpenDeleteDialog = (user: ManagedUser) => {
     setSelectedUser(user)
     setIsDeleteConfirmOpen(true)
   }
@@ -83,20 +129,20 @@ export default function AdminUserManagement() {
   const handleDeleteConfirm = async () => {
     if (!selectedUser) return
 
-    handleDelete(selectedUser.id)
-    handleCloseDeleteDialog()
+    setIsSubmitting(true)
+
+    const success = await deleteUser(selectedUser.id)
+
+    if (success) {
+      toast.success('Admin user deleted')
+      await refreshUsers()
+      handleCloseDeleteDialog()
+    }
+
+    setIsSubmitting(false)
   }
 
-  const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(search.toLowerCase())
-  )
-
-  const columns: Column<User>[] = [
-    { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Name' },
-    { key: 'username', label: 'Username' },
-    { key: 'email', label: 'Email' },
-  ]
+  if (isLoading) return <PageLoadingIndicator />
 
   return (
     <>
@@ -125,7 +171,9 @@ export default function AdminUserManagement() {
         variant="default"
       />
 
-      <div className="w-full min-w-0">
+      <div
+        className={`w-full min-w-0 ${isSubmitting ? 'pointer-events-none opacity-70' : ''}`}
+      >
         {/* Desktop */}
         <div className="hidden min-w-200 md:block">
           <CardHeader className="px-0 pt-0 pb-5">
@@ -150,32 +198,44 @@ export default function AdminUserManagement() {
                     No users found matching &quot;{search}&quot;
                   </p>
                 </div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="rounded-xl bg-white px-6 py-10 text-center">
+                  <p className="text-muted-foreground">
+                    There are no admin users to display.
+                  </p>
+                </div>
               ) : (
                 <DataTable
                   columns={columns}
                   data={filteredUsers}
-                  gridClassName="grid-cols-[80px_1.2fr_1.4fr_1.6fr_120px]"
-                  renderActions={(user) => (
-                    <div className="flex items-center justify-center gap-5">
-                      <button
-                        type="button"
-                        className="cursor-pointer transition hover:opacity-70"
-                        onClick={() => handleOpenDeleteDialog(user)}
-                        aria-label="Delete user"
-                      >
-                        <Trash2 size={28} strokeWidth={2.25} />
-                      </button>
+                  gridClassName={
+                    isSuperAdmin
+                      ? 'grid-cols-[1.1fr_1.1fr_1.2fr_1.6fr_120px]'
+                      : 'grid-cols-[1.1fr_1.1fr_1.2fr_1.8fr_72px]'
+                  }
+                  renderActions={(user) =>
+                    isSuperAdmin ? (
+                      <div className="flex items-center justify-center gap-5">
+                        <button
+                          type="button"
+                          className="cursor-pointer transition hover:opacity-70"
+                          onClick={() => handleOpenDeleteDialog(user)}
+                          aria-label="Delete user"
+                        >
+                          <Trash2 size={28} strokeWidth={2.25} />
+                        </button>
 
-                      <button
-                        type="button"
-                        className="cursor-pointer transition hover:opacity-70"
-                        onClick={() => handleOpenRevokeDialog(user)}
-                        aria-label="Revoke admin privileges"
-                      >
-                        <ArrowDownCircle size={30} strokeWidth={2.25} />
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          type="button"
+                          className="cursor-pointer transition hover:opacity-70"
+                          onClick={() => handleOpenRevokeDialog(user)}
+                          aria-label="Revoke admin privileges"
+                        >
+                          <ArrowDownCircle size={30} strokeWidth={2.25} />
+                        </button>
+                      </div>
+                    ) : null
+                  }
                 />
               )}
             </CardContent>
@@ -199,6 +259,12 @@ export default function AdminUserManagement() {
                   No users found matching &quot;{search}&quot;
                 </p>
               </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="rounded-xl bg-white px-5 py-8 text-center">
+                <p className="text-muted-foreground">
+                  There are no admin users to display.
+                </p>
+              </div>
             ) : (
               <div className="space-y-3">
                 {filteredUsers.map((user) => (
@@ -207,7 +273,9 @@ export default function AdminUserManagement() {
                     className="rounded-md bg-white px-3 py-2 shadow-sm"
                   >
                     <div className="space-y-1 text-sm leading-tight text-black/80">
-                      <p>ID: {user.id}</p>
+                      <p className="text-xs font-normal break-all">
+                        ID: {user.id}
+                      </p>
 
                       <div>
                         <p className="text-sm text-black/50 italic">Name</p>
@@ -225,23 +293,25 @@ export default function AdminUserManagement() {
                       </div>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenDeleteDialog(user)}
-                        className="cursor-pointer rounded bg-red-800 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
-                      >
-                        Delete
-                      </button>
+                    {isSuperAdmin && (
+                      <div className="mt-3 flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDeleteDialog(user)}
+                          className="cursor-pointer rounded bg-red-800 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                        >
+                          Delete
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleOpenRevokeDialog(user)}
-                        className="cursor-pointer rounded bg-slate-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
-                      >
-                        Revoke
-                      </button>
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenRevokeDialog(user)}
+                          className="cursor-pointer rounded bg-slate-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                        >
+                          Revoke
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
