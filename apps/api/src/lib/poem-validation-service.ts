@@ -1,7 +1,7 @@
 import { Poem, PoemApprovalStatus, ReasonType } from '@prisma/client'
 import damerauLevenshtein from 'damerau-levenshtein'
 
-import { POEM_INCLUDE_STATEMENT } from '../controllers/poem-controller'
+import { getPoemInclude } from '../controllers/poem-controller'
 import { normalizePoemBody } from '../mappers/poem-mapper'
 import {
   type PoemAIDetectionResponse,
@@ -14,6 +14,7 @@ import config from './config'
 import { prisma } from './db'
 import { logger } from './logger'
 import { getErrorStatus } from './utils'
+import { get } from 'http'
 
 // Prompt constants
 const PLAGIARISM_PROMPT = `You are assisting with plagiarism triage for a poetry platform.
@@ -325,7 +326,7 @@ const shouldFlagAIDetection = (triage: PoemAIDetectionResponse) =>
  * @returns Resolves when validation and persistence complete, or immediately when skipped.
  * @throws {Error} Propagates database/model errors from report creation or poem updates.
  */
-export const runPoemValidationPipeline = async (poem: Poem) => {
+export const runPoemValidationPipeline = async (poem: Poem, userId: string) => {
   const startedAt = Date.now()
   logger.info(
     `Starting poem validation pipeline poemId=${poem.id} isPublic=${poem.isPublic} approvalStatus=${poem.approvalStatus} isAIAssisted=${poem.isAIAssisted}`
@@ -397,7 +398,7 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
       aiLikelihoodScore: aiDetection?.aiLikelihood,
       plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood,
     },
-    include: POEM_INCLUDE_STATEMENT,
+    include: getPoemInclude(),
   })
 
   logger.info(
