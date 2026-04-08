@@ -76,7 +76,7 @@ export function FullPoemDialog({
         <div className="space-y-1">
           {/* Poem contents */}
           <div className="bg-off-white max-h-[60vh] overflow-y-auto rounded-lg border p-4">
-            <p className="leading-relaxed whitespace-pre-wrap md:text-lg">
+            <p className="leading-relaxed break-normal wrap-anywhere whitespace-pre-wrap md:text-lg">
               {poem.body}
             </p>
           </div>

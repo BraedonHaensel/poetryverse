@@ -120,7 +120,7 @@ export default function PoemCard({
           {/* Poem contents */}
           <p
             ref={textClampRef}
-            className="line-clamp-4 text-sm whitespace-pre-wrap"
+            className="line-clamp-4 text-sm break-normal wrap-anywhere whitespace-pre-wrap"
           >
             {poem.body}
           </p>
