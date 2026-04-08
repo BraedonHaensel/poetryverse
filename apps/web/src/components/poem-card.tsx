@@ -106,8 +106,8 @@ export default function PoemCard({
             </p>
           </div>
 
-          {/* AI Assisted indicator */}
-          <div className="flex items-center">
+          {/* AI Assisted indicator & menu */}
+          <div className="flex items-center gap-2">
             {poem.isAIAssisted && (
               <span className="rounded-full bg-black px-3 py-1 text-xs font-bold whitespace-nowrap text-white min-[400px]:text-sm">
                 AI Assisted
