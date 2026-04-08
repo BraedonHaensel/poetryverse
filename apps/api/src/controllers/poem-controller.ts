@@ -48,6 +48,16 @@ import {
 } from '../schemas/poem-schemas'
 import { validateUserExists } from './user-controller'
 
+const PUBLIC_APPROVED_POEM_FILTER = {
+  isPublic: true,
+  approvalStatus: PoemApprovalStatus.APPROVED,
+} as const
+
+interface PublicPoemsOptions {
+  requesterUserId?: string
+  excludeUserId?: string
+}
+
 // Include statement for fetching poems from the database with Prisma.
 export const getPoemInclude = (currentUserId?: string) => ({
   type: true,
@@ -82,16 +92,6 @@ export const getPoemInclude = (currentUserId?: string) => ({
     },
   },
 })
-
-const PUBLIC_APPROVED_POEM_FILTER = {
-  isPublic: true,
-  approvalStatus: PoemApprovalStatus.APPROVED,
-} as const
-
-interface PublicPoemsOptions {
-  requesterUserId?: string
-  excludeUserId?: string
-}
 
 function mapPoems(
   poems: Prisma.PoemGetPayload<{ include: ReturnType<typeof getPoemInclude> }>[]
