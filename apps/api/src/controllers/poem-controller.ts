@@ -251,13 +251,11 @@ export const updatePoem = async (req: AuthRequest, res: Response) => {
 
   if (shouldRunValidationPipeline) {
     // Validate public poems in the background after returning a pending response.
-    void runPoemValidationPipeline(updatedPoem, requesterUserId).catch(
-      (err: unknown) => {
-        logger.error(
-          `Background poem validation failed for poemId=${updatedPoem.id} userId=${req.auth.userId}: ${String(err)}`
-        )
-      }
-    )
+    void runPoemValidationPipeline(updatedPoem).catch((err: unknown) => {
+      logger.error(
+        `Background poem validation failed for poemId=${updatedPoem.id} userId=${req.auth.userId}: ${String(err)}`
+      )
+    })
   }
   const poemWithLikeInfo = mapPoems([updatedPoem])[0]
   return res.status(200).json(poemWithLikeInfo)
@@ -364,13 +362,11 @@ export const createPoem = async (req: AuthRequest, res: Response) => {
   )
 
   // Validate public poems in the background after returning a pending response.
-  void runPoemValidationPipeline(createdPoem, req.auth.userId).catch(
-    (err: unknown) => {
-      logger.error(
-        `Background poem validation failed for poemId=${createdPoem.id} userId=${req.auth.userId}: ${String(err)}`
-      )
-    }
-  )
+  void runPoemValidationPipeline(createdPoem).catch((err: unknown) => {
+    logger.error(
+      `Background poem validation failed for poemId=${createdPoem.id} userId=${req.auth.userId}: ${String(err)}`
+    )
+  })
 
   const poemWithLikeInfo = {
     ...createdPoem,
