@@ -32,7 +32,7 @@ const DUMMY_POEM: PoemData = {
     name: 'Sonnet',
   },
   body: "Beneath the velvet cloak of silver night,\nI find my world reflected in your eyes,\nA soft and steady, soul-consuming light,\nThat steals the breath of all my weary sighs,\nThe winter frost may chill the hollow air,\nAnd summer blooms may wither in the sun,\nBut nothing dims the grace of what we share,\nTwo separate paths that are joined and beat as one\nNo gilded crown could ever hold the worth,\nOf quiet moments whispered in the dark,\nFor you have been my anchor to the Earth,\nAnd to my soul, you are the living spark,\nThough time may drift as tide pulls us from the shore,\nI'll love you now, and then forevermore.",
-  count: {
+  _count: {
     likes: 2,
   },
   isPublic: true,
@@ -41,6 +41,8 @@ const DUMMY_POEM: PoemData = {
   poemTags: [],
   createdAt: new Date('2026-03-15T03:09:16.151Z'),
   updatedAt: new Date('2026-03-15T03:09:16.151Z'),
+  approvalStatus: 'APPROVED',
+  isLikedByCurrentUser: true,
 }
 
 const USE_DUMMY_DATA = true
@@ -127,6 +129,11 @@ export default function PoemOfTheDay() {
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
@@ -182,7 +189,9 @@ export default function PoemOfTheDay() {
                     className="text-black"
                     fill={isLiked ? '#fbbf24' : 'none'}
                   />
-                  <span className="text-sm font-semibold">{poem.count.likes}</span>
+                  <span className="text-sm font-semibold">
+                    {poem._count.likes}
+                  </span>
                 </button>
                 <p className="text-muted-foreground text-xs">
                   {poem.body.split('\n').length} lines
@@ -251,7 +260,9 @@ export default function PoemOfTheDay() {
                   className="text-black"
                   fill={isLiked ? '#fbbf24' : 'none'}
                 />
-                <span className="text-lg font-semibold">{poem.count.likes}</span>
+                <span className="text-lg font-semibold">
+                  {poem._count.likes}
+                </span>
               </button>
               <p className="text-muted-foreground text-xs">
                 {poem.body.split('\n').length} lines
@@ -292,7 +303,7 @@ export default function PoemOfTheDay() {
                   fill={isLiked ? '#fbbf24' : 'none'}
                 />
                 <span className="text-lg font-semibold">
-                  {poem.count.likes}
+                  {poem._count.likes}
                 </span>
               </button>
               <span className="text-muted-foreground text-sm">
@@ -302,11 +313,6 @@ export default function PoemOfTheDay() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <SignInRequiredDialog
-        isOpen={showSignInDialog}
-        onClose={() => setShowSignInDialog(false)}
-      />
     </>
   )
 }

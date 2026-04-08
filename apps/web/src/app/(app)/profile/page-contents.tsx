@@ -9,9 +9,16 @@ import { toast } from 'sonner'
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { PoemFilterMode } from '@/components/poem-filters'
+import SignInRequiredDialog from '@/components/sign-in-required-dialog'
 import { Button } from '@/components/ui/button'
 import { api, displayApiError } from '@/lib/api'
-import { filterPoems, getUserPoems, PoemData } from '@/lib/poem-requests'
+import {
+  filterPoems,
+  getUserPoems,
+  likePoem,
+  PoemData,
+  unlikePoem,
+} from '@/lib/poem-requests'
 import {
   FollowerData,
   FollowingData,
@@ -61,6 +68,8 @@ export default function ProfilePageContents({
   const [viewingUserData, setViewingUserData] = useState<UserData>()
   const [followers, setFollowers] = useState<FollowerData[]>()
   const [following, setFollowing] = useState<FollowingData[]>()
+
+  const [showSignInDialog, setShowSignInDialog] = useState(false)
 
   const session = useSession()
   const isGuest = session.status === 'unauthenticated'
@@ -197,6 +206,37 @@ export default function ProfilePageContents({
       })
   }
 
+  /** Handles liking or removing a like from a poem. */
+  function handleToggleLike(poemId: string, isLike: boolean) {
+    if (isGuest) {
+      setShowSignInDialog(true)
+      return
+    }
+
+    // Send the like or unlike request to the API
+    if (isLike) {
+      likePoem(poemId)
+    } else {
+      unlikePoem(poemId)
+    }
+
+    // Update the poem data for the like or unlike
+    setPoems((prev) => {
+      if (prev === undefined) return undefined
+      return prev.map((poem) =>
+        poem.id === poemId
+          ? {
+              ...poem,
+              isLikedByCurrentUser: isLike,
+              _count: {
+                likes: isLike ? poem._count.likes + 1 : poem._count.likes - 1,
+              },
+            }
+          : poem
+      )
+    })
+  }
+
   // Get the profile stats to display
   const profileStats: ProfileStat[] = [
     {
@@ -224,6 +264,11 @@ export default function ProfilePageContents({
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-2 divide-y-2 divide-gray-300 md:hidden">
         {/* Header */}
@@ -268,6 +313,7 @@ export default function ProfilePageContents({
             onSetPublic={setPublic}
             onSetPrivate={setPrivate}
             onDeletePoem={deletePoem}
+            onToggleLike={handleToggleLike}
           />
         ) : (
           <ConnectionsTab
@@ -312,6 +358,7 @@ export default function ProfilePageContents({
                   onSetPublic={setPublic}
                   onSetPrivate={setPrivate}
                   onDeletePoem={deletePoem}
+                  onToggleLike={handleToggleLike}
                 />
               ) : (
                 <ConnectionsTab

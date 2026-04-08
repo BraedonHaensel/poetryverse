@@ -4,9 +4,10 @@ import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
-import { FullPoemDialog } from '@/components/full-poem-dialog'
 import MobilePageHeader from '@/components/mobile-page-header'
-import { PoemCard } from '@/components/poem-card'
+import OtherUserPoemMenu from '@/components/other-user-poem-menu'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
+import PoemCard from '@/components/poem-card'
 import { PoemTagsFilter } from '@/components/poem-tags-filter'
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
 import SignInRequiredDialog from '@/components/sign-in-required-dialog'
@@ -16,8 +17,10 @@ import {
   filterPoems,
   getFeedPoems,
   getPoemTags,
+  likePoem,
   type PoemData,
   type PoemTag,
+  unlikePoem,
 } from '@/lib/poem-requests'
 
 import { FollowingOnlyToggle } from './following-only-toggle'
@@ -38,9 +41,11 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.26,
-    count: { likes: 5 },
+    _count: { likes: 5 },
     createdAt: new Date('2026-03-15T03:09:16.151Z'),
     updatedAt: new Date('2026-03-15T03:09:16.151Z'),
+    approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
   {
     id: 'cmnauvd5y0007356uo71h9zsh',
@@ -53,9 +58,11 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.75,
-    count: { likes: 8 },
+    _count: { likes: 8 },
     createdAt: new Date('2026-03-17T05:11:13.151Z'),
     updatedAt: new Date('2026-03-17T05:11:13.151Z'),
+    approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: false,
   },
   {
     id: 'cmn5hpdln000204kzfbg941te',
@@ -68,9 +75,11 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.16,
-    count: { likes: 3 },
+    _count: { likes: 3 },
     createdAt: new Date('2026-03-19T05:12:13.151Z'),
     updatedAt: new Date('2026-03-19T05:12:13.151Z'),
+    approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
   {
     id: 'cmnauycv2000d356u2oq6xzt9',
@@ -83,9 +92,11 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: true,
     aiLikelihoonScore: 0.85,
-    count: { likes: 12 },
+    _count: { likes: 12 },
     createdAt: new Date('2026-03-20T05:12:13.151Z'),
     updatedAt: new Date('2026-03-20T05:12:13.151Z'),
+    approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
   {
     id: 'cmn5hq2m4000604kzj8mn2b5p',
@@ -98,9 +109,11 @@ const DUMMY_POEMS: PoemData[] = [
     isPublic: true,
     isAIAssisted: false,
     aiLikelihoonScore: 0.22,
-    count: { likes: 6 },
+    _count: { likes: 6 },
     createdAt: new Date('2026-03-10T14:20:45.151Z'),
     updatedAt: new Date('2026-03-10T14:20:45.151Z'),
+    approvalStatus: 'APPROVED',
+    isLikedByCurrentUser: true,
   },
 ]
 
@@ -110,16 +123,15 @@ export default function HomePage() {
   const [poemTypeFilter, setPoemTypeFilter] =
     useState<PoemTypeFilterMode>('ALL')
   const [isFollowingOnly, setIsFollowingOnly] = useState(false)
-  const session = useSession()
-  const isGuest = session.status === 'unauthenticated'
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [likedPoems, setLikedPoems] = useState<Set<string>>(new Set())
-  const [fullPoemOpen, setFullPoemOpen] = useState(false)
-  const [selectedPoem, setSelectedPoem] = useState<PoemData | null>(null)
   const [showSignInDialog, setShowSignInDialog] = useState(false)
 
-  const [poems, setPoems] = useState<PoemData[]>(DUMMY_POEMS)
+  const [poems, setPoems] = useState<PoemData[] | undefined>(DUMMY_POEMS)
+  const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [allTags, setAllTags] = useState<PoemTag[]>([])
+
+  const session = useSession()
+  const isGuest = session.status === 'unauthenticated'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -146,32 +158,61 @@ export default function HomePage() {
     fetchData()
   }, [])
 
-  const toggleLike = (poemId: string) => {
+  // Update the filtered poems to display
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilteredPoems(
+      poems === undefined ? [] : filterPoems(poems, poemTypeFilter)
+    )
+  }, [poems, poemTypeFilter])
+
+  if (poems === undefined) return <PageLoadingIndicator />
+
+  /** Handles liking or removing a like from a poem. */
+  const handleToggleLike = (poemId: string, isLike: boolean) => {
     if (isGuest) {
       setShowSignInDialog(true)
       return
     }
-    const newLiked = new Set(likedPoems)
-    if (newLiked.has(poemId)) {
-      newLiked.delete(poemId)
+
+    // Send the like or unlike request to the API
+    if (isLike) {
+      likePoem(poemId)
     } else {
-      newLiked.add(poemId)
+      unlikePoem(poemId)
     }
-    setLikedPoems(newLiked)
-  }
 
-  const openFullPoem = (poem: PoemData) => {
-    setSelectedPoem(poem)
-    setFullPoemOpen(true)
+    // Update the poem data for the like or unlike
+    setPoems((prev) => {
+      if (prev === undefined) return undefined
+      return prev.map((poem) =>
+        poem.id === poemId
+          ? {
+              ...poem,
+              isLikedByCurrentUser: isLike,
+              _count: {
+                likes: isLike ? poem._count.likes + 1 : poem._count.likes - 1,
+              },
+            }
+          : poem
+      )
+    })
   }
-
-  const filteredPoems = filterPoems(poems, poemTypeFilter)
 
   return (
     <>
+      <SignInRequiredDialog
+        isOpen={showSignInDialog}
+        onClose={() => setShowSignInDialog(false)}
+      />
+
       {/* Mobile layout */}
       <div className="flex flex-1 flex-col gap-4 md:hidden">
-        <MobilePageHeader title="PoetryVerse" showLogo={true} showSignInButton={isGuest} />
+        <MobilePageHeader
+          title="PoetryVerse"
+          showLogo={true}
+          showSignInButton={isGuest}
+        />
 
         {/* Filters */}
         <div className="flex flex-col gap-3 px-2">
@@ -200,13 +241,10 @@ export default function HomePage() {
         {/* Poems */}
         <div className="flex flex-col gap-2 px-2 pb-2">
           {filteredPoems.map((poem) => (
-            <PoemCard
-              key={poem.id}
-              poem={poem}
-              isLiked={likedPoems.has(poem.id)}
-              onToggleLike={() => toggleLike(poem.id)}
-              onReadMore={() => openFullPoem(poem)}
-            />
+            <PoemCard key={poem.id} poem={poem} onToggleLike={handleToggleLike}>
+              {/* Poem dropdown menu */}
+              {!isGuest && <OtherUserPoemMenu poem={poem} />}
+            </PoemCard>
           ))}
         </div>
       </div>
@@ -251,33 +289,20 @@ export default function HomePage() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto px-4 py-4">
-          <div className="grid gap-4 grid-cols-1 min-[1200px]:grid-cols-2 min-[1600px]:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 min-[1200px]:grid-cols-2 min-[1600px]:grid-cols-3">
             {filteredPoems.map((poem) => (
               <PoemCard
                 key={poem.id}
                 poem={poem}
-                isLiked={likedPoems.has(poem.id)}
-                onToggleLike={() => toggleLike(poem.id)}
-                onReadMore={() => openFullPoem(poem)}
-              />
+                onToggleLike={handleToggleLike}
+              >
+                {/* Poem dropdown menu */}
+                {!isGuest && <OtherUserPoemMenu poem={poem} />}
+              </PoemCard>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Full poem modal */}
-      <FullPoemDialog
-        poem={selectedPoem}
-        isOpen={fullPoemOpen}
-        isLiked={selectedPoem ? likedPoems.has(selectedPoem.id) : false}
-        onOpenChange={setFullPoemOpen}
-        onToggleLike={() => selectedPoem && toggleLike(selectedPoem.id)}
-      />
-
-      <SignInRequiredDialog
-        isOpen={showSignInDialog}
-        onClose={() => setShowSignInDialog(false)}
-      />
     </>
   )
 }
