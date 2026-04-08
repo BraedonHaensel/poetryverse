@@ -51,7 +51,7 @@ export default function ConnectionsTab({
           <UserConnectionCard
             key={follower.id}
             className="py-3 max-[420px]:gap-2"
-            isMyPage={true}
+            isMyPage={isMyPage}
             userConnectionData={follower}
             filterMode={filterMode}
             sendFollow={sendFollow}
