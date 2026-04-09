@@ -19,7 +19,7 @@ import UserSettingsForms from './forms/user-settings-forms'
  * User settings page.
  */
 export default function UserSettings() {
-  const [userData, setUserData] = useState<UserData>()
+  const [userData, setUserData] = useState<UserData | null>()
   const session = useSession()
   const isGuest = session.status === 'unauthenticated'
 
@@ -29,8 +29,13 @@ export default function UserSettings() {
     if (didFetch.current) return // Prevent double fetch in strict mode
     didFetch.current = true
 
-    getUserData().then(setUserData)
-  }, [])
+    if (!isGuest) {
+      getUserData().then(setUserData)
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUserData(null)
+    }
+  }, [isGuest])
 
   // Display a loading indicator until the user data has loaded
   if (userData === undefined) return <PageLoadingIndicator />
