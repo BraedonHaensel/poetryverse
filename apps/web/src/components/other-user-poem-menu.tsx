@@ -1,8 +1,14 @@
+'use client'
+
 import { EllipsisVertical } from 'lucide-react'
+import { useState } from 'react'
 
 import { PoemData } from '@/lib/poem-requests'
 import { cn } from '@/lib/utils'
 
+import { PoemInterpretDialog } from './poem-interpret-dialog'
+import { PoemReportDialog } from './poem-report-dialog'
+import { PoemTranslateDialog } from './poem-translate-dialog'
 import { Button } from './ui/button'
 import {
   DropdownMenu,
@@ -29,48 +35,74 @@ export default function OtherUserPoemMenu({
   menuClassName = '',
   poem,
 }: Props) {
+  const [openDialog, setOpenDialog] = useState<
+    'translate' | 'interpret' | 'report' | null
+  >(null)
+
   return (
-    <DropdownMenu>
-      {/* Ellipsis to open the menu */}
-      <DropdownMenuTrigger asChild>
-        <Button
-          className={cn(
-            'w-fit focus:outline-none focus-visible:ring-0',
-            buttonClassName
-          )}
-          variant="ghost"
-        >
-          <EllipsisVertical />
-        </Button>
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu>
+        {/* Ellipsis to open the menu */}
+        <DropdownMenuTrigger asChild>
+          <Button
+            className={cn(
+              'w-fit focus:outline-none focus-visible:ring-0',
+              buttonClassName
+            )}
+            variant="ghost"
+          >
+            <EllipsisVertical />
+          </Button>
+        </DropdownMenuTrigger>
 
-      {/* Menu contents */}
-      <DropdownMenuContent className={cn('w-40', menuClassName)} align="end">
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={() => console.log('Translate:', poem.id)}
-        >
-          Translate
-        </DropdownMenuItem>
+        {/* Menu contents */}
+        <DropdownMenuContent className={cn('w-40', menuClassName)} align="end">
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => setOpenDialog('translate')}
+          >
+            Translate
+          </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={() => console.log('Interpret:', poem.id)}
-        >
-          Interpret
-        </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => setOpenDialog('interpret')}
+          >
+            Interpret
+          </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          className="text-destructive cursor-pointer"
-          onClick={() => console.log('Report:', poem.id)}
-        >
-          Report
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem
+            className="text-destructive cursor-pointer"
+            onClick={() => setOpenDialog('report')}
+          >
+            Report
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <PoemTranslateDialog
+        isOpen={openDialog === 'translate'}
+        onOpenChange={(open) => setOpenDialog(open ? 'translate' : null)}
+        poemId={poem.id}
+        poemBody={poem.body}
+      />
+
+      <PoemInterpretDialog
+        isOpen={openDialog === 'interpret'}
+        onOpenChange={(open) => setOpenDialog(open ? 'interpret' : null)}
+        poemId={poem.id}
+        poemBody={poem.body}
+      />
+
+      <PoemReportDialog
+        isOpen={openDialog === 'report'}
+        onOpenChange={(open) => setOpenDialog(open ? 'report' : null)}
+        poemId={poem.id}
+      />
+    </>
   )
 }
