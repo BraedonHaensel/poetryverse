@@ -104,7 +104,7 @@ export default function UserSettings() {
           ) : (
             <>
               <UserSettingsForms
-                userData={userData}
+                userData={userData!}
                 onProfilePictureSubmit={onProfilePictureSubmit}
                 onUsernameSubmit={onUsernameSubmit}
                 onDeleteAccount={onDeleteAccount}
@@ -132,7 +132,7 @@ export default function UserSettings() {
               </CardHeader>
               <CardContent className="flex h-full flex-col gap-5">
                 <UserSettingsForms
-                  userData={userData}
+                  userData={userData!}
                   onProfilePictureSubmit={onProfilePictureSubmit}
                   onUsernameSubmit={onUsernameSubmit}
                   onDeleteAccount={onDeleteAccount}

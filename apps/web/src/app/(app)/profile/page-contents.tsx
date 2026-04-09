@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { ConfirmationDialog } from '@/components/confirmation-dialog'
 import MobilePageHeader from '@/components/mobile-page-header'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { PoemFilterMode } from '@/components/poem-filters'
@@ -73,8 +74,12 @@ export default function ProfilePageContents({
 
   const pendingPoemIdsRef = useRef<string[]>([])
   const [pendingPoemIds, setPendingPoemIds] = useState<string[]>([])
-  
+
   const [showSignInDialog, setShowSignInDialog] = useState(false)
+  const [isSetPublicConfirmOpen, setIsSetPublicConfirmOpen] = useState(false)
+  const [isSetPrivateConfirmOpen, setIsSetPrivateConfirmOpen] = useState(false)
+  const [isDeleteConfrimOpen, setIsDeleteConfirmOpen] = useState(false)
+  const [selectedPoem, setSelectedPoem] = useState<PoemData>()
 
   const session = useSession()
   const isGuest = session.status === 'unauthenticated'
@@ -159,8 +164,14 @@ export default function ProfilePageContents({
   if (viewingUserData === undefined || poems === undefined)
     return <PageLoadingIndicator />
 
+  /** Prompts to set the visibility of a poem to public. */
+  function setPublic(poem: PoemData) {
+    setSelectedPoem(poem)
+    setIsSetPublicConfirmOpen(true)
+  }
+
   /** Sets the visibility of a poem to public. */
-  function setPublic(poemId: string) {
+  function setPublicConfirmed(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: true })
       .then((res) => {
@@ -186,10 +197,19 @@ export default function ProfilePageContents({
       .catch((error) => {
         displayApiError(error, 'Failed to update visibility')
       })
+      .finally(() => {
+        setIsDeleteConfirmOpen(false)
+      })
+  }
+
+  /** Prompts to set the visibility of a poem to private. */
+  function setPrivate(poem: PoemData) {
+    setSelectedPoem(poem)
+    setIsSetPrivateConfirmOpen(true)
   }
 
   /** Sets the visibility of a poem to private. */
-  function setPrivate(poemId: string) {
+  function setPrivateConfirmed(poemId: string) {
     api
       .patch(`/api/poems/${poemId}`, { isPublic: false })
       .then((res) => {
@@ -210,10 +230,19 @@ export default function ProfilePageContents({
       .catch((error) => {
         displayApiError(error, 'Failed to update visibility')
       })
+      .finally(() => {
+        setIsDeleteConfirmOpen(false)
+      })
   }
 
-  /** Deletes a user's poem */
-  function deletePoem(poemId: string) {
+  /** Prompts to delete a user's poem */
+  function deletePoem(poem: PoemData) {
+    setSelectedPoem(poem)
+    setIsDeleteConfirmOpen(true)
+  }
+
+  /** Deletes a user's poem. */
+  function deletePoemConfirmed(poemId: string) {
     api
       .delete(`/api/poems/${poemId}`)
       .then(() => {
@@ -227,6 +256,9 @@ export default function ProfilePageContents({
       })
       .catch((error) => {
         displayApiError(error, 'Failed to delete poem')
+      })
+      .finally(() => {
+        setIsDeleteConfirmOpen(false)
       })
   }
 
@@ -328,9 +360,87 @@ export default function ProfilePageContents({
 
   return (
     <>
+      {/* Sign in required dialog */}
       <SignInRequiredDialog
         isOpen={showSignInDialog}
         onClose={() => setShowSignInDialog(false)}
+      />
+
+      {/* Set public confirmation dialog */}
+      <ConfirmationDialog
+        isOpen={isSetPublicConfirmOpen}
+        title={
+          selectedPoem === undefined
+            ? ''
+            : `Are you sure you want make \"${selectedPoem.title}\" public?`
+        }
+        description="This will make it visible to other users."
+        onClose={() => {
+          setIsSetPublicConfirmOpen(false)
+          setSelectedPoem(undefined)
+        }}
+        onAction={() => {
+          if (selectedPoem == undefined) return
+          setPublicConfirmed(selectedPoem.id)
+        }}
+      />
+
+      {/* Set private confirmation dialog */}
+      <ConfirmationDialog
+        isOpen={isSetPrivateConfirmOpen}
+        title={
+          selectedPoem === undefined
+            ? ''
+            : `Are you sure you want make \"${selectedPoem.title}\" private?`
+        }
+        description="This will hide it from other users."
+        onClose={() => {
+          setIsSetPrivateConfirmOpen(false)
+          setSelectedPoem(undefined)
+        }}
+        onAction={() => {
+          if (selectedPoem == undefined) return
+          setPrivateConfirmed(selectedPoem.id)
+        }}
+      />
+
+      {/* Delete poem confirmation dialog */}
+      <ConfirmationDialog
+        isOpen={isDeleteConfrimOpen}
+        title={
+          selectedPoem === undefined
+            ? ''
+            : `Are you sure you want to delete \"${selectedPoem.title}\"?`
+        }
+        description="This action cannot be undone."
+        onClose={() => {
+          setIsDeleteConfirmOpen(false)
+          setSelectedPoem(undefined)
+        }}
+        onAction={() => {
+          if (selectedPoem == undefined) return
+          deletePoemConfirmed(selectedPoem.id)
+        }}
+        variant="delete"
+      />
+
+      <ConfirmationDialog
+        isOpen={isDeleteConfrimOpen}
+        title={
+          selectedPoem === undefined
+            ? ''
+            : `Are you sure you want to delete \"${selectedPoem.title}\"?`
+        }
+        description="This action cannot be undone."
+        onClose={() => {
+          setIsDeleteConfirmOpen(false)
+          setSelectedPoem(undefined)
+        }}
+        onAction={() => {
+          if (selectedPoem == undefined) return
+          deletePoemConfirmed(selectedPoem?.id)
+        }}
+        variant="delete"
       />
 
       {/* Mobile layout */}
