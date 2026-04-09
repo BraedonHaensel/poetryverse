@@ -105,7 +105,7 @@ export default function AnalyticsPageContents() {
         <button
           type="button"
           onClick={() => handleOpenFullPoem(row.poem, row.title)}
-          className="block w-full cursor-pointer text-left transition hover:opacity-70"
+          className="block w-full min-w-0 cursor-pointer text-left transition hover:opacity-70"
         >
           <p className="line-clamp-4 wrap-anywhere break-all whitespace-pre-wrap">
             {row.poem}
@@ -117,9 +117,21 @@ export default function AnalyticsPageContents() {
       key: 'reason',
       label: 'Reason',
       className: 'justify-start text-left text-sm',
+      render: (row) => (
+        <button
+          type="button"
+          onClick={() =>
+            handleOpenFullPoem(row.reason, `Reason for ${row.title}`)
+          }
+          className="block w-full min-w-0 cursor-pointer text-left transition hover:opacity-70"
+        >
+          <p className="line-clamp-4 wrap-anywhere break-all whitespace-pre-wrap">
+            {row.reason}
+          </p>
+        </button>
+      ),
     },
   ]
-
   useEffect(() => {
     if (didFetch.current) return
     didFetch.current = true
@@ -407,28 +419,36 @@ function MobilePoemCard({
     : 'bg-red-800'
 
   return (
-    <div className="rounded-xl bg-white p-3 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm">
-            <span>ID: {poem.id}</span>
-            <span className="italic">{poem.title}</span>
-          </div>
-
-          <span
-            className={`mt-1 inline-block rounded px-2 py-0.5 text-xs text-white ${badgeColor}`}
-          >
-            {poem.reportType}
-          </span>
+    <div className="w-full overflow-hidden rounded-xl bg-white p-3 shadow-sm">
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-2 text-sm">
+          <span className="shrink-0">ID: {poem.id}</span>
+          <span className="min-w-0 truncate italic">{poem.title}</span>
         </div>
+
+        <span
+          className={`mt-1 inline-block rounded px-2 py-0.5 text-xs text-white ${badgeColor}`}
+        >
+          {poem.reportType}
+        </span>
       </div>
 
       <button
         type="button"
         onClick={onOpenFullPoem}
-        className="mt-2 block w-full cursor-pointer text-left text-sm whitespace-pre-line transition hover:opacity-80"
+        className="mt-2 block w-full min-w-0 cursor-pointer text-left transition hover:opacity-80"
       >
-        {poem.poem}
+        <div
+          className="w-full overflow-hidden text-sm leading-6"
+          style={{
+            maxHeight: '4.5rem',
+            overflowWrap: 'anywhere',
+            wordBreak: 'break-word',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {poem.poem}
+        </div>
       </button>
 
       <div className="mt-3 flex gap-4">
