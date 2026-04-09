@@ -105,7 +105,7 @@ export default function AnalyticsPageContents() {
         <button
           type="button"
           onClick={() => handleOpenFullPoem(row.poem, row.title)}
-          className="block w-full min-w-0 cursor-pointer text-left transition hover:opacity-70"
+          className="block w-full min-w-0 cursor-pointer text-left transition hover:opacity-60"
         >
           <p className="line-clamp-4 wrap-anywhere break-all whitespace-pre-wrap">
             {row.poem}
@@ -123,7 +123,7 @@ export default function AnalyticsPageContents() {
           onClick={() =>
             handleOpenFullPoem(row.reason, `Reason for ${row.title}`)
           }
-          className="block w-full min-w-0 cursor-pointer text-left transition hover:opacity-70"
+          className="block w-full min-w-0 cursor-pointer text-left transition hover:opacity-60"
         >
           <p className="line-clamp-4 wrap-anywhere break-all whitespace-pre-wrap">
             {row.reason}
@@ -249,7 +249,7 @@ export default function AnalyticsPageContents() {
       />
 
       {/*Mobile Layout*/}
-      <div className={isSubmitting ? 'pointer-events-none opacity-70' : ''}>
+      <div className={isSubmitting ? 'pointer-events-none opacity-60' : ''}>
         <div className="md:hidden">
           <div className="flex flex-col gap-6 p-4">
             <section>
@@ -348,7 +348,7 @@ export default function AnalyticsPageContents() {
                         <div className="flex items-center justify-center gap-3">
                           <button
                             type="button"
-                            className="cursor-pointer transition hover:opacity-70"
+                            className="cursor-pointer transition hover:opacity-60"
                             onClick={() => handleOpenDeleteDialog(row)}
                             aria-label="Delete report"
                           >
@@ -357,7 +357,7 @@ export default function AnalyticsPageContents() {
 
                           <button
                             type="button"
-                            className="cursor-pointer transition hover:opacity-70"
+                            className="cursor-pointer transition hover:opacity-60"
                             onClick={() => handleOpenApproveDialog(row)}
                             aria-label="Approve report"
                           >
@@ -436,7 +436,7 @@ function MobilePoemCard({
       <button
         type="button"
         onClick={onOpenFullPoem}
-        className="mt-2 block w-full min-w-0 cursor-pointer text-left transition hover:opacity-80"
+        className="mt-2 block w-full min-w-0 cursor-pointer text-left transition hover:opacity-60"
       >
         <div
           className="w-full overflow-hidden text-sm leading-6"
@@ -455,14 +455,14 @@ function MobilePoemCard({
         <button
           type="button"
           onClick={onDelete}
-          className="cursor-pointer transition hover:opacity-80"
+          className="cursor-pointer transition hover:opacity-60"
         >
           <Trash2 size={22} />
         </button>
         <button
           type="button"
           onClick={onApprove}
-          className="cursor-pointer transition hover:opacity-80"
+          className="cursor-pointer transition hover:opacity-60"
         >
           <CircleCheckBig size={22} />
         </button>
