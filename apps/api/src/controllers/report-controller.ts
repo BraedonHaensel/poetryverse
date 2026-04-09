@@ -78,7 +78,6 @@ export const resolveReport = async (req: AuthRequest, res: Response) => {
   )
 
   const existingReport = await getAndValidateReport(reportId)
-  await validateAndReturnPoem(existingReport.poemId)
 
   // Can't resolve a report that's already resolved.
   if (existingReport.status === ReportStatus.RESOLVED) {

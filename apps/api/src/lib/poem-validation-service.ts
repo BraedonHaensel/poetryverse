@@ -397,7 +397,6 @@ export const runPoemValidationPipeline = async (poem: Poem) => {
       aiLikelihoodScore: aiDetection?.aiLikelihood,
       plagiarismLikelihoodScore: plagiarismTriage?.plagiarismLikelihood,
     },
-    include: getPoemInclude(),
   })
 
   logger.info(
