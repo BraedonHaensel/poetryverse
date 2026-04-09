@@ -81,8 +81,7 @@ export default function GeneralUserManagement() {
     {
       key: 'id',
       label: 'ID',
-      className:
-        'text-left text-xs font-normal',
+      className: 'text-center text-xs font-normal break-all',
       headerClassName: 'text-sm',
     },
     { key: 'name', label: 'Name' },
