@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
 import { LoadingDialog } from '@/components/loading-dialog'
 import MobilePageHeader from '@/components/mobile-page-header'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
@@ -28,6 +29,9 @@ import {
 
 import CreatePoemWithAIForm from './with-ai-form'
 
+const LOCAL_STORAGE_BACKUP_KEY = 'ai-poem-backup'
+const LOCAL_STORAGE_IS_GENERATED_KEY = 'ai-poem-is-generated'
+
 /**
  * Create poem with AI page.
  */
@@ -40,8 +44,9 @@ export default function CreatePoemWithAI() {
   const [isRegenConfirmOpen, setIsRegenConfirmOpen] = useState(false)
 
   const [isPublishing, setIsPublishing] = useState(false)
-  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
-  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
+  const [poemTypes, setPoemTypes] = useState<PoemType[]>()
+  const [poemTags, setPoemTags] = useState<PoemTag[]>()
+
   const router = useRouter()
 
   // Prevent the body scrollbar from appearing, as the page has its own scrollbar
@@ -74,11 +79,39 @@ export default function CreatePoemWithAI() {
     },
   })
 
+  // Try loading a form backup from local storage
+  useEffect(() => {
+    try {
+      const backup = localStorage.getItem(LOCAL_STORAGE_BACKUP_KEY)
+      if (backup) form.reset(JSON.parse(backup))
+
+      // Check if the AI generation stage is already complete
+      const isGenerated = localStorage.getItem(LOCAL_STORAGE_IS_GENERATED_KEY)
+      if (isGenerated) setIsGenerated(JSON.parse(isGenerated))
+    } catch (e) {
+      console.error('Failed to load poem backup:', e)
+    }
+  }, [form])
+
+  // Save backups of form changes to local storage
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const autosave = form.watch((value) => {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_BACKUP_KEY, JSON.stringify(value))
+      } catch (e) {
+        console.error('Failed to save poem backup:', e)
+      }
+    })
+
+    return () => autosave.unsubscribe()
+  }, [form])
+
   async function validateAIGenerationFields(): Promise<boolean> {
     return form.trigger(['typeId', 'prompt'])
   }
 
-  // Handle generating an AI poem from the current prompt
+  /** Handle generating an AI poem from the current prompt. */
   async function generate() {
     // Validate the poem type and AI prompt
     if (!(await validateAIGenerationFields())) return
@@ -95,6 +128,12 @@ export default function CreatePoemWithAI() {
         form.setValue('title', title)
         form.setValue('poem', poem)
         setIsGenerated(true)
+
+        // Update local storage that the poem has been generated
+        localStorage.setItem(
+          LOCAL_STORAGE_IS_GENERATED_KEY,
+          JSON.stringify(true)
+        )
       })
       .catch((error) => {
         displayApiError(error, 'Failed to generate poem')
@@ -104,7 +143,10 @@ export default function CreatePoemWithAI() {
       })
   }
 
-  // Handle submitting the form (publishing a poem)
+  /**
+   * Handle submitting the form (publishing a poem).
+   * @param data The form data to submit.
+   */
   function onSubmit(data: CreateWithAISchema) {
     setIsPublishing(true)
 
@@ -122,9 +164,14 @@ export default function CreatePoemWithAI() {
         // Publish successful
         const data = response.data.data
         console.log('Poem published successfully:', data)
+
+        // Clear the local backup
+        localStorage.removeItem(LOCAL_STORAGE_BACKUP_KEY)
+        localStorage.removeItem(LOCAL_STORAGE_IS_GENERATED_KEY)
+
         router.push('/profile')
         toast.success('Poem published successfully')
-        // Note: Keep isPublishing false to prevent resubmits
+        // Note: isPublishing is kept false to prevent resubmits
       })
       .catch((error) => {
         displayApiError(error, 'Failed to publish poem')
@@ -132,7 +179,7 @@ export default function CreatePoemWithAI() {
       })
   }
 
-  // Handle clicking the Generate button.
+  /** Handle clicking the Generate button. */
   async function handleGenerateClick() {
     if (!isGenerated) {
       generate()
@@ -142,6 +189,10 @@ export default function CreatePoemWithAI() {
     const isValid = await validateAIGenerationFields()
     if (isValid) setIsRegenConfirmOpen(true)
   }
+
+  // Wait for the poem types and tags to load
+  if (poemTypes === undefined || poemTags === undefined)
+    return <PageLoadingIndicator />
 
   return (
     <>
