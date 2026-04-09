@@ -382,6 +382,7 @@ export default function ProfilePageContents({
         ) : (
           <ConnectionsTab
             isMyPage={isMyPage}
+            isGuest={isGuest}
             followers={followers}
             following={following}
             filterMode={connectionsFilterMode}
@@ -427,6 +428,7 @@ export default function ProfilePageContents({
               ) : (
                 <ConnectionsTab
                   isMyPage={isMyPage}
+                  isGuest={isGuest}
                   followers={followers}
                   following={following}
                   filterMode={connectionsFilterMode}

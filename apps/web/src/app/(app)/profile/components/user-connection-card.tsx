@@ -14,6 +14,7 @@ import { ConnectionsFilterMode } from './connections-filters'
 type Props = {
   className?: string
   isMyPage: boolean
+  isGuest: boolean
   userConnectionData: FollowerData | FollowingData
   filterMode: ConnectionsFilterMode
   sendFollow: (userId: string) => void
@@ -24,6 +25,7 @@ type Props = {
  * Card to display each user connection.
  * @param className Optional additional className values to apply.
  * @param isMyPage Whether the user is viewing their own page.
+ * @param isGuest Whether the current user is a guest.
  * @param userConnectionData Data of the user in the connection.
  * @param filterMode Whether a "Followers" or "Following" connections tab is being viewed.
  * @param sendFollow Callback to follow a user.
@@ -32,6 +34,7 @@ type Props = {
 export default function UserConnectionCard({
   className = '',
   isMyPage,
+  isGuest,
   userConnectionData,
   filterMode,
   sendFollow,
@@ -91,7 +94,7 @@ export default function UserConnectionCard({
       </Link>
 
       {/* Right side */}
-      {userConnectionData.id !== myUserId && (
+      {!isGuest && userConnectionData.id !== myUserId && (
         <Button
           className={cn(
             'w-33 justify-start',

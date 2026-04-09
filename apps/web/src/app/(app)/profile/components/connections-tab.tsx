@@ -10,6 +10,7 @@ import UserConnectionCard from './user-connection-card'
 
 type Props = {
   isMyPage: boolean
+  isGuest: boolean
   followers: FollowerData[] | undefined
   following: FollowingData[] | undefined
   filterMode: ConnectionsFilterMode
@@ -21,6 +22,7 @@ type Props = {
 /**
  * Followers and following users connection tab contents.
  * @param isMyPage Whether the user is viewing their own page.
+ * @param isGuest Whether the current user is a guest.
  * @param followers Follower users.
  * @param following Following users.
  * @param filterMode Whether a "Followers" or "Following" connections tab is being viewed.
@@ -30,6 +32,7 @@ type Props = {
  */
 export default function ConnectionsTab({
   isMyPage,
+  isGuest,
   followers,
   following,
   filterMode,
@@ -54,6 +57,7 @@ export default function ConnectionsTab({
             isMyPage={isMyPage}
             userConnectionData={follower}
             filterMode={filterMode}
+            isGuest={isGuest}
             sendFollow={sendFollow}
             sendUnfollow={sendUnfollow}
           />
@@ -73,6 +77,7 @@ export default function ConnectionsTab({
           key={following.id}
           className="py-3 max-[420px]:gap-2"
           isMyPage={isMyPage}
+          isGuest={isGuest}
           userConnectionData={following}
           filterMode={filterMode}
           sendFollow={sendFollow}
