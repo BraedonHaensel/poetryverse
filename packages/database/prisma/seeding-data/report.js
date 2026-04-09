@@ -33,4 +33,11 @@ export const reportData = [
     createdAt: new Date('2026-03-24 16:24:50.655'),
     resolvedAt: new Date('2026-03-25 11:20:50.655'),
   },
+  {
+    reporterUserId: userIds.superAdmin,
+    poemId: poemIds.superAdminPoem4,
+    reasonType: ReasonType.CUSTOM,
+    reason:
+      "I don't like this poem. This poem uses inappropriate language and discusses sensitive subject matter. In particular, it goes into too much detail about the struggles a man faces on a remote island, with graphic descriptions.",
+  },
 ]

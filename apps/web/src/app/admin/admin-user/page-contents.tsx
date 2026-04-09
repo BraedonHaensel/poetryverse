@@ -172,7 +172,7 @@ export default function AdminUserManagement() {
       />
 
       <div
-        className={`w-full min-w-0 ${isSubmitting ? 'pointer-events-none opacity-70' : ''}`}
+        className={`w-full min-w-0 ${isSubmitting ? 'pointer-events-none opacity-60' : ''}`}
       >
         {/* Desktop */}
         <div className="hidden min-w-200 md:block">
@@ -218,7 +218,7 @@ export default function AdminUserManagement() {
                       <div className="flex items-center justify-center gap-5">
                         <button
                           type="button"
-                          className="cursor-pointer transition hover:opacity-70"
+                          className="cursor-pointer transition hover:opacity-60"
                           onClick={() => handleOpenDeleteDialog(user)}
                           aria-label="Delete user"
                         >
@@ -227,7 +227,7 @@ export default function AdminUserManagement() {
 
                         <button
                           type="button"
-                          className="cursor-pointer transition hover:opacity-70"
+                          className="cursor-pointer transition hover:opacity-60"
                           onClick={() => handleOpenRevokeDialog(user)}
                           aria-label="Revoke admin privileges"
                         >
@@ -298,7 +298,7 @@ export default function AdminUserManagement() {
                         <button
                           type="button"
                           onClick={() => handleOpenDeleteDialog(user)}
-                          className="cursor-pointer rounded bg-red-800 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                          className="cursor-pointer rounded bg-red-800 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-60"
                         >
                           Delete
                         </button>
@@ -306,7 +306,7 @@ export default function AdminUserManagement() {
                         <button
                           type="button"
                           onClick={() => handleOpenRevokeDialog(user)}
-                          className="cursor-pointer rounded bg-slate-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-80"
+                          className="cursor-pointer rounded bg-slate-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase transition hover:opacity-60"
                         >
                           Revoke
                         </button>
