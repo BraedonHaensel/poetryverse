@@ -16,9 +16,9 @@ type Props = {
   buttonClassName?: string
   menuClassName?: string
   poem: PoemData
-  onSetPublic: (poemid: string) => void
-  onSetPrivate: (poemId: string) => void
-  onDeletePoem: (poemId: string) => void
+  onSetPublic: (poem: PoemData) => void
+  onSetPrivate: (poem: PoemData) => void
+  onDeletePoem: (poem: PoemData) => void
 }
 
 /**
@@ -58,14 +58,14 @@ export default function MyPoemMenu({
         {poem.isPublic ? (
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() => onSetPrivate(poem.id)}
+            onClick={() => onSetPrivate(poem)}
           >
             Set Private
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() => onSetPublic(poem.id)}
+            onClick={() => onSetPublic(poem)}
           >
             Set Public
           </DropdownMenuItem>
@@ -75,7 +75,7 @@ export default function MyPoemMenu({
 
         <DropdownMenuItem
           className="text-destructive cursor-pointer"
-          onClick={() => onDeletePoem(poem.id)}
+          onClick={() => onDeletePoem(poem)}
         >
           Delete
         </DropdownMenuItem>

@@ -14,9 +14,9 @@ type Props = {
   isGuest: boolean
   filterMode: PoemFilterMode
   filteredPoems: PoemData[]
-  onSetPublic: (poemid: string) => void
-  onSetPrivate: (poemId: string) => void
-  onDeletePoem: (poemId: string) => void
+  onSetPublic: (poem: PoemData) => void
+  onSetPrivate: (poem: PoemData) => void
+  onDeletePoem: (poem: PoemData) => void
   onToggleLike: (poemId: string, isLike: boolean) => void
 }
 
