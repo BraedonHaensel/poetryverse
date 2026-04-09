@@ -59,8 +59,8 @@ model User {
  
   authoredPoems  Poem[]
   likes          PoemLike[]
-  followers      Follow[]  @relation("Followers")
-  following      Follow[]  @relation("Following")
+  followers      Follow[]  @relation("UserFollowedBy")
+  following      Follow[]  @relation("UserFollows")
   reportsMade    Report[]  @relation("ReportsMade")
   reportsHandled Report[]  @relation("ReportsHandled")
 }
@@ -175,8 +175,8 @@ model Follow {
   followingId String
   createdAt   DateTime @default(now())
 
-  follower    User     @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
-  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  follower    User     @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowedBy", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
   @@index([followingId])
