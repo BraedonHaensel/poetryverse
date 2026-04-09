@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 
 import { Column, DataTable } from '@/components/admin-table/data-table'
 import { ConfirmationDialog } from '@/components/confirmation-dialog'
+import { FullTextDialog } from '@/components/full-text-dialog'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,22 +32,6 @@ type AnalyticsSnapshot = {
   handwrittenPoems: number
   reportedPoems: ReportedPoem[]
 }
-
-const columns: Column<ReportedPoem>[] = [
-  { key: 'id', label: 'ID' },
-  { key: 'title', label: 'Title' },
-  { key: 'reportType', label: 'Report Type' },
-  {
-    key: 'poem',
-    label: 'Poem',
-    className: 'justify-start text-left text-sm',
-  },
-  {
-    key: 'reason',
-    label: 'Reason',
-    className: 'justify-start text-left text-sm',
-  },
-]
 
 function formatReportType(reasonType: string) {
   return reasonType
@@ -87,6 +72,9 @@ export default function AnalyticsPageContents() {
   const [isApproveConfirmOpen, setIsApproveConfirmOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedPoemText, setSelectedPoemText] = useState('')
+  const [isFullPoemOpen, setIsFullPoemOpen] = useState(false)
+  const [fullPoemTitle, setFullPoemTitle] = useState('')
 
   const [totalPoems, setTotalPoems] = useState(0)
   const [aiPoems, setAiPoems] = useState(0)
@@ -98,6 +86,39 @@ export default function AnalyticsPageContents() {
     () => selectedPoem?.title ?? 'this poem',
     [selectedPoem]
   )
+
+  const handleOpenFullPoem = (poemText: string, poemTitle: string) => {
+    setSelectedPoemText(poemText)
+    setFullPoemTitle(poemTitle)
+    setIsFullPoemOpen(true)
+  }
+
+  const columns: Column<ReportedPoem>[] = [
+    { key: 'id', label: 'ID' },
+    { key: 'title', label: 'Title' },
+    { key: 'reportType', label: 'Report Type' },
+    {
+      key: 'poem',
+      label: 'Poem',
+      className: 'justify-start text-left text-sm',
+      render: (row) => (
+        <button
+          type="button"
+          onClick={() => handleOpenFullPoem(row.poem, row.title)}
+          className="block w-full cursor-pointer text-left transition hover:opacity-70"
+        >
+          <p className="line-clamp-4 wrap-anywhere break-all whitespace-pre-wrap">
+            {row.poem}
+          </p>
+        </button>
+      ),
+    },
+    {
+      key: 'reason',
+      label: 'Reason',
+      className: 'justify-start text-left text-sm',
+    },
+  ]
 
   useEffect(() => {
     if (didFetch.current) return
@@ -208,6 +229,13 @@ export default function AnalyticsPageContents() {
         variant="default"
       />
 
+      <FullTextDialog
+        isOpen={isFullPoemOpen}
+        onOpenChange={setIsFullPoemOpen}
+        title={fullPoemTitle || 'Full Poem'}
+        content={selectedPoemText}
+      />
+
       {/*Mobile Layout*/}
       <div className={isSubmitting ? 'pointer-events-none opacity-70' : ''}>
         <div className="md:hidden">
@@ -243,6 +271,9 @@ export default function AnalyticsPageContents() {
                     poem={poem}
                     onDelete={() => handleOpenDeleteDialog(poem)}
                     onApprove={() => handleOpenApproveDialog(poem)}
+                    onOpenFullPoem={() =>
+                      handleOpenFullPoem(poem.poem, poem.title)
+                    }
                   />
                 ))}
 
@@ -364,10 +395,12 @@ function MobilePoemCard({
   poem,
   onDelete,
   onApprove,
+  onOpenFullPoem,
 }: {
   poem: ReportedPoem
   onDelete: () => void
   onApprove: () => void
+  onOpenFullPoem: () => void
 }) {
   const badgeColor = poem.reportType.toLowerCase().includes('ai')
     ? 'bg-slate-500'
@@ -390,13 +423,27 @@ function MobilePoemCard({
         </div>
       </div>
 
-      <p className="mt-2 text-sm whitespace-pre-line">{poem.poem}</p>
+      <button
+        type="button"
+        onClick={onOpenFullPoem}
+        className="mt-2 block w-full cursor-pointer text-left text-sm whitespace-pre-line transition hover:opacity-80"
+      >
+        {poem.poem}
+      </button>
 
-      <div className="mt-3 flex cursor-pointer gap-4 transition hover:opacity-80">
-        <button onClick={onDelete}>
+      <div className="mt-3 flex gap-4">
+        <button
+          type="button"
+          onClick={onDelete}
+          className="cursor-pointer transition hover:opacity-80"
+        >
           <Trash2 size={22} />
         </button>
-        <button onClick={onApprove}>
+        <button
+          type="button"
+          onClick={onApprove}
+          className="cursor-pointer transition hover:opacity-80"
+        >
           <CircleCheckBig size={22} />
         </button>
       </div>
