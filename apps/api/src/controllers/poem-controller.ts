@@ -681,7 +681,7 @@ export const validateAndReturnPoem = async (
 }
 
 /** Retrieves daily poem from database by validating greatest like count over the past 24 hours.*/
-async function getPoemOfDay() {
+async function getPoemOfDay(requesterUserId?: string) {
   //Retrieve the timestamp of the previous 24 hours.
   const DAY_MS = 24 * 60 * 60 * 1000
   const now = new Date()
@@ -708,27 +708,21 @@ async function getPoemOfDay() {
     take: 1,
   })
 
-  //Fetch the poem using the poemId with the greatest number of likes in the past 24 hours. Ensure the author, number of likes, and tags are included.
+  // Fetch the poem using the poemId with the greatest number of likes in the past 24 hours.
   if (topLikedPoem.length > 0) {
     const poem = await prisma.poem.findFirst({
       where: {
         id: topLikedPoem[0].poemId,
         ...PUBLIC_APPROVED_POEM_FILTER,
       },
-      include: {
-        author: true,
-        likes: true,
-        poemTags: {
-          include: { tag: true },
-        },
-      },
+      include: getPoemInclude(requesterUserId),
     })
     if (poem) {
-      return poem
+      return mapPoems([poem])[0]
     }
   }
 
-  // If each poem does not have a like. Then fetch a random poem from the poems database
+  // If each poem does not have a like, then fetch a random poem from the poems database
   const count = await prisma.poem.count({
     where: PUBLIC_APPROVED_POEM_FILTER,
   })
@@ -741,13 +735,9 @@ async function getPoemOfDay() {
     skip: randIndex,
     take: 1,
     where: PUBLIC_APPROVED_POEM_FILTER,
-    include: {
-      author: true,
-      likes: true,
-      poemTags: { include: { tag: true } },
-    },
+    include: getPoemInclude(requesterUserId),
   })
-  return randPoem
+  return mapPoems(randPoem ? [randPoem] : [])[0] || null
 }
 
 /**
@@ -758,8 +748,13 @@ async function getPoemOfDay() {
  * @throws {HttpError} 404 if the poem does not exist.
  */
 export const getDailyPoem = async (req: Request, res: Response) => {
-  logger.info('Fetch new poem of the day.')
-  const poem = await getPoemOfDay()
+  const authReq = req as OptionalAuthRequest
+  const requesterUserId = authReq.auth?.userId
+  logger.info(
+    `Received request for daily poem from userId=${requesterUserId ?? 'guest'}`
+  )
+
+  const poem = await getPoemOfDay(requesterUserId)
   if (!poem) {
     logger.warn('Poem of the day failed to retrieve')
     throw new HttpError(
@@ -770,7 +765,7 @@ export const getDailyPoem = async (req: Request, res: Response) => {
     )
   }
 
-  logger.info(`Poem of the day: ${poem.id}`)
+  logger.info(`Retrieved poem of the day poemId=${poem.id}`)
 
   return res.status(200).json({ data: poem })
 }

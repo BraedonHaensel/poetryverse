@@ -88,7 +88,7 @@ router.delete(
 )
 
 /** GET /api/poems/daily-poem */
-router.get('/daily-poem', asyncHandler(getDailyPoem))
+router.get('/daily-poem', optionalAuth, asyncHandler(getDailyPoem))
 
 /** POST /api/poems/report */
 router.post(
