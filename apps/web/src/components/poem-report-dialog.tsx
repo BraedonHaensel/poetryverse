@@ -49,62 +49,59 @@ export function PoemReportDialog({ isOpen, onOpenChange, poemId }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-2xl! overflow-auto px-4 md:px-8"
-        aria-describedby={undefined}
-      >
+      <DialogContent className="max-w-2xl! overflow-auto px-4 md:px-8" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Report Submission</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Report Type */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Report Type</label>
-            <Select value={reportType} onValueChange={setReportType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {REPORT_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
+            {/* Report Type */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Report Type</label>
+              <Select value={reportType} onValueChange={setReportType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {REPORT_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Reporting Reason */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Reporting Reason:</label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Please provide details about why you're reporting this content..."
+                className="w-full min-h-32 md:min-h-48 p-3 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            {/* Report Button */}
+            <Button
+              onClick={handleReport}
+              className="w-full bg-black text-white hover:bg-gray-800"
+            >
+              Report
+            </Button>
+
+            {/* Community Guidelines */}
+            <div className="space-y-2 bg-gray-50 p-3 rounded-md">
+              <p className="text-sm font-semibold">Community Guidelines:</p>
+              <ul className="text-sm space-y-1 list-decimal list-inside">
+                {COMMUNITY_GUIDELINES.map((guideline, index) => (
+                  <li key={index} className="text-gray-700">
+                    {guideline}
+                  </li>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Reporting Reason */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Reporting Reason:</label>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Please provide details about why you're reporting this content..."
-              className="w-full min-h-32 p-3 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          {/* Report Button */}
-          <Button
-            onClick={handleReport}
-            className="w-full bg-black text-white hover:bg-gray-800"
-          >
-            Report
-          </Button>
-
-          {/* Community Guidelines */}
-          <div className="space-y-2 bg-gray-50 p-3 rounded-md">
-            <p className="text-sm font-semibold">Community Guidelines:</p>
-            <ul className="text-sm space-y-1 list-decimal list-inside">
-              {COMMUNITY_GUIDELINES.map((guideline, index) => (
-                <li key={index} className="text-gray-700">
-                  {guideline}
-                </li>
-              ))}
-            </ul>
-          </div>
+              </ul>
+            </div>
         </div>
       </DialogContent>
     </Dialog>

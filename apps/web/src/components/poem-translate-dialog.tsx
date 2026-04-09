@@ -47,6 +47,7 @@ export function PoemTranslateDialog({
   const [targetLanguage, setTargetLanguage] = useState('French')
   const [translation, setTranslation] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
 
   const handleTranslate = async () => {
     setIsLoading(true)
@@ -57,6 +58,7 @@ export function PoemTranslateDialog({
       setTranslation(
         `Translation to ${targetLanguage} will appear here...\n\n[Translated text pending]`
       )
+      setHasSubmitted(true)
     } finally {
       setIsLoading(false)
     }
@@ -64,10 +66,7 @@ export function PoemTranslateDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-2xl! overflow-auto px-4 md:px-8"
-        aria-describedby={undefined}
-      >
+      <DialogContent className="max-w-2xl! overflow-auto px-4 md:px-8" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Translation</DialogTitle>
         </DialogHeader>
@@ -93,12 +92,18 @@ export function PoemTranslateDialog({
           {/* Translation Result */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Translation Result:</label>
-            <textarea
-              value={translation}
-              readOnly
-              placeholder="Translation will appear here..."
-              className="w-full min-h-32 p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700"
-            />
+            {hasSubmitted ? (
+              <textarea
+                value={translation}
+                readOnly
+                placeholder="Translation will appear here..."
+                className="w-full min-h-32 md:min-h-48 p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700"
+              />
+            ) : (
+              <div className="w-full min-h-32 md:min-h-48 p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-400 flex items-center justify-center">
+                Translation will appear here after translating
+              </div>
+            )}
           </div>
 
           {/* Translate Button */}
