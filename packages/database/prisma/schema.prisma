@@ -59,8 +59,8 @@ model User {
  
   authoredPoems  Poem[]
   likes          PoemLike[]
-  followers      Follow[]  @relation("Followers")
-  following      Follow[]  @relation("Following")
+  followers      Follow[]  @relation("Following")
+  following      Follow[]  @relation("Followers")
   reportsMade    Report[]  @relation("ReportsMade")
   reportsHandled Report[]  @relation("ReportsHandled")
 }

@@ -63,7 +63,7 @@ interface PublicPoemsOptions {
  * with Prisma. Includes poem type, tags, author username, and like information (whether
  * the current user has liked the poem, and total like count).
  */
-export const getPoemInclude = (currentUserId?: string) => ({
+const getPoemInclude = (currentUserId?: string) => ({
   type: true,
   poemTags: {
     select: {
