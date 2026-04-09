@@ -308,7 +308,7 @@ export default function HomePage() {
             <div>
               <h3 className="mb-2 font-semibold">Tags</h3>
               <PoemTagsSelector
-                className="bg-white"
+                className="border-black/50 bg-white"
                 poemTags={allTags}
                 selectedTagIds={selectedTags}
                 onChange={setSelectedTags}

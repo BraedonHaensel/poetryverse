@@ -16,6 +16,7 @@ export function PoemTagsFilter({
     <div>
       <p className="mb-2 font-semibold">Tags</p>
       <PoemTagsSelector
+        className="border-black/50 bg-white"
         poemTags={poemTags}
         selectedTagIds={selectedTagIds}
         onChange={onChange}
