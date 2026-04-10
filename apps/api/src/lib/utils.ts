@@ -31,3 +31,8 @@ export const getImageExtension = (mimetype: string) => {
       throw badRequest('Unsupported image type.')
   }
 }
+
+/** Helper function for generating a pseudorandom number that changes each day. */
+export const getDailyRandomNumber = (date: Date = new Date()) => {
+  return date.getFullYear() * (date.getMonth() + 1) * date.getDate()
+}
