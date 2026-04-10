@@ -126,7 +126,7 @@ export default function HomePage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showSignInDialog, setShowSignInDialog] = useState(false)
 
-  const [poems, setPoems] = useState<PoemData[] | undefined>(DUMMY_POEMS)
+  const [poems, setPoems] = useState<PoemData[]>()
   const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [allTags, setAllTags] = useState<PoemTag[]>([])
 
@@ -162,7 +162,6 @@ export default function HomePage() {
         if (axios.isAxiosError(error)) {
           displayApiError(error, 'Failed to load home feed')
         }
-        setPoems(DUMMY_POEMS)
       }
     }
 
