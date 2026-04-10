@@ -530,9 +530,7 @@ export const translatePoem = async (
     const status = getErrorStatus(err)
 
     if (status === 429) {
-      logger.warn(
-        `Poem translation rate limited for userId=${req.auth.userId}`
-      )
+      logger.warn(`Poem translation rate limited for userId=${req.auth.userId}`)
       throw new HttpError(
         429,
         'Rate limit exceeded.',

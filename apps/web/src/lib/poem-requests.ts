@@ -241,9 +241,9 @@ export async function reportPoem(
   const reportTypeMap: Record<string, string> = {
     'Inappropriate Content': 'INAPPROPRIATE',
     'Copyright Violation': 'PLAGIARISM',
-    'Spam': 'CUSTOM',
+    Spam: 'CUSTOM',
     'Hateful or Abusive': 'INAPPROPRIATE',
-    'Other': 'CUSTOM',
+    Other: 'CUSTOM',
   }
 
   const reasonType = reportTypeMap[reportType] || 'CUSTOM'

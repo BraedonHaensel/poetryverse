@@ -89,9 +89,7 @@ export const PoemInterpretRequestSchema = z.object({
 export const PoemTranslateRequestSchema = z.object({
   body: z.object({
     poemId: z.string().nonempty('Poem is required.'),
-    targetLanguage: z
-      .string()
-      .nonempty('Target language is required.'),
+    targetLanguage: z.string().nonempty('Target language is required.'),
   }),
 })
 
