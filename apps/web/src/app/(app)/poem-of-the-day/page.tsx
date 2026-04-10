@@ -154,10 +154,7 @@ export default function PoemOfTheDay() {
     return (
       <>
         <div className="flex flex-1 flex-col gap-4 md:hidden">
-          <MobilePageHeader
-            title="Poem of the Day"
-            showGuestSignIn={true}
-          />
+          <MobilePageHeader title="Poem of the Day" showGuestSignIn={isGuest} />
           <PageLoadingIndicator />
         </div>
 
@@ -189,7 +186,7 @@ export default function PoemOfTheDay() {
       <div className="relative flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
           title="Poem of the Day"
-          showGuestSignIn={true}
+          showGuestSignIn={isGuest}
           className="text-xl min-[350px]:text-2xl"
         />
 

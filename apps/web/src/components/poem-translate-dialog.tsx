@@ -1,5 +1,6 @@
 'use client'
 
+import type { AxiosError } from 'axios'
 import { useState } from 'react'
 
 import {
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { api, displayApiError } from '@/lib/api'
 
 import { Button } from './ui/button'
 
@@ -22,7 +24,6 @@ type Props = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   poemId: string
-  poemBody: string
 }
 
 const LANGUAGES = [
@@ -38,12 +39,7 @@ const LANGUAGES = [
   'Arabic',
 ]
 
-export function PoemTranslateDialog({
-  isOpen,
-  onOpenChange,
-  poemId,
-  poemBody,
-}: Props) {
+export function PoemTranslateDialog({ isOpen, onOpenChange, poemId }: Props) {
   const [targetLanguage, setTargetLanguage] = useState('French')
   const [translation, setTranslation] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -52,13 +48,14 @@ export function PoemTranslateDialog({
   const handleTranslate = async () => {
     setIsLoading(true)
     try {
-      console.log('Translating poem:', { poemId, targetLanguage, poemBody })
-      // TODO: Implement API call to get translation
-      // For now, showing placeholder
-      setTranslation(
-        `Translation to ${targetLanguage} will appear here...\n\n[Translated text pending]`
-      )
+      const response = await api.post('/api/poems/translate', {
+        poemId,
+        targetLanguage,
+      })
+      setTranslation(response.data.data.translation)
       setHasSubmitted(true)
+    } catch (error) {
+      displayApiError(error as AxiosError<unknown>, 'Failed to translate poem')
     } finally {
       setIsLoading(false)
     }
@@ -66,7 +63,10 @@ export function PoemTranslateDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl! overflow-auto px-4 md:px-8" aria-describedby={undefined}>
+      <DialogContent
+        className="max-w-2xl! overflow-auto px-4 md:px-8"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle>Translation</DialogTitle>
         </DialogHeader>
@@ -97,10 +97,10 @@ export function PoemTranslateDialog({
                 value={translation}
                 readOnly
                 placeholder="Translation will appear here..."
-                className="w-full min-h-32 md:min-h-48 p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700"
+                className="min-h-32 w-full rounded-md border border-gray-300 bg-gray-50 p-3 text-gray-700 md:min-h-48"
               />
             ) : (
-              <div className="w-full min-h-32 md:min-h-48 p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-400 flex items-center justify-center">
+              <div className="flex min-h-32 w-full items-center justify-center rounded-md border border-gray-300 bg-gray-50 p-3 text-gray-400 md:min-h-48">
                 Translation will appear here after translating
               </div>
             )}

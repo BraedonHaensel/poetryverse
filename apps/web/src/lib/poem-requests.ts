@@ -224,3 +224,42 @@ export async function getAllPoems(): Promise<PoemData[]> {
       return []
     })
 }
+
+/**
+ * Reports a poem for violating community guidelines.
+ * @param poemId ID of the poem to report.
+ * @param reportType Type of report (user-facing).
+ * @param reason Detailed explanation of the report.
+ * @returns True if the report was successfully submitted, otherwise false.
+ */
+export async function reportPoem(
+  poemId: string,
+  reportType: string,
+  reason: string
+): Promise<boolean> {
+  // Map user-facing report types to backend enum values
+  const reportTypeMap: Record<string, string> = {
+    'Inappropriate Content': 'INAPPROPRIATE',
+    'Copyright Violation': 'PLAGIARISM',
+    Spam: 'CUSTOM',
+    'Hateful or Abusive': 'INAPPROPRIATE',
+    Other: 'CUSTOM',
+  }
+
+  const reasonType = reportTypeMap[reportType] || 'CUSTOM'
+
+  return api
+    .post('/api/poems/report', {
+      poemId,
+      reasonType,
+      reason,
+    })
+    .then((response) => {
+      console.log('Poem reported:', response.data)
+      return true
+    })
+    .catch((error) => {
+      displayApiError(error, 'Failed to report poem')
+      return false
+    })
+}
