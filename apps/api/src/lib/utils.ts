@@ -32,7 +32,7 @@ export const getImageExtension = (mimetype: string) => {
   }
 }
 
-/** Helper function for retrieving daily poem seed, when poems for the day dont exist */
-export const getDailySeed = (date: Date = new Date()) => {
+/** Helper function for generating a pseudorandom number that changes each day. */
+export const getDailyRandomNumber = (date: Date = new Date()) => {
   return date.getFullYear() * (date.getMonth() + 1) * date.getDate()
 }
