@@ -43,7 +43,7 @@ const DUMMY_POEM: PoemData = {
   isLikedByCurrentUser: true,
 }
 
-const USE_DUMMY_DATA = true
+const USE_DUMMY_DATA = false
 
 export default function PoemOfTheDay() {
   const [poem, setPoemData] = useState<PoemData>()
@@ -156,7 +156,6 @@ export default function PoemOfTheDay() {
         <div className="flex flex-1 flex-col gap-4 md:hidden">
           <MobilePageHeader
             title="Poem of the Day"
-            showLogo={true}
             showGuestSignIn={true}
           />
           <PageLoadingIndicator />
@@ -190,7 +189,6 @@ export default function PoemOfTheDay() {
       <div className="relative flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
           title="Poem of the Day"
-          showLogo={false}
           showGuestSignIn={true}
           className="text-xl min-[350px]:text-2xl"
         />
@@ -269,7 +267,7 @@ export default function PoemOfTheDay() {
         </div>
 
         {/* Poem writing hand image */}
-        <div className="pointer-events-none absolute bottom-0 aspect-square max-h-70 w-full flex-1 overflow-hidden">
+        <div className="pointer-events-none absolute bottom-0 left-1/2 aspect-square max-h-70 w-full -translate-x-1/2 overflow-hidden">
           <Image
             className="translate-y-4 object-contain object-bottom"
             src="/poem-writing-hand.svg"
