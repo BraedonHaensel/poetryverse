@@ -730,7 +730,7 @@ async function getPoemOfDay(requesterUserId?: string) {
     return null
   }
   const seed = getDailySeed()
-  const randIndex = Math.floor(seed % count)
+  const randIndex = seed % count
 
   const randPoem = await prisma.poem.findFirst({
     skip: randIndex,
