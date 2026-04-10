@@ -32,6 +32,7 @@ import {
 import {
   PoemAIResponseSchema,
   PoemInterpretResponseSchema,
+  PoemTranslateResponseSchema,
 } from '../schemas/gemini-response-schemas'
 import {
   CreatePoemRequest,
@@ -41,6 +42,7 @@ import {
   LikePoemRequest,
   PoemAIRequest,
   PoemInterpretRequest,
+  PoemTranslateRequest,
   ReportPoemRequest,
   UnlikePoemRequest,
   UpdatePoemBodyRequest,
@@ -488,6 +490,62 @@ export const interpretPoem = async (
       'Poem failed to generate.',
       err,
       'We could not interpret this poem right now. Please try again.'
+    )
+  }
+}
+
+/**
+ * Translates a poem to a target language.
+ * @param req Express request with the poem ID and target language.
+ * @param res Express response object.
+ * @returns A 200 response with the translated poem.
+ * @throws {HttpError} 429 if rate limited, or 500 if translation fails.
+ */
+export const translatePoem = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { poemId, targetLanguage } = req.body as PoemTranslateRequest
+    logger.info(
+      `Generating translation for userId=${req.auth.userId} poemId=${poemId} targetLanguage=${targetLanguage}`
+    )
+
+    const poem = await validateAndReturnPoem(poemId)
+    const startedAt = Date.now()
+
+    const geminiPrompt = `Translate the following poem to ${targetLanguage}. Only return the translation, no additional text or explanations.
+                          Poem title: ${poem.title}. Poem: ${poem.body}`
+
+    const responseJSON = await generateGeminiJSONResponse(
+      geminiPrompt,
+      PoemTranslateResponseSchema
+    )
+    logger.info(
+      `Generated translation for userId=${req.auth.userId} poemId=${poemId} durationMs=${Date.now() - startedAt}`
+    )
+
+    return res.status(200).json({ data: responseJSON })
+  } catch (err: unknown) {
+    const status = getErrorStatus(err)
+
+    if (status === 429) {
+      logger.warn(
+        `Poem translation rate limited for userId=${req.auth.userId}`
+      )
+      throw new HttpError(
+        429,
+        'Rate limit exceeded.',
+        err,
+        'AI usage limit exceeded. Please try again in a moment.'
+      )
+    }
+
+    throw new HttpError(
+      500,
+      'Poem failed to translate.',
+      err,
+      'We could not translate this poem right now. Please try again.'
     )
   }
 }

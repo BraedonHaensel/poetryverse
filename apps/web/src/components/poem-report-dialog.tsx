@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
+
+import { reportPoem } from '@/lib/poem-requests'
 
 import {
   Dialog,
@@ -40,11 +43,34 @@ const COMMUNITY_GUIDELINES = [
 export function PoemReportDialog({ isOpen, onOpenChange, poemId }: Props) {
   const [reportType, setReportType] = useState('Inappropriate Content')
   const [reason, setReason] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleReport = () => {
-    console.log('Reporting poem:', { poemId, reportType, reason })
-    // TODO: Implement API call to submit report
-    onOpenChange(false)
+  const handleReport = async () => {
+    if (!reason.trim()) {
+      toast.error('Please provide a reason for your report')
+      return
+    }
+
+    if (reason.length < 10) {
+      toast.error('Report reason must be at least 10 characters')
+      return
+    }
+
+    if (reason.length > 500) {
+      toast.error('Report reason must not exceed 500 characters')
+      return
+    }
+
+    setIsLoading(true)
+    const success = await reportPoem(poemId, reportType, reason)
+    setIsLoading(false)
+
+    if (success) {
+      toast.success('Thank you for reporting this content. We will review it shortly.')
+      setReason('')
+      setReportType('Inappropriate Content')
+      onOpenChange(false)
+    }
   }
 
   return (
@@ -74,21 +100,28 @@ export function PoemReportDialog({ isOpen, onOpenChange, poemId }: Props) {
 
             {/* Reporting Reason */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Reporting Reason:</label>
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Reporting Reason:</label>
+                <span className={`text-xs ${reason.length > 500 ? 'text-red-500' : 'text-gray-500'}`}>
+                  {reason.length}/500
+                </span>
+              </div>
               <textarea
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Please provide details about why you're reporting this content..."
-                className="w-full min-h-32 md:min-h-48 p-3 border border-gray-300 rounded-md"
+                onChange={(e) => setReason(e.target.value.slice(0, 500))}
+                disabled={isLoading}
+                placeholder="Please provide details about why you're reporting this content... (10-500 characters)"
+                className="w-full min-h-32 md:min-h-48 p-3 border border-gray-300 rounded-md disabled:opacity-50"
               />
             </div>
 
             {/* Report Button */}
             <Button
               onClick={handleReport}
-              className="w-full bg-black text-white hover:bg-gray-800"
+              disabled={isLoading || reason.length < 10}
+              className="w-full bg-black text-white hover:bg-gray-800 disabled:opacity-50"
             >
-              Report
+              {isLoading ? 'Submitting...' : 'Report'}
             </Button>
 
             {/* Community Guidelines */}

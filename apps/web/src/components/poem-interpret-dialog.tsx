@@ -1,5 +1,6 @@
 'use client'
 
+import type { AxiosError } from 'axios'
 import { useState } from 'react'
 
 import {
@@ -8,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { api, displayApiError } from '@/lib/api'
 
 import { Button } from './ui/button'
 
@@ -15,14 +17,12 @@ type Props = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   poemId: string
-  poemBody: string
 }
 
 export function PoemInterpretDialog({
   isOpen,
   onOpenChange,
   poemId,
-  poemBody,
 }: Props) {
   const [prompt, setPrompt] = useState('')
   const [response, setResponse] = useState('')
@@ -41,12 +41,14 @@ export function PoemInterpretDialog({
     setIsLoading(true)
     setError('')
     try {
-      console.log('Interpreting poem:', { poemId, prompt, poemBody })
-      // TODO: Implement API call to get interpretation
-      setResponse(
-        'The Red circle illustrated in the example poem depicts the idea of anger...'
-      )
+      const response = await api.post('/api/poems/interpret', {
+        poemId,
+        prompt,
+      })
+      setResponse(response.data.data.interpretation)
       setHasSubmitted(true)
+    } catch (error) {
+      displayApiError(error as AxiosError<unknown>, 'Failed to interpret poem')
     } finally {
       setIsLoading(false)
     }

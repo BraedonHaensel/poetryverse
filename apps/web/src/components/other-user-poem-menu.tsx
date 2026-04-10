@@ -88,14 +88,12 @@ export default function OtherUserPoemMenu({
         isOpen={openDialog === 'translate'}
         onOpenChange={(open) => setOpenDialog(open ? 'translate' : null)}
         poemId={poem.id}
-        poemBody={poem.body}
       />
 
       <PoemInterpretDialog
         isOpen={openDialog === 'interpret'}
         onOpenChange={(open) => setOpenDialog(open ? 'interpret' : null)}
         poemId={poem.id}
-        poemBody={poem.body}
       />
 
       <PoemReportDialog

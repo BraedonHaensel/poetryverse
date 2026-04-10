@@ -23,11 +23,11 @@ interface ApiErrorResponse {
  * Ex: "Search failed" => "Search failed: Network Error"
  */
 export async function displayApiError(
-  error: AxiosError<ApiErrorResponse>,
+  error: AxiosError<ApiErrorResponse | unknown>,
   prefix: string
 ) {
   const toastPrefix = prefix ? prefix + ': ' : ''
-  const apiErrorData = error?.response?.data
+  const apiErrorData = error?.response?.data as ApiErrorResponse | undefined
   const apiError =
     apiErrorData?.displayMessage ?? apiErrorData?.message ?? apiErrorData?.error
 

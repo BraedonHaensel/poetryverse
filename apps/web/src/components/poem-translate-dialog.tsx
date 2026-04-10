@@ -1,5 +1,6 @@
 'use client'
 
+import type { AxiosError } from 'axios'
 import { useState } from 'react'
 
 import {
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { api, displayApiError } from '@/lib/api'
 
 import { Button } from './ui/button'
 
@@ -22,7 +24,6 @@ type Props = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   poemId: string
-  poemBody: string
 }
 
 const LANGUAGES = [
@@ -42,7 +43,6 @@ export function PoemTranslateDialog({
   isOpen,
   onOpenChange,
   poemId,
-  poemBody,
 }: Props) {
   const [targetLanguage, setTargetLanguage] = useState('French')
   const [translation, setTranslation] = useState('')
@@ -52,13 +52,14 @@ export function PoemTranslateDialog({
   const handleTranslate = async () => {
     setIsLoading(true)
     try {
-      console.log('Translating poem:', { poemId, targetLanguage, poemBody })
-      // TODO: Implement API call to get translation
-      // For now, showing placeholder
-      setTranslation(
-        `Translation to ${targetLanguage} will appear here...\n\n[Translated text pending]`
-      )
+      const response = await api.post('/api/poems/translate', {
+        poemId,
+        targetLanguage,
+      })
+      setTranslation(response.data.data.translation)
       setHasSubmitted(true)
+    } catch (error) {
+      displayApiError(error as AxiosError<unknown>, 'Failed to translate poem')
     } finally {
       setIsLoading(false)
     }

@@ -11,6 +11,7 @@ import {
   interpretPoem,
   likePoem,
   reportPoem,
+  translatePoem,
   unlikePoem,
   updatePoem,
 } from '../controllers/poem-controller'
@@ -25,6 +26,7 @@ import {
   LikePoemRequestSchema,
   PoemAIRequestSchema,
   PoemInterpretRequestSchema,
+  PoemTranslateRequestSchema,
   ReportPoemRequestSchema,
   UnlikePoemRequestSchema,
   UpdatePoemParamSchema,
@@ -69,6 +71,14 @@ router.post(
   requireAuth,
   validate(PoemInterpretRequestSchema),
   asyncHandler(interpretPoem)
+)
+
+/** POST /api/poems/translate */
+router.post(
+  '/translate',
+  requireAuth,
+  validate(PoemTranslateRequestSchema),
+  asyncHandler(translatePoem)
 )
 
 /** PUT /api/poems/like */

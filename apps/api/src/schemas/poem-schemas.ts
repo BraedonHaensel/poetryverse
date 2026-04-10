@@ -85,6 +85,16 @@ export const PoemInterpretRequestSchema = z.object({
   }),
 })
 
+/** Validates `POST /api/poems/translate` request bodies. */
+export const PoemTranslateRequestSchema = z.object({
+  body: z.object({
+    poemId: z.string().nonempty('Poem is required.'),
+    targetLanguage: z
+      .string()
+      .nonempty('Target language is required.'),
+  }),
+})
+
 /** Validates `PUT /api/poems/like` request bodies. */
 export const LikePoemRequestSchema = z.object({
   body: z.object({
@@ -146,6 +156,11 @@ export type CreatePoemRequest = z.infer<typeof CreatePoemRequestSchema>['body']
 /** Request body type for `PoemInterpretRequestSchema`. */
 export type PoemInterpretRequest = z.infer<
   typeof PoemInterpretRequestSchema
+>['body']
+
+/** Request body type for `PoemTranslateRequestSchema`. */
+export type PoemTranslateRequest = z.infer<
+  typeof PoemTranslateRequestSchema
 >['body']
 
 /** Request body type for `LikePoemRequestSchema`. */

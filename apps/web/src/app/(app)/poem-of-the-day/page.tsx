@@ -42,7 +42,7 @@ const DUMMY_POEM: PoemData = {
   isLikedByCurrentUser: true,
 }
 
-const USE_DUMMY_DATA = true
+const USE_DUMMY_DATA = false
 
 export default function PoemOfTheDay() {
   const [poem, setPoemData] = useState<PoemData>()

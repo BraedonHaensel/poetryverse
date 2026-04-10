@@ -13,6 +13,13 @@ export const PoemInterpretResponseSchema = z.object({
     .describe('Interpretation provided from interpret call'),
 })
 
+/** Validates structured AI translation responses. */
+export const PoemTranslateResponseSchema = z.object({
+  translation: z
+    .string()
+    .describe('Translation of the poem in the target language'),
+})
+
 /** Validates structured AI plagiarism triage responses. */
 export const PoemPlagiarismTriageResponseSchema = z.object({
   plagiarismLikelihood: z
@@ -78,6 +85,9 @@ export type PoemAIResponse = z.infer<typeof PoemAIResponseSchema>
 
 /** Type returned by `interpretSchema`. */
 export type PoemInterpretResponse = z.infer<typeof PoemInterpretResponseSchema>
+
+/** Type returned by `PoemTranslateResponseSchema`. */
+export type PoemTranslateResponse = z.infer<typeof PoemTranslateResponseSchema>
 
 /** Type returned by `PoemPlagiarismTriageResponseSchema`. */
 export type PoemPlagiarismTriageResponse = z.infer<
