@@ -515,7 +515,7 @@ export const translatePoem = async (
     const startedAt = Date.now()
 
     const geminiPrompt = `Translate the following poem to ${targetLanguage}. Only return the translation, no additional text or explanations.
-                          Poem title: ${poem.title}. Poem: ${poem.body}`
+                          Maintain newline characters. Poem title: ${poem.title}. Poem: ${poem.body}`
 
     const responseJSON = await generateGeminiJSONResponse(
       geminiPrompt,

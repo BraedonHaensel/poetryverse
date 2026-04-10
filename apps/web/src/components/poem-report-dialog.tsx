@@ -3,8 +3,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { reportPoem } from '@/lib/poem-requests'
-
 import {
   Dialog,
   DialogContent,
@@ -18,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { reportPoem } from '@/lib/poem-requests'
 
 import { Button } from './ui/button'
 
