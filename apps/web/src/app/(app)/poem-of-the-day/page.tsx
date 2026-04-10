@@ -17,34 +17,6 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { api, displayApiError } from '@/lib/api'
 import { likePoem, type PoemData, unlikePoem } from '@/lib/poem-requests'
 
-// Dummy poem data for development/preview
-const DUMMY_POEM: PoemData = {
-  id: 'poem1',
-  title: 'Sonnet 1',
-  authorId: 'cmn5hpdln000104kzfbg941tb',
-  author: {
-    username: 'User 2',
-  },
-  type: {
-    id: 'type-sonnet',
-    name: 'Sonnet',
-  },
-  body: "Beneath the velvet cloak of silver night,\nI find my world reflected in your eyes,\nA soft and steady, soul-consuming light,\nThat steals the breath of all my weary sighs,\nThe winter frost may chill the hollow air,\nAnd summer blooms may wither in the sun,\nBut nothing dims the grace of what we share,\nTwo separate paths that are joined and beat as one\nNo gilded crown could ever hold the worth,\nOf quiet moments whispered in the dark,\nFor you have been my anchor to the Earth,\nAnd to my soul, you are the living spark,\nThough time may drift as tide pulls us from the shore,\nI'll love you now, and then forevermore.",
-  _count: {
-    likes: 2,
-  },
-  isPublic: true,
-  isAIAssisted: false,
-  aiLikelihoonScore: 0.26,
-  poemTags: [],
-  createdAt: new Date('2026-03-15T03:09:16.151Z'),
-  updatedAt: new Date('2026-03-15T03:09:16.151Z'),
-  approvalStatus: 'APPROVED',
-  isLikedByCurrentUser: true,
-}
-
-const USE_DUMMY_DATA = false
-
 export default function PoemOfTheDay() {
   const [poem, setPoemData] = useState<PoemData>()
   const [isLoading, setIsLoading] = useState(true)
@@ -67,14 +39,9 @@ export default function PoemOfTheDay() {
     const fetchPoem = async () => {
       try {
         setIsLoading(true)
-        if (USE_DUMMY_DATA) {
-          await new Promise((resolve) => setTimeout(resolve, 500))
-          setPoemData(DUMMY_POEM)
-        } else {
-          const response = await api.get('/api/poems/daily-poem')
-          console.log('Daily poem:', response.data.data)
-          setPoemData(response.data.data)
-        }
+        const response = await api.get('/api/poems/daily-poem')
+        console.log('Daily poem:', response.data.data)
+        setPoemData(response.data.data)
       } catch (error) {
         if (axios.isAxiosError(error)) {
           displayApiError(error, 'Failed to load Poem of the Day')

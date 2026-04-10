@@ -27,97 +27,6 @@ import { getUserFollowing } from '@/lib/user-requests'
 
 import { FollowingOnlyToggle } from './following-only-toggle'
 
-const USE_DUMMY_DATA = false
-
-// Dummy poem data for development/preview
-const DUMMY_POEMS: PoemData[] = [
-  {
-    id: 'cmnauvhd1000b356uw16pnt8t',
-    title: 'I Like Cars',
-    authorId: 'cmn5hpdln000104kzfbg941tb',
-    author: { username: 'User 2' },
-    type: { id: 'type-haiku', name: 'Haiku' },
-    body: 'Cars go slow and fast.\nCars drive on highways all day.\nI really like cars.',
-    poemTags: [],
-    isPublic: true,
-    isAIAssisted: false,
-    aiLikelihoonScore: 0.26,
-    _count: { likes: 5 },
-    createdAt: new Date('2026-03-15T03:09:16.151Z'),
-    updatedAt: new Date('2026-03-15T03:09:16.151Z'),
-    approvalStatus: 'APPROVED',
-    isLikedByCurrentUser: true,
-  },
-  {
-    id: 'cmnauvd5y0007356uo71h9zsh',
-    title: 'The Pink Octopus',
-    authorId: 'cmn5hpdln000104kzfbg941tb',
-    author: { username: 'User 2' },
-    type: { id: 'type-tercet', name: 'Tercet' },
-    body: 'The octopus is pink and sweet.\nShe has many fishes to eat.\nCrabs are her favourite treat.',
-    poemTags: [],
-    isPublic: true,
-    isAIAssisted: false,
-    aiLikelihoonScore: 0.75,
-    _count: { likes: 8 },
-    createdAt: new Date('2026-03-17T05:11:13.151Z'),
-    updatedAt: new Date('2026-03-17T05:11:13.151Z'),
-    approvalStatus: 'APPROVED',
-    isLikedByCurrentUser: false,
-  },
-  {
-    id: 'cmn5hpdln000204kzfbg941te',
-    title: 'Running On Grass',
-    authorId: 'cmn5hpdln000104kzfbg941ta',
-    author: { username: 'blakeN99' },
-    type: { id: 'type-haiku', name: 'Haiku' },
-    body: "I like running fast.\nEspecially while on grass.\nUnless it's wet grass.",
-    poemTags: [],
-    isPublic: true,
-    isAIAssisted: false,
-    aiLikelihoonScore: 0.16,
-    _count: { likes: 3 },
-    createdAt: new Date('2026-03-19T05:12:13.151Z'),
-    updatedAt: new Date('2026-03-19T05:12:13.151Z'),
-    approvalStatus: 'APPROVED',
-    isLikedByCurrentUser: true,
-  },
-  {
-    id: 'cmnauycv2000d356u2oq6xzt9',
-    title: 'The Shadowed Wit',
-    authorId: 'cmn5hpdln000104kzfbg941ta',
-    author: { username: 'blakeN99' },
-    type: { id: 'type-ballad', name: 'Ballad' },
-    body: 'In the hall of mirrors, truth bends like light,\nwhere shadows dance and steal away the sight.\nThey whisper secrets only darkness knows,\nwhile reason falls wherever wisdom goes.',
-    poemTags: [],
-    isPublic: true,
-    isAIAssisted: true,
-    aiLikelihoonScore: 0.85,
-    _count: { likes: 12 },
-    createdAt: new Date('2026-03-20T05:12:13.151Z'),
-    updatedAt: new Date('2026-03-20T05:12:13.151Z'),
-    approvalStatus: 'APPROVED',
-    isLikedByCurrentUser: true,
-  },
-  {
-    id: 'cmn5hq2m4000604kzj8mn2b5p',
-    title: 'Winter Snow',
-    authorId: 'cmn5hpdln000104kzfbg941tc',
-    author: { username: 'poetryLover' },
-    type: { id: 'type-haiku', name: 'Haiku' },
-    body: 'Snowflakes fall gently.\nBlanketing the frozen ground.\nNature sleeps in white.',
-    poemTags: [],
-    isPublic: true,
-    isAIAssisted: false,
-    aiLikelihoonScore: 0.22,
-    _count: { likes: 6 },
-    createdAt: new Date('2026-03-10T14:20:45.151Z'),
-    updatedAt: new Date('2026-03-10T14:20:45.151Z'),
-    approvalStatus: 'APPROVED',
-    isLikedByCurrentUser: true,
-  },
-]
-
 export type { PoemTag }
 
 export default function HomePage() {
@@ -138,25 +47,20 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (USE_DUMMY_DATA) {
-          await new Promise((resolve) => setTimeout(resolve, 500))
-          setPoems(DUMMY_POEMS)
-        } else {
-          const [fetchedPoems, fetchedTags] = await Promise.all([
-            getFeedPoems(),
-            getPoemTags(),
-          ])
-          setPoems(fetchedPoems)
-          setAllTags(fetchedTags)
+        const [fetchedPoems, fetchedTags] = await Promise.all([
+          getFeedPoems(),
+          getPoemTags(),
+        ])
+        setPoems(fetchedPoems)
+        setAllTags(fetchedTags)
 
-          if (!isGuest) {
-            const followingUsers = await getUserFollowing()
-            setFollowingUserIds(
-              followingUsers === undefined
-                ? []
-                : followingUsers.map((user) => user.id)
-            )
-          }
+        if (!isGuest) {
+          const followingUsers = await getUserFollowing()
+          setFollowingUserIds(
+            followingUsers === undefined
+              ? []
+              : followingUsers.map((user) => user.id)
+          )
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
