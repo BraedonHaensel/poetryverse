@@ -73,7 +73,7 @@ export function PoemTagsSelector({
       >
         <ComboboxValue>
           {selectedTagIds.map((tagId) => (
-            <ComboboxChip key={tagId} className="bg-gray-300 text-sm">
+            <ComboboxChip key={tagId} className="bg-gray-300 text-base">
               {tagIdToObj(tagId).name}
             </ComboboxChip>
           ))}

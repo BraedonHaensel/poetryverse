@@ -5,7 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 body {
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-inter),
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
 }
 
 @theme inline {
