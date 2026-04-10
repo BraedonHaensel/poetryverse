@@ -287,7 +287,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold">Home</h2>
 
             <div>
-              <h3 className="mb-2 font-semibold">Poem Type</h3>
+              <h3 className="mb-2 font-semibold">Poem Source</h3>
               <PoemFilters
                 className="flex-col md:gap-2"
                 buttonClassName="justify-start py-1"
