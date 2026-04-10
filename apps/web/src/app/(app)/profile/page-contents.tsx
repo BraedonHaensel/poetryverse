@@ -450,7 +450,7 @@ export default function ProfilePageContents({
           showBackButton={pageTab === 'CONNECTIONS' || !isMyPage}
           onBackButton={() => {
             if (isMyPage || pageTab !== 'MY_POEMS') setPageTab('MY_POEMS')
-            else router.push('/profile') // return to my profile page
+            else router.back() // return to the previous page
           }}
           title={`@${viewingUserData.username}`}
         >

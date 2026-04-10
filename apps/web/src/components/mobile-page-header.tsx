@@ -67,6 +67,7 @@ export default function MobilePageHeader({
               alt="PoetryVerse logo"
               width={30}
               height={30}
+              loading="eager"
             />
           </Link>
         )}

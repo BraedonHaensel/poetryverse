@@ -19,6 +19,7 @@ const POEM_FILTER_MODE_LABELS: Record<PoemFilterMode, string> = {
 
 type Props = {
   className?: string
+  buttonClassName?: string
   filterMode: PoemFilterMode
   modeOptions: PoemFilterMode[]
   setFilterMode: (filterMode: PoemFilterMode) => void
@@ -27,27 +28,28 @@ type Props = {
 /**
  * Controls to toggle between poem filters.
  * @param className Optional additional className values to apply.
+ * @param buttonClassName Optional additional className values to apply to the
+ * filter buttons.
  * @param filterMode Current filter mode.
  * @param modeOptions Filter mode options.
  * @param setFilterMode Callback to set the filter mode.
  */
 export default function PoemFilters({
   className = '',
+  buttonClassName = '',
   filterMode,
   modeOptions,
   setFilterMode,
 }: Props) {
   return (
-    <div
-      className={cn(
-        'flex gap-1 overflow-x-auto min-[370px]:gap-2 md:gap-4',
-        className
-      )}
-    >
+    <div className={cn('flex gap-1 min-[370px]:gap-2 md:gap-4', className)}>
       {modeOptions.map((modeOption) => (
         <Button
           key={modeOption}
-          className="flex-1 cursor-pointer border-2 border-black/50 p-2 font-bold min-[450px]:text-lg md:max-w-50"
+          className={cn(
+            'flex-1 cursor-pointer border-2 border-black/50 p-2 font-bold min-[410px]:text-lg',
+            buttonClassName
+          )}
           variant={modeOption === filterMode ? 'default' : 'outline'}
           onClick={() => setFilterMode(modeOption)}
         >

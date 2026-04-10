@@ -2,6 +2,7 @@
 
 import axios from 'axios'
 import { Star } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
@@ -155,7 +156,6 @@ export default function PoemOfTheDay() {
         <div className="flex flex-1 flex-col gap-4 md:hidden">
           <MobilePageHeader
             title="Poem of the Day"
-            showLogo={true}
             showGuestSignIn={true}
           />
           <PageLoadingIndicator />
@@ -186,14 +186,14 @@ export default function PoemOfTheDay() {
       )}
 
       {/* Mobile layout */}
-      <div className="flex flex-1 flex-col gap-4 md:hidden">
+      <div className="relative flex flex-1 flex-col gap-4 md:hidden">
         <MobilePageHeader
           title="Poem of the Day"
-          showLogo={false}
           showGuestSignIn={true}
+          className="text-xl min-[350px]:text-2xl"
         />
 
-        <div className="flex flex-col gap-2 px-2 pb-2">
+        <div className="z-1 flex flex-col gap-2 px-2 pb-2">
           <ShadowCard>
             <CardHeader className="text-center break-normal wrap-anywhere">
               <div className="mb-1 block w-full rounded-full bg-yellow-400 px-3 py-1 text-xs font-semibold text-black">
@@ -223,7 +223,7 @@ export default function PoemOfTheDay() {
               <div className="bg-off-white rounded-lg p-3">
                 <p
                   ref={mobileTextClampRef}
-                  className="line-clamp-14 break-normal wrap-anywhere whitespace-pre-wrap"
+                  className="line-clamp-10 break-normal wrap-anywhere whitespace-pre-wrap"
                 >
                   {poem.body}
                 </p>
@@ -265,11 +265,22 @@ export default function PoemOfTheDay() {
             </CardContent>
           </ShadowCard>
         </div>
+
+        {/* Poem writing hand image */}
+        <div className="pointer-events-none absolute bottom-0 left-1/2 aspect-square max-h-70 w-full -translate-x-1/2 overflow-hidden">
+          <Image
+            className="translate-y-4 object-contain object-bottom"
+            src="/poem-writing-hand.svg"
+            alt="Hand writing poem"
+            priority
+            fill
+          />
+        </div>
       </div>
 
       {/* Desktop layout */}
-      <div className="my-auto hidden md:flex">
-        <ShadowCard className="mx-auto w-full max-w-2xl">
+      <div className="relative hidden flex-1 items-center md:flex">
+        <ShadowCard className="z-1 mx-auto w-full max-w-2xl">
           <CardHeader className="border-b text-center break-normal wrap-anywhere">
             <div>
               <div className="mb-3 block w-full rounded-full bg-yellow-400 px-3 py-1 text-xs font-semibold text-black">
@@ -340,6 +351,17 @@ export default function PoemOfTheDay() {
             </div>
           </CardContent>
         </ShadowCard>
+
+        {/* Desktop background image */}
+        <div className="pointer-events-none absolute inset-0">
+          <Image
+            className="mx-auto max-w-6xl object-cover opacity-15"
+            src="/potd-desktop-background.png"
+            alt="Hands holding pen background"
+            priority
+            fill
+          />
+        </div>
       </div>
     </>
   )

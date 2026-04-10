@@ -8,6 +8,7 @@ import MobilePageHeader from '@/components/mobile-page-header'
 import OtherUserPoemMenu from '@/components/other-user-poem-menu'
 import PageLoadingIndicator from '@/components/page-loading-indicator'
 import PoemCard from '@/components/poem-card'
+import PoemFilters, { PoemFilterMode } from '@/components/poem-filters'
 import { PoemTagsFilter } from '@/components/poem-tags-filter'
 import { PoemTagsSelector } from '@/components/poem-tags-selector'
 import SignInRequiredDialog from '@/components/sign-in-required-dialog'
@@ -25,7 +26,6 @@ import {
 import { getUserFollowing } from '@/lib/user-requests'
 
 import { FollowingOnlyToggle } from './following-only-toggle'
-import PoemTypeFilters, { PoemTypeFilterMode } from './poem-type-filters'
 
 const USE_DUMMY_DATA = false
 
@@ -121,13 +121,12 @@ const DUMMY_POEMS: PoemData[] = [
 export type { PoemTag }
 
 export default function HomePage() {
-  const [poemTypeFilter, setPoemTypeFilter] =
-    useState<PoemTypeFilterMode>('ALL')
+  const [poemTypeFilter, setPoemTypeFilter] = useState<PoemFilterMode>('ALL')
   const [isFollowingOnly, setIsFollowingOnly] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showSignInDialog, setShowSignInDialog] = useState(false)
 
-  const [poems, setPoems] = useState<PoemData[] | undefined>(DUMMY_POEMS)
+  const [poems, setPoems] = useState<PoemData[]>()
   const [filteredPoems, setFilteredPoems] = useState<PoemData[]>([])
   const [allTags, setAllTags] = useState<PoemTag[]>([])
 
@@ -163,7 +162,6 @@ export default function HomePage() {
         if (axios.isAxiosError(error)) {
           displayApiError(error, 'Failed to load home feed')
         }
-        setPoems(DUMMY_POEMS)
       }
     }
 
@@ -245,10 +243,12 @@ export default function HomePage() {
 
         {/* Filters */}
         <div className="flex flex-col gap-3 px-2">
-          <PoemTypeFilters
-            mode={poemTypeFilter}
-            setMode={setPoemTypeFilter}
-            buttonClassName="flex-1"
+          <PoemFilters
+            filterMode={poemTypeFilter}
+            modeOptions={
+              ['ALL', 'AI_ASSISTED', 'HANDWRITTEN'] as PoemFilterMode[]
+            }
+            setFilterMode={setPoemTypeFilter}
           />
 
           {!isGuest && (
@@ -286,12 +286,15 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold">Home</h2>
 
             <div>
-              <h3 className="mb-2 font-semibold">Poem Type</h3>
-              <PoemTypeFilters
-                mode={poemTypeFilter}
-                setMode={setPoemTypeFilter}
-                className="flex-col"
-                buttonClassName="w-full justify-start"
+              <h3 className="mb-2 font-semibold">Poem Source</h3>
+              <PoemFilters
+                className="flex-col md:gap-2"
+                buttonClassName="justify-start py-1"
+                filterMode={poemTypeFilter}
+                modeOptions={
+                  ['ALL', 'AI_ASSISTED', 'HANDWRITTEN'] as PoemFilterMode[]
+                }
+                setFilterMode={setPoemTypeFilter}
               />
             </div>
 
