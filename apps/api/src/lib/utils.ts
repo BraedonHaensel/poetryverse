@@ -31,3 +31,7 @@ export const getImageExtension = (mimetype: string) => {
       throw badRequest('Unsupported image type.')
   }
 }
+
+export const getDailySeed = (date: Date = new Date()) => {
+  return date.getFullYear() * (date.getMonth() + 1) * date.getDate()
+}
