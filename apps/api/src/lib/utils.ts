@@ -31,7 +31,7 @@ export const getImageExtension = (mimetype: string) => {
       throw badRequest('Unsupported image type.')
   }
 }
-
+/** Helper function for retrieving daily poem seed, when poems for the day dont exist */
 export const getDailySeed = (date: Date = new Date()) => {
   return date.getFullYear() * (date.getMonth() + 1) * date.getDate()
 }
