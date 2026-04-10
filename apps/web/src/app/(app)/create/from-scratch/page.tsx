@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 
 import { LoadingDialog } from '@/components/loading-dialog'
 import MobilePageHeader from '@/components/mobile-page-header'
+import PageLoadingIndicator from '@/components/page-loading-indicator'
 import { ShadowCard } from '@/components/shadow-card'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
@@ -23,13 +24,15 @@ import { CreateFromScratchSchema } from '@/schemas/create-poem-schemas'
 
 import CreatePoemFromScratchForm from './from-scratch-form'
 
+const LOCAL_STORAGE_BACKUP_KEY = 'scratch-poem-backup'
+
 /**
  * Create poem from scratch page.
  */
 export default function CreatePoemFromScratch() {
   const [isPublishing, setIsPublishing] = useState(false)
-  const [poemTypes, setPoemTypes] = useState<PoemType[]>([])
-  const [poemTags, setPoemTags] = useState<PoemTag[]>([])
+  const [poemTypes, setPoemTypes] = useState<PoemType[]>()
+  const [poemTags, setPoemTags] = useState<PoemTag[]>()
   const router = useRouter()
 
   useEffect((): (() => void) => {
@@ -62,7 +65,34 @@ export default function CreatePoemFromScratch() {
     },
   })
 
-  // Handle submitting the form (publishing a poem)
+  // Try loading a form backup from local storage
+  useEffect(() => {
+    try {
+      const backup = localStorage.getItem(LOCAL_STORAGE_BACKUP_KEY)
+      if (backup) form.reset(JSON.parse(backup))
+    } catch (e) {
+      console.error('Failed to load poem backup:', e)
+    }
+  }, [form])
+
+  // Save backups of form changes to local storage
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const autosave = form.watch((value) => {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_BACKUP_KEY, JSON.stringify(value))
+      } catch (e) {
+        console.error('Failed to save poem backup:', e)
+      }
+    })
+
+    return () => autosave.unsubscribe()
+  }, [form])
+
+  /**
+   * Handle submitting the form (publishing a poem).
+   * @param data The form data to submit.
+   */
   function onSubmit(data: CreateFromScratchSchema) {
     setIsPublishing(true)
     console.log('Publishing poem:', data)
@@ -72,15 +102,23 @@ export default function CreatePoemFromScratch() {
         // Publish successful
         const data = response.data.data
         console.log('Poem published successfully:', data)
+
+        // Clear the local backup
+        localStorage.removeItem(LOCAL_STORAGE_BACKUP_KEY)
+
         router.push('/profile')
         toast.success('Poem published successfully')
-        // Note: Keep isPublishing false to prevent resubmits
+        // Note: isPublishing is kept false to prevent resubmits
       })
       .catch((error) => {
         displayApiError(error, 'Failed to publish poem')
         setIsPublishing(false)
       })
   }
+
+  // Wait for the poem types and tags to load
+  if (poemTypes === undefined || poemTags === undefined)
+    return <PageLoadingIndicator />
 
   return (
     <>

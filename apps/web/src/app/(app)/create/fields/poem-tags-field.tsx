@@ -26,7 +26,7 @@ export function PoemTagsField<T extends HasTagIds>({
   control,
   poemTags,
 }: Props<T>) {
-  const { trigger } = useFormContext<T>()
+  const { trigger, clearErrors } = useFormContext<T>()
 
   return (
     <ShadowCard className="p-3">
@@ -43,9 +43,15 @@ export function PoemTagsField<T extends HasTagIds>({
                 onChange={async (val) => {
                   // Prevent adding excess tags (+1 so the validation error appears)
                   if (val.length > MAX_TAGS + 1) return
+                  
                   field.onChange(val)
-                  // Validate the number of tags added
-                  await trigger('tagIds' as Path<T>)
+                  if (val.length === 0) {
+                    // All tags cleared, remove any validation errors
+                    clearErrors('tagIds' as Path<T>)
+                  } else {
+                    // Validate if too many tags are used
+                    await trigger('tagIds' as Path<T>)
+                  }
                 }}
                 isInvalid={!!fieldState.error}
               />
