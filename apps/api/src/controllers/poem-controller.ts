@@ -22,7 +22,7 @@ import {
   POEM_DETECTION_THRESHOLDS,
   runPoemValidationPipeline,
 } from '../lib/poem-validation-service'
-import { getDailySeed, getErrorStatus } from '../lib/utils'
+import { getDailyRandomNumber, getErrorStatus } from '../lib/utils'
 import { mapCreatePoemRequestToPrismaInput } from '../mappers/poem-mapper'
 import {
   type AuthRequest,
@@ -729,7 +729,7 @@ async function getPoemOfDay(requesterUserId?: string) {
   if (count === 0) {
     return null
   }
-  const seed = getDailySeed()
+  const seed = getDailyRandomNumber()
   const randIndex = seed % count
 
   const randPoem = await prisma.poem.findFirst({
