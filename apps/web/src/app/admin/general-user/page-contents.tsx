@@ -81,12 +81,24 @@ export default function GeneralUserManagement() {
     {
       key: 'id',
       label: 'ID',
-      className: 'text-center text-xs font-normal break-all',
+      className: 'text-center text-xs font-normal break-all leading-tight px-2',
       headerClassName: 'text-sm',
     },
-    { key: 'name', label: 'Name' },
-    { key: 'username', label: 'Username' },
-    { key: 'email', label: 'Email' },
+    {
+      key: 'name',
+      label: 'Name',
+      className: 'text-center break-words leading-snug px-2',
+    },
+    {
+      key: 'username',
+      label: 'Username',
+      className: 'text-center break-words leading-snug px-2',
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      className: 'text-center break-all leading-snug px-2',
+    },
   ]
 
   const handleOpenDeleteDialog = (user: ManagedUser) => {
