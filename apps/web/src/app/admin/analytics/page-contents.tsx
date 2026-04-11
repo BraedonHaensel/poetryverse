@@ -95,7 +95,7 @@ export default function AnalyticsPageContents() {
 
   const columns: Column<ReportedPoem>[] = [
     { key: 'id', label: 'ID' },
-    { key: 'title', label: 'Title' },
+    { key: 'title', label: 'Title', className: 'wrap-anywhere' },
     { key: 'reportType', label: 'Report Type' },
     {
       key: 'poem',
