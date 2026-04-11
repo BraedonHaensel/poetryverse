@@ -64,7 +64,7 @@ export default function PoemsTab({
 
       {/* Poem filter controls */}
       <PoemFilters
-        className="p-2 pt-0 md:max-w-50 md:p-0 md:pb-4"
+        className="p-2 pt-0 md:max-w-100 md:p-0 md:pb-4"
         filterMode={filterMode}
         modeOptions={
           [

@@ -64,7 +64,7 @@ export function UsernameForm({ username, onUsernameSubmit }: Props) {
     <Dialog
       open={isOpen}
       onOpenChange={(val) => {
-        if (val) form.reset()
+        if (val) form.reset({ username })
         setIsOpen(val)
       }}
     >
