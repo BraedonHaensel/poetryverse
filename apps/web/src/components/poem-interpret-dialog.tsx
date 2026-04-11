@@ -78,9 +78,11 @@ export function PoemInterpretDialog({ isOpen, onOpenChange, poemId }: Props) {
               }`}
             />
             {error && <p className="text-xs text-red-500">{error}</p>}
-            <p className="text-xs text-gray-500">
-              {prompt.length} / {MIN_CHARS} characters
-            </p>
+            {prompt.length < MIN_CHARS && (
+              <p className="text-xs text-gray-500">
+                Minimum {MIN_CHARS} characters
+              </p>
+            )}
           </div>
 
           {/* Interpret Button */}
