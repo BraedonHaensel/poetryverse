@@ -46,6 +46,8 @@ cp apps/web/.env.example apps/web/.env
 cp packages/database/.env.example packages/database/.env
 ```
 
+**Note for TA:** Please use the populated .env files provided in the "populated_env_files" package in our final D2L submission.
+
 Fill in the missing env var values by following the instructions in each respective `.env` file. Please add the values directly; do not enclose them with double quotes (e.g. do `NEXT_AUTH_SECRET=secret-here` rather than `NEXT_AUTH_SECRET="secret-here"`).
 
 Initialize Prisma:
@@ -125,6 +127,8 @@ cp .env.production.example .env.production
 cp apps/api/.env.production.example apps/api/.env.production
 cp apps/web/.env.production.example apps/web/.env.production
 ```
+
+**Note for TA:** Please use the populated .env files provided in the "populated_env_files" package in our final D2L submission.
 
 Then, run this command from root: `docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up` .
 
