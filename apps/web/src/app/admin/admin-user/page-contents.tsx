@@ -81,13 +81,24 @@ export default function AdminUserManagement() {
     {
       key: 'id',
       label: 'ID',
-      className:
-        'text-left text-xs font-normal',
+      className: 'text-xs font-normal break-all leading-tight px-2',
       headerClassName: 'text-sm',
     },
-    { key: 'name', label: 'Name' },
-    { key: 'username', label: 'Username' },
-    { key: 'email', label: 'Email' },
+    {
+      key: 'name',
+      label: 'Name',
+      className: 'break-words leading-snug px-2',
+    },
+    {
+      key: 'username',
+      label: 'Username',
+      className: 'break-words leading-snug px-2',
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      className: 'break-all leading-snug px-2',
+    },
   ]
 
   const handleOpenRevokeDialog = (user: ManagedUser) => {
