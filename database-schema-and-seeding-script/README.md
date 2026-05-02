@@ -2,14 +2,12 @@
 
 ## Group Members
 
-| Person          | Lecture | Lab | UCID     |
-| --------------- | ------- | --- | -------- |
-| Carson May      | L01     | B05 | 30139961 |
-| Sukriti Badhwar | L01     | B05 | 30164075 |
-| Feranmi Falade  | L01     | B05 | 30145480 |
-| Chantae Ho      | L01     | B08 | 30141743 |
-| Rohan Kapila    | L01     | B08 | 30145862 |
-| Braedon Haensel | L01     | B02 | 30144363 |
+- Sukriti Badhwar
+- Feranmi Falade
+- Braedon Haensel
+- Chantae Ho
+- Rohan Kapila
+- Carson May
 
 ## Schema File
 
